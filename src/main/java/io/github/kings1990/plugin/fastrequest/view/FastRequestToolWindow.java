@@ -106,6 +106,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -124,6 +126,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -163,7 +166,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JTabbedPane responseTabbedPanel;
     private JScrollPane responseBodyScrollPanel;
     private JScrollPane responseInfoScrollPanel;
-    private JComboBox<Integer> responseStatusComboBox;
+//    private JComboBox<Integer> responseStatusComboBox;
     private JPanel responseInfoPanel;
     private JTabbedPane multipartTabbedPane;
     private JPanel multipartTablePanel;
@@ -176,6 +179,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JProgressBar requestProgressBar;
     private JPanel prettyJsonEditorPanel;
     private JPanel responseTextAreaPanel;
+    private JCheckBox completeCheckBox;
 
 
     private MyLanguageTextField prettyJsonLanguageTextField;
@@ -204,6 +208,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private LinkedHashMap<String, Object> bodyParamMap;
     private AtomicBoolean urlEncodedParamChangeFlag;
     private AtomicBoolean urlParamsChangeFlag;
+    private AtomicBoolean urlCompleteChangeFlag;
     private static final Map<Object, Icon> TYPE_ICONS = ImmutableMap.<Object, Icon>builder()
             .put(TypeUtil.Type.Object.name(), PluginIcons.ICON_OBJECT)
             .put(TypeUtil.Type.Array.name(), PluginIcons.ICON_ARRAY)
@@ -285,6 +290,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         urlEncodedParamChangeFlag = new AtomicBoolean(true);
         urlParamsChangeFlag = new AtomicBoolean(true);
+        urlCompleteChangeFlag = new AtomicBoolean(false);
 
         renderingHeaderTablePanel();
         renderingUrlParamsTablePanel();
@@ -408,7 +414,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         //responseStatus ComboBox
         List<Integer> values = new ArrayList<>(Constant.HttpStatusDesc.STATUS_MAP.keySet());
         CollectionComboBoxModel<Integer> responseStatusComboBoxModel = new CollectionComboBoxModel<>(values);
-        responseStatusComboBox.setModel(responseStatusComboBoxModel);
+//        responseStatusComboBox.setModel(responseStatusComboBoxModel);
 
         String activeEnv = getActiveEnv();
         String activeProject = getActiveProject();
@@ -627,6 +633,17 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         //2秒内不允许狂点
         requestProgressBar.setIndeterminate(true);
         requestProgressBar.setVisible(false);
+        completeCheckBox.addItemListener(e -> {
+            if(e.getStateChange() == ItemEvent.SELECTED){
+                urlCompleteChangeFlag.set(true);
+                if(!UrlUtil.isHttpURL(urlTextField.getText())){
+                    urlTextField.setText(getActiveDomain() + urlTextField.getText());
+                }
+            }else {
+                urlCompleteChangeFlag.set(false);
+                urlTextField.setText(urlTextField.getText().replace(getActiveDomain(), ""));
+            }
+        });
     }
 
     private void changeUrlParamsText() {
@@ -705,12 +722,19 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         try {
             FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
             assert config != null;
-//            NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
-//            HostGroup defaultHostGroup = new HostGroup(StringUtils.EMPTY, StringUtils.EMPTY);
-//            String domain = config.getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
-//                    .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
+            NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
+            HostGroup defaultHostGroup = new HostGroup(StringUtils.EMPTY, StringUtils.EMPTY);
+            String domain = config.getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
+                    .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
+            String sendUrl;
+            //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
+            if(UrlUtil.isHttpURL(urlTextField.getText())){
+                sendUrl = urlTextField.getText();
+            }else {
+                //如果不是url 就给加
+                sendUrl = domain + urlTextField.getText();
+            }
 
-            String sendUrl = urlTextField.getText();
             if (!UrlUtil.isURL(sendUrl)) {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required");
@@ -855,21 +879,21 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
                         responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
                         responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
-                        responseStatusComboBox.setSelectedItem(status);
-                        responseStatusComboBox.setBackground((status >= 200 && status < 300) ? MyColor.green : MyColor.red);
+//                        responseStatusComboBox.setSelectedItem(status);
+//                        responseStatusComboBox.setBackground((status >= 200 && status < 300) ? MyColor.green : MyColor.red);
                     }, ModalityState.NON_MODAL);
                 } catch (Exception ee) {
                     sendButtonFlag = true;
                     requestProgressBar.setVisible(false);
                     tabbedPane.setSelectedIndex(4);
                     responseTabbedPanel.setSelectedIndex(2);
-                    responseStatusComboBox.setSelectedItem(0);
+//                    responseStatusComboBox.setSelectedItem(0);
                     String errorMsg = ee.getMessage();
                     ApplicationManager.getApplication().invokeLater(() -> {
                         ((MyLanguageTextField) responseTextAreaPanel).setText(errorMsg);
                         ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
                     });
-                    responseStatusComboBox.setBackground(MyColor.red);
+//                    responseStatusComboBox.setBackground(MyColor.red);
                     responseInfoParamsKeyValueList = Lists.newArrayList(
                             new ParamKeyValue("Url", request.getUrl(), 2, TypeUtil.Type.String.name()),
                             new ParamKeyValue("Error", errorMsg)
@@ -891,8 +915,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 ((MyLanguageTextField) responseTextAreaPanel).setText(errorMsg);
                 ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
             });
-            responseStatusComboBox.setSelectedItem(0);
-            responseStatusComboBox.setBackground(MyColor.red);
+//            responseStatusComboBox.setSelectedItem(0);
+//            responseStatusComboBox.setBackground(MyColor.red);
             responseInfoParamsKeyValueList = Lists.newArrayList(
                     new ParamKeyValue("Error", errorMsg)
             );
@@ -1139,8 +1163,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         multipartTable.setModel(new ListTableModel<>(getPathColumnInfo(), multipartKeyValueList));
         resizeTable(multipartTable);
         setCheckBoxHeader(multipartTable, multipartCheckBoxHeader);
-
-        urlTextField.setText(url);
+        //默认不刷第一个url 这里与complete冲突
+//        urlTextField.setText(url);
+        changeUrl();
     }
 
     private void setCheckBoxHeader(JTable table, CheckBoxHeader header) {
@@ -1277,8 +1302,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
         String url = buildPathParamUrl(originUrl);
         url = ((url.startsWith("/") || "".equals(url)) ? "" : "/") + url;
-        urlTextField.setText(getActiveDomain()+ url);
-        paramGroup.setUrl(getActiveDomain()+ url);
+        if(!UrlUtil.isHttpURL(url) && urlCompleteChangeFlag.get()){
+            urlTextField.setText(getActiveDomain()+ url);
+            paramGroup.setUrl(getActiveDomain()+ url);
+        }else {
+            urlTextField.setText(url);
+            paramGroup.setUrl(url);
+        }
         warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
     }
 

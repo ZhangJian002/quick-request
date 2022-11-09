@@ -42,4 +42,12 @@ public class UrlUtil {
             return false;
         }
     }
+
+    public static boolean isHttpURL(String url) {
+        try {
+            return  (url.startsWith("http://") || url.startsWith("https://"));
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

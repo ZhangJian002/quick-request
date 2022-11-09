@@ -48,16 +48,6 @@
                   <toolTipText value="request url"/>
                 </properties>
               </component>
-              <component id="35110" class="javax.swing.JComboBox" binding="responseStatusComboBox">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <editable value="false"/>
-                  <enabled value="false"/>
-                  <model/>
-                </properties>
-              </component>
               <component id="27e19" class="javax.swing.JComboBox" binding="methodTypeComboBox">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
@@ -72,6 +62,15 @@
                     <item value="PUT"/>
                     <item value="PATCH"/>
                   </model>
+                </properties>
+              </component>
+              <component id="d08ea" class="javax.swing.JCheckBox" binding="completeCheckBox" default-binding="true">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <selected value="false"/>
+                  <text value="complete"/>
                 </properties>
               </component>
             </children>
