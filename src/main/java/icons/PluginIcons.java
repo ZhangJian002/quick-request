@@ -67,4 +67,5 @@ public interface PluginIcons {
 
     Icon ICON_POSTMAN = IconLoader.getIcon("/icon/postman.svg", PluginIcons.class);
     Icon ICON_LOCAL_SCOPE = IconLoader.getIcon("/icon/localScope.svg", PluginIcons.class);
+    Icon ICON_LOCAL_SCOPE_LARGE = IconLoader.getIcon("/icon/localScope-large.svg", PluginIcons.class);
 }

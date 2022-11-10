@@ -357,11 +357,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //        CollectionComboBoxModel<AnAction> sendModel = new CollectionComboBoxModel<>(sendListClone);
 //        sendComboBox.setModel(sendModel);
 //        group.add(sendComboBox);
+        DefaultActionGroup sendGroup = new DefaultActionGroup();
+        sendGroup.add(toolbarSendRequestAction);
+        sendGroup.add(sendAndDownloadRequestAction);
+        SplitButtonAction splitButtonAction = new SplitButtonAction(sendGroup);
+        group.add(splitButtonAction);
 
-
-//        actionGroup.
-        group.add(toolbarSendRequestAction);
-        group.add(sendAndDownloadRequestAction);
         group.add(new FixPositionAction());
         group.add(new SaveRequestAction());
         group.add(new RetryAction());
@@ -3053,7 +3054,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     private final class FixPositionAction extends AnAction {
         public FixPositionAction() {
-            super("Focus", "Focus", PluginIcons.ICON_LOCAL_SCOPE);
+            super("Focus", "Focus", PluginIcons.ICON_LOCAL_SCOPE_LARGE);
         }
 
         @Override
