@@ -41,10 +41,7 @@ import io.github.kings1990.plugin.fastrequest.util.UrlUtil;
 import io.github.kings1990.plugin.fastrequest.view.CommonConfigView;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SpringMethodUrlGenerator extends FastUrlGenerator {
     private FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
@@ -140,31 +137,47 @@ public class SpringMethodUrlGenerator extends FastUrlGenerator {
             return StringUtils.EMPTY;
         }
 
-        String url;
+        StringBuilder url;
         if(value instanceof PsiReferenceExpression){
+            //value是变量类型的
             PsiField psiField = (PsiField) ((PsiReferenceExpression)value).resolve();
-            url = psiField == null ? "" : psiField.getInitializer() == null? "" : psiField.getInitializer().getText();
+            url = new StringBuilder(psiField == null ? "" : psiField.getInitializer() == null ? "" : psiField.getInitializer().getText());
         } else if(value instanceof PsiArrayInitializerMemberValue){
+            //value是数组类型的
             PsiAnnotationMemberValue[] initializers = ((PsiArrayInitializerMemberValue) value).getInitializers();
             if(initializers.length > 0){
-                PsiAnnotationMemberValue initializer = ((PsiArrayInitializerMemberValue) value).getInitializers()[0];
+                int i = (int)(Math.random()*(initializers.length));
+                PsiAnnotationMemberValue initializer = ((PsiArrayInitializerMemberValue) value).getInitializers()[i];
                 if(initializer instanceof PsiReferenceExpression){
                     PsiField psiField = (PsiField) ((PsiReferenceExpression)initializer).resolve();
-                    url = psiField == null ? "" : psiField.getInitializer() == null? "" : psiField.getInitializer().getText();
+                    url = new StringBuilder(psiField == null ? "" : psiField.getInitializer() == null ? "" : psiField.getInitializer().getText());
                 } else {
-                    url = initializer.getText();
+                    url = new StringBuilder(initializer.getText());
                 }
             } else {
-                url = "";
+                url = new StringBuilder();
+            }
+        }else if(value instanceof PsiPolyadicExpression){
+            //value是变量+常量类型的
+            url = new StringBuilder();
+            PsiPolyadicExpression binaryExpression = (PsiPolyadicExpression) value;
+            PsiExpression[] operands = binaryExpression.getOperands();
+            for (PsiExpression operand : operands) {
+                if(operand instanceof PsiReferenceExpression){
+                    PsiField psiField = (PsiField)((PsiReferenceExpression) operand).resolve();
+                    url.append(psiField == null ? "" : psiField.getInitializer() == null ? "" : psiField.getInitializer().getText());
+                }else {
+                    url.append(operand.getText());
+                }
             }
         } else {
-            url = value.getText();
+            url = new StringBuilder(value.getText());
         }
         List<DataMapping> urlReplaceMappingList = config.getUrlReplaceMappingList();
         for (DataMapping dataMapping : urlReplaceMappingList) {
-            url = url.replace(dataMapping.getType(), dataMapping.getValue());
+            url = new StringBuilder(url.toString().replace(dataMapping.getType(), dataMapping.getValue()));
         }
-        return url.replace("\"", "");
+        return url.toString().replace("\"", "");
     }
 
     /**
