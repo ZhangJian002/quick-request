@@ -34,6 +34,7 @@ public interface PluginIcons {
     Icon ICON_FILE = IconLoader.getIcon("/icon/file.svg", PluginIcons.class);
 
     Icon ICON_SEND = IconLoader.getIcon("/icon/send.svg", PluginIcons.class);
+    Icon ICON_SEND_MINI = IconLoader.getIcon("/icon/send-mini.svg", PluginIcons.class);
     Icon ICON_SEND_DOWNLOAD = IconLoader.getIcon("/icon/send_download.svg", PluginIcons.class);
 
     Icon ICON_VISIBLE = IconLoader.getIcon("/icon/visible.svg", PluginIcons.class);

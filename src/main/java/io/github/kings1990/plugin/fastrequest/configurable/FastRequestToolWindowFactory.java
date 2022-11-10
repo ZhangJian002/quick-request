@@ -68,7 +68,7 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         toolWindow.getContentManager().addContent(contentCollection);
 
         allApisNavToolWindow.getComponent().add(allApisNavToolWindow.getContent());
-        Content allApis = contentFactory.createContent(allApisNavToolWindow, "API Navigate", true);
+        Content allApis = contentFactory.createContent(allApisNavToolWindow, "Navigate", true);
         allApis.setIcon(AllIcons.Ide.LocalScopeAction);
         allApis.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
         toolWindow.getContentManager().addContent(allApis);
@@ -107,8 +107,11 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         connect.subscribe(ConfigChangeNotifier.LOAD_REQUEST,
                 new ConfigChangeNotifier() {
                     @Override
-                    public void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName) {
+                    public void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName, boolean sendFlag) {
                         windowMap.get(projectName).refreshByCollection(detail);
+                        if(sendFlag){
+                            windowMap.get(projectName).sendRequestEvent(false);
+                        }
 //                    window.refreshByCollection(detail);
                     }
                 });

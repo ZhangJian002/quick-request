@@ -47,6 +47,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.ExtendableTextComponent;
 import com.intellij.ui.content.Content;
@@ -78,6 +79,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
@@ -98,10 +100,8 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
@@ -563,7 +563,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         CollectionCustomNode root = new CollectionCustomNode("0", "Root", 1);
         convertToNode(root, new ArrayList<>());
         ColumnInfo[] columnInfo = new ColumnInfo[]{
-                new TreeColumnInfo("Name") {
+                new TreeColumnInfo("Api Name") {
 
                 },   // <-- This is important!
                 new ColumnInfo("Url") {
@@ -572,10 +572,12 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                     public Object valueOf(Object o) {
                         if (o instanceof CollectionCustomNode) {
                             return ((CollectionCustomNode) o).getUrl();
-                        } else return o;
+                        } else {
+                            return o;
+                        }
                     }
                 },
-                new ColumnInfo("Navigate") {
+                new ColumnInfo("Operation") {
                     @Nullable
                     @Override
                     public Object valueOf(Object o) {
@@ -661,23 +663,23 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         table.setTransferHandler(new TransferHelper());
         table.setRootVisible(true);
         table.setVisible(true);
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent event) {
-                if (event.getClickCount() == 2 && event.getButton() == MouseEvent.BUTTON1) {
-                    navigate(table);
-                }
-            }
-        });
-        table.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                super.keyPressed(e);
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    navigate(table);
-                }
-            }
-        });
+//        table.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent event) {
+//                if (event.getClickCount() == 2 && event.getButton() == MouseEvent.BUTTON1) {
+//                    navigate(table);
+//                }
+//            }
+//        });
+//        table.addKeyListener(new KeyAdapter() {
+//            @Override
+//            public void keyPressed(KeyEvent e) {
+//                super.keyPressed(e);
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+//                    navigate(table);
+//                }
+//            }
+//        });
 
         return table;
     }
@@ -688,42 +690,61 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         Object rowValue = myModel.getRowValue(row);
         CollectionCustomNode node;
         if(rowValue !=null && (node = (CollectionCustomNode) rowValue).getType() == 2){
-            load(node);
+            load(node, false);
         }
     }
 
-    class ButtonRenderer extends JButton implements TableCellRenderer {
-
+    class ButtonRenderer extends JBPanel implements TableCellRenderer {
         public ButtonRenderer() {
 
         }
-
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
-            setIcon(PluginIcons.ICON_LOCAL_SCOPE);
-            setBackground(new JBColor(JBColor.WHITE, new Color(60, 63, 65)));
-            return this;
+            return renderButtons(this, row);
         }
 
     }
 
-    class ButtonEditor extends DefaultCellEditor {
-        protected JButton jButton;
+    public JBPanel renderButtons(JBPanel jbPanel, int row){
+        BorderLayout borderLayout = new BorderLayout();
+        jbPanel.setLayout(borderLayout);
+        Dimension dimension = new Dimension(40, 20);
+        JButton jButton = new JButton();
+        jButton.setPreferredSize(dimension);
+        jButton.setIcon(PluginIcons.ICON_LOCAL_SCOPE);
+        JBColor jbColor = new JBColor(JBColor.WHITE, new Color(60, 63, 65));
+        jButton.setBackground(jbColor);
+        jButton.addActionListener(e-> {
+            ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) collectionTable.getTableModel();
+            CollectionCustomNode node = (CollectionCustomNode) myModel.getRowValue(row);
+            load(node, false);
+        });
+        JButton jButton1 = new JButton();
+        jButton1.setPreferredSize(dimension);
+        jButton1.setIcon(PluginIcons.ICON_SEND_MINI);
+        jButton1.setBackground(jbColor);
+        jButton1.addActionListener(e-> {
+            ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) collectionTable.getTableModel();
+            CollectionCustomNode node = (CollectionCustomNode) myModel.getRowValue(row);
+            load(node, true);
+        });
+        jbPanel.add(jButton, BorderLayout.WEST);
+        jbPanel.add(jButton1, BorderLayout.EAST);
+        return jbPanel;
+    }
 
+    class ButtonEditor extends DefaultCellEditor {
+        private JBPanel jbPanel;
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
-            jButton = new JButton();
+            jbPanel = new JBPanel();
         }
 
+        @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                                                      boolean isSelected, int row, int column) {
-            if (isSelected) {
-                ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) collectionTable.getTableModel();
-                CollectionCustomNode node = (CollectionCustomNode) myModel.getRowValue(row);
-                load(node);
-            }
-            jButton.setIcon(PluginIcons.ICON_LOCAL_SCOPE);
-            return jButton;
+            return renderButtons(jbPanel, row);
         }
     }
 
@@ -860,7 +881,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         to.getChildList().add(position, from);
     }
 
-    private void load(CollectionCustomNode node) {
+    private void load(CollectionCustomNode node, boolean sendFlag) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             ApplicationManager.getApplication().runReadAction(() -> {
                 boolean flag = false;
@@ -892,7 +913,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                         NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Method not found", MessageType.INFO).notify(myProject);
                     }
                 }
-                loadAncChangeTab(flag, detail);
+                loadAncChangeTab(flag, detail, sendFlag);
             });
         });
 
@@ -907,7 +928,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 //        ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
     }
 
-    private void loadAncChangeTab(boolean flag, CollectionConfiguration.CollectionDetail detail) {
+    private void loadAncChangeTab(boolean flag, CollectionConfiguration.CollectionDetail detail, boolean sendFlag) {
         //切换tab
         if (flag) {
             //change data
@@ -920,7 +941,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 MessageBus messageBus = myProject.getMessageBus();
                 messageBus.connect();
                 ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.LOAD_REQUEST);
-                configChangeNotifier.loadRequest(detail, myProject.getName());
+                configChangeNotifier.loadRequest(detail, myProject.getName(), sendFlag);
             });
         }
     }

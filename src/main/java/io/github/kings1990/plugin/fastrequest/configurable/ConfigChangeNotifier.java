@@ -34,7 +34,7 @@ public interface ConfigChangeNotifier {
 
     }
 
-    default void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName) {
+    default void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName, boolean sendFlag) {
 
     }
 
