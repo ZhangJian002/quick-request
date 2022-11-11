@@ -17,9 +17,7 @@
 package io.github.kings1990.plugin.fastrequest.contributor;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.ide.actions.searcheverywhere.AbstractGotoSEContributor;
-import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributor;
-import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributorFactory;
+import com.intellij.ide.actions.searcheverywhere.*;
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel;
 import com.intellij.navigation.ChooseByNameContributor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -28,16 +26,18 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.util.TextWithIcon;
 import io.github.kings1990.plugin.fastrequest.idea.SearchEverywherePsiRenderer;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     private Project myProject;
-    private RequestMappingModel requestMappingModel;
+    private final RequestMappingModel requestMappingModel;
 
     protected FastRequestGotoContributor(@NotNull AnActionEvent event) {
         super(event);
@@ -50,6 +50,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     public @NotNull ListCellRenderer<Object> getElementsRenderer() {
         return new SearchEverywherePsiRenderer(this){
 
+            @Override
             protected DefaultListCellRenderer getRightCellRenderer(final Object value) {
                 if(value instanceof RequestMappingItem){
                     RequestMappingItem item = (RequestMappingItem) value;
@@ -58,6 +59,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
                     if(module == null){
                         return super.getRightCellRenderer(value);
                     }
+
 
                     return new DefaultListCellRenderer(){
                         @Override
@@ -87,13 +89,13 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
                 }
                 return super.getItemLocation(value);
             }
-             */
+//             */
         };
     }
 
     @Override
     public @Nullable @Nls String getAdvertisement() {
-        return "type [/url] or [post /url] to search";
+        return "type [/url] to search";
     }
 
     @Override
@@ -117,8 +119,8 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     }
 
     @Override
-    public boolean isEmptyPatternSupported() {
-        return true;
+    public int getElementPriority(@NotNull Object element, @NotNull String searchPattern) {
+        return super.getElementPriority(element, searchPattern) + 5;
     }
 
     static class Factory implements SearchEverywhereContributorFactory<Object>{
