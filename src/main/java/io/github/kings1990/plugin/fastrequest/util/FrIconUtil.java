@@ -16,6 +16,7 @@
 
 package io.github.kings1990.plugin.fastrequest.util;
 
+import com.intellij.icons.AllIcons;
 import icons.PluginIcons;
 
 import javax.swing.*;
@@ -33,6 +34,42 @@ public class FrIconUtil {
                 return PluginIcons.ICON_PATCH;
             default:
                 return PluginIcons.ICON_GET;
+        }
+    }
+
+    public static Icon getIconByMethodAndClassType(String methodType, boolean isInterface) {
+        if("GET".equals(methodType)){
+            if(isInterface){
+                return PluginIcons.ICON_GET_INTEFACE;
+            }else {
+                return PluginIcons.ICON_GET_CLASS;
+            }
+        }
+        if("POST".equals(methodType)){
+            if(isInterface){
+                return PluginIcons.ICON_POST_INTEFACE;
+            }else {
+                return PluginIcons.ICON_POST_CLASS;
+            }
+        }
+        if("PUT".equals(methodType)){
+            if(isInterface){
+                return PluginIcons.ICON_PUT_INTEFACE;
+            }else {
+                return PluginIcons.ICON_PUT_CLASS;
+            }
+        }
+        if("DELETE".equals(methodType)){
+            if(isInterface){
+                return PluginIcons.ICON_DEL_INTEFACE;
+            }else {
+                return PluginIcons.ICON_DEL_CLASS;
+            }
+        }
+        if(isInterface){
+            return AllIcons.Nodes.Interface;
+        }else {
+            return AllIcons.Nodes.Class;
         }
     }
 }

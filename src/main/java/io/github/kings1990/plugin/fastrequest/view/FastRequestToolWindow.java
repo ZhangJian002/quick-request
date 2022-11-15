@@ -369,8 +369,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(new CopyCurlAction());
         group.addSeparator("  |  ");
         group.add(new DocAction());
-        group.add(new WhatsNewAction());
-        group.add(new CoffeeMeAction());
+//        group.add(new WhatsNewAction());
+//        group.add(new CoffeeMeAction());
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT, group, true);
         actionToolbar.setTargetComponent(panel);
         JComponent toolbarComponent = actionToolbar.getComponent();

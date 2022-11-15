@@ -1,0 +1,18 @@
+<svg width="39" height="16" xmlns="http://www.w3.org/2000/svg">
+
+ <g>
+  <title>Layer 1</title>
+  <g id="svg_1" fill-rule="evenodd" fill="none">
+   <path id="svg_2" d="m37,8c0,3.866 -3.134,7 -7,7c-3.866,0 -7,-3.134 -7,-7c0,-3.866 3.134,-7 7,-7c3.866,0 7,3.134 7,7" fill-opacity="0.6" fill="#62B543"/>
+   <polygon id="svg_3" opacity="0.7" points="30.599998474121094,10 30.599998474121094,6 32,6 32,5 28,5 28,6 29.400001525878906,6 29.400001525878906,10 28,10.006999969482422 28,11 32,11 32,10 " fill-rule="nonzero" fill="#231F20"/>
+  </g>
+  <g stroke="null" id="svg_6">
+   <rect stroke="0E932E" fill="#389fd6" stroke-width="1.5" stroke-opacity="null" x="-28" y="2" width="22" height="14" id="svg_4"/>
+   <text transform="matrix(1 0 0 0.875 0 0)" stroke="0E932E" fill="#2c2c2c" stroke-width="0" stroke-opacity="null" x="-25.05468" y="13.15778" id="svg_5" font-size="8" font-family="Arvo, sans-serif" text-anchor="start" xml:space="preserve" font-weight="bold">GET</text>
+  </g>
+  <g id="svg_9">
+   <rect fill="#389fd6" stroke-width="1.5" stroke-opacity="null" x="0" y="0" width="22" height="16" id="svg_7" stroke="0E932E"/>
+   <text fill="#2c2c2c" stroke="0E932E" stroke-width="0" stroke-opacity="null" x="2.94532" y="10.87206" id="svg_8" font-size="8" font-family="Arvo, sans-serif" text-anchor="start" xml:space="preserve" font-weight="bold">GET</text>
+  </g>
+ </g>
+</svg>

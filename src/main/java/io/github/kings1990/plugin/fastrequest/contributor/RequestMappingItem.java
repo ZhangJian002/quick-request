@@ -16,17 +16,24 @@
 
 package io.github.kings1990.plugin.fastrequest.contributor;
 
+import com.intellij.icons.AllIcons;
+import com.intellij.navigation.ColoredItemPresentation;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.navigation.NavigationItem;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.SyntaxHighlighterColors;
+import com.intellij.openapi.editor.colors.CodeInsightColors;
+import com.intellij.openapi.editor.colors.EditorColors;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import io.github.kings1990.plugin.fastrequest.util.FrIconUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.Objects;
 
 
 public  class RequestMappingItem implements NavigationItem {
@@ -36,16 +43,19 @@ public  class RequestMappingItem implements NavigationItem {
    private final String urlPath;
    private final String requestMethod;
 
+   @Override
    @NotNull
    public String getName() {
       return this.requestMethod + " " +this.urlPath;
    }
 
+   @Override
    @NotNull
    public ItemPresentation getPresentation() {
-      return (ItemPresentation)(new RequestMappingItem.RequestMappingItemPresentation());
+      return new RequestMappingItem.RequestMappingItemPresentation();
    }
 
+   @Override
    public void navigate(boolean requestFocus) {
       if (navigationElement != null) {
          navigationElement.navigate(requestFocus);
@@ -54,14 +64,17 @@ public  class RequestMappingItem implements NavigationItem {
 
 
 
+   @Override
    public boolean canNavigate() {
       return this.navigationElement != null;
    }
 
+   @Override
    public boolean canNavigateToSource() {
       return true;
    }
 
+   @Override
    @NotNull
    public String toString() {
       return "RequestMappingItem(psiElement=" + this.psiElement + ", urlPath='" + this.urlPath + "', requestMethod='" + this.requestMethod + "', navigationElement=" + this.navigationElement + ')';
@@ -84,12 +97,14 @@ public  class RequestMappingItem implements NavigationItem {
       this.navigationElement = (Navigatable)var10001;
    }
 
-   public final class RequestMappingItemPresentation implements ItemPresentation {
+   public final class RequestMappingItemPresentation implements ColoredItemPresentation {
+      @Override
       @NotNull
       public String getPresentableText() {
          return RequestMappingItem.this.urlPath;
       }
 
+      @Override
       @NotNull
       public String getLocationString() {
          PsiElement psiElement = RequestMappingItem.this.getPsiElement();
@@ -104,9 +119,19 @@ public  class RequestMappingItem implements NavigationItem {
          }
       }
 
+      @Override
       @NotNull
       public Icon getIcon(boolean b) {
-         return FrIconUtil.getIconByMethodType(requestMethod);
+         PsiElement psiElement = RequestMappingItem.this.getPsiElement();
+         PsiFile psiFile = psiElement.getContainingFile();
+         PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
+         return FrIconUtil.getIconByMethodAndClassType(requestMethod, psiJavaFile.getClasses()[0].isInterface());
+      }
+
+      @Override
+      public @Nullable TextAttributesKey getTextAttributesKey() {
+         return null;
+//         return EditorColors.SEARCH_RESULT_ATTRIBUTES;
       }
    }
 }

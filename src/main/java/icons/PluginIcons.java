@@ -63,6 +63,18 @@ public interface PluginIcons {
     Icon ICON_PATCH = IconLoader.getIcon("/icon/patch.svg", PluginIcons.class);
     Icon ICON_CODE = IconLoader.getIcon("/icon/code.svg", PluginIcons.class);
 
+    Icon ICON_GET_INTEFACE = IconLoader.getIcon("/icon/get-interface.svg", PluginIcons.class);
+    Icon ICON_POST_INTEFACE = IconLoader.getIcon("/icon/post-interface.svg", PluginIcons.class);
+    Icon ICON_PUT_INTEFACE = IconLoader.getIcon("/icon/put-interface.svg", PluginIcons.class);
+    Icon ICON_DEL_INTEFACE = IconLoader.getIcon("/icon/del-interface.svg", PluginIcons.class);
+
+    Icon ICON_GET_CLASS = IconLoader.getIcon("/icon/get-class.svg", PluginIcons.class);
+    Icon ICON_POST_CLASS = IconLoader.getIcon("/icon/post-class.svg", PluginIcons.class);
+    Icon ICON_PUT_CLASS = IconLoader.getIcon("/icon/put-class.svg", PluginIcons.class);
+    Icon ICON_DEL_CLASS = IconLoader.getIcon("/icon/del-class.svg", PluginIcons.class);
+
+
+
     Icon NOTIFICATIONS_NEW = IconLoader.getIcon("/icon/notificationsNew.svg", PluginIcons.class);
 
     Icon ICON_POSTMAN = IconLoader.getIcon("/icon/postman.svg", PluginIcons.class);
