@@ -1,7 +1,7 @@
 <idea-plugin>
-    <id>io.github.kings1990.FastRequest</id>
-    <name>Restful Fast Request</name>
-    <vendor email="shihuanggege@gmail.com" url="">Zjay</vendor>
+    <id>idea.FastRequest</id>
+    <name>Fast Request</name>
+    <vendor email="shihuanggege@gmail.com">Zjay</vendor>
 
     <description><![CDATA[
     基于Restful Fast Request开源版修改，原作者kings1990
@@ -30,7 +30,7 @@
                 serviceImplementation="io.github.kings1990.plugin.fastrequest.generator.impl.JaxRsGenerator"/>
         <applicationService
                 serviceImplementation="io.github.kings1990.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
-        <applicationConfigurable id="p" displayName="Restful Fast Request"
+        <applicationConfigurable id="p" displayName="Fast Request"
                                  instance="io.github.kings1990.plugin.fastrequest.configurable.CommonConfigurable">
             <configurable parentId="p"
                           instance="io.github.kings1990.plugin.fastrequest.configurable.DataMappingConfigurable"/>
@@ -113,7 +113,7 @@
                 implementation="io.github.kings1990.plugin.fastrequest.contributor.FastRequestEqualityProvider"/>
     </extensions>
 
-    <extensions defaultExtensionNs="io.github.kings1990.FastRequest">
+    <extensions defaultExtensionNs="idea.FastRequest">
         <requestMappingContributor
                 implementation="io.github.kings1990.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
 

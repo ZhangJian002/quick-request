@@ -302,7 +302,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
 
         ActionLink managerConfigLink = new ActionLink("config", e -> {
-            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Restful Fast Request");
+            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request");
         });
         managerConfigLink.setExternalLinkIcon();
         manageConfigButton = managerConfigLink;
@@ -453,7 +453,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     int idx = config.getEnvList().indexOf(activeEnv);
                     envComboBox.setSelectedIndex(Math.max(0, idx + 1));
                     envComboBox.hidePopup();
-                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Restful Fast Request");
+                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request");
                     return;
                 }
 
@@ -523,7 +523,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     int idx = config.getProjectList().indexOf(activeProject);
                     projectComboBox.setSelectedIndex(Math.max(0, idx + 1));
                     projectComboBox.hidePopup();
-                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Restful Fast Request");
+                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request");
                     return;
                 }
                 String projectSelect = selectProject.toString();

@@ -1,7 +1,7 @@
 ---
 home: true
 heroImage: /img/fastRequest.svg
-heroText: Restful Fast Request
+heroText: Fast Request
 tagline: 为简化开发而生
 action:
       - text: 快速上手 💡
@@ -20,9 +20,9 @@ footer: Apache License 2.0 | Copyright © 2021-present Kings
 
 meta:
   - name: keywords
-    content: Restful Fast Request,idea插件,http client,Restful API
+    content: Fast Request,idea插件,http client,Restful API
   - name: description
-    content: Restful Fast Request,一个基于IDEA的类似postman的restful api工具包插件,可以根据已有的方法帮助您快速生成url和params,一个API调试工具+API管理工具,支持springmvc、springboot、java-rs
+    content: Fast Request,一个基于IDEA的类似postman的restful api工具包插件,可以根据已有的方法帮助您快速生成url和params,一个API调试工具+API管理工具,支持springmvc、springboot、java-rs
 
 ---
 
@@ -69,7 +69,7 @@ meta:
 
 ### 特别鸣谢
 
-为Restful Fast Request提供宣传、托管等服务
+为Fast Request提供宣传、托管等服务
 
 [![](./.vuepress/public/img/org/gitee.svg)](https://gitee.com)
 [![](./.vuepress/public/img/org/OSChina.svg)](https://www.oschina.net)

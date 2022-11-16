@@ -34,6 +34,6 @@ public class OpenConfigAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getData(LangDataKeys.PROJECT);
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Restful Fast Request");
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Fast Request");
     }
 }

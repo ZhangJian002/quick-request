@@ -1,4 +1,4 @@
-# Restful Fast Request
+# Fast Request
 
 * [简体中文](./README.zh_CN.md)
 
@@ -15,14 +15,14 @@
 [![QQ群](https://img.shields.io/badge/chat-QQ群:754131222-46BC99.svg?logo=Tencent%20QQ)](https://qm.qq.com/cgi-bin/qm/qr?k=1OEJ5QST4zoEUv0x0OvOmC3TUfAIZXAO)
 [![Slack](https://img.shields.io/badge/Slack-%23Fast--Request-DD1265?logo=Slack)](https://fastrequest.slack.com)
 
-[**Restful Fast Request**](https://plugins.jetbrains.com/plugin/16988-fast-request) is a plugin based on springmvc that
+[**Fast Request**](https://plugins.jetbrains.com/plugin/16988-fast-request) is a plugin based on springmvc that
 help you quickly generate **url** and **params**.It is also a http client tool.
 
 You only need to click the rocket icon on the left side of the method, the plugin will help you generate the method url
 and parameters and display in the tool window, and then click Send Request to complete the API debugging in IDEA, and
 you can save the history request
 
-Compared with the HTTP Client, Restful Fast Request not only has the built-in functions of the HTTP Client, but also
+Compared with the HTTP Client, Fast Request not only has the built-in functions of the HTTP Client, but also
 provides a friendly, easy-to-understand and intuitive interface, which makes it more convenient and simple for users to
 debug the API. At the same time, various types of parameters also provide different customization methods to make it
 more flexible.
@@ -77,7 +77,7 @@ If you think this plugin help you, please **🌟Star** project, and also welcome
 **using IDE plugin system**
 
 - recommended <kbd>Preferences(Settings)</kbd> > <kbd>Plugins</kbd> > <kbd>Browse repositories...</kbd> > <kbd>find"
-  Restful Fast Request"</kbd> > <kbd>Install Plugin</kbd>
+  Fast Request"</kbd> > <kbd>Install Plugin</kbd>
 
 ![](./screenshot/download.png)
 

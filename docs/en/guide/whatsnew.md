@@ -290,7 +290,7 @@ Will only be shown once
 
 ## v2.0.1
 
-*   rename from Fast Request to Restful Fast Request
+*   rename from Fast Request to Fast Request
 *   merge Json、Form URL-Encoded、Multipart to Body Tab to reduce the tool window width
 *   fix bug when modify config in global mode
 *   add get、post、delete、put icon to saved request

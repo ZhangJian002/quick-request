@@ -6,7 +6,7 @@ module.exports = config({
 //              title: "二轮投票支持",  //vuepress公告插件 先安装在配置 npm install @vuepress-yard/vuepress-plugin-window --save
 //              contentInfo: {
 //                  title: "投票支持🎉🎉🎉",
-//                content: "《2021年度OSC中国最佳开源项目评选》已成功晋级TOP50进入下一轮，希望大家再次为Restful Fast Request投上一票，在此非常感谢各位 ❤️❤️❤️ 二轮投票有效时间：2021.12.20~2021.12.26 ",
+//                content: "《2021年度OSC中国最佳开源项目评选》已成功晋级TOP50进入下一轮，希望大家再次为Fast Request投上一票，在此非常感谢各位 ❤️❤️❤️ 二轮投票有效时间：2021.12.20~2021.12.26 ",
 //                contentStyle: {"font-size":"13px"}
 //              },
 //              windowStyle:{right: '10px',top: '300px',width: '210px'},
@@ -19,8 +19,8 @@ module.exports = config({
 //            }]
     ],
     base : '/fast-request/',
-    title: 'Restful Fast Request',
-    description: 'Intellij Restful Fast Request',
+    title: 'Fast Request',
+    description: 'Intellij Fast Request',
     head: [
         [
             'link',

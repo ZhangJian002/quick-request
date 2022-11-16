@@ -16,7 +16,10 @@
 
 package io.github.kings1990.plugin.fastrequest.contributor;
 
+import com.intellij.find.impl.FindInProjectUtil;
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.structureView.impl.java.ClassInitializerTreeElement;
+import com.intellij.model.presentation.SymbolDeclarationPresentation;
 import com.intellij.navigation.ColoredItemPresentation;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.navigation.NavigationItem;
@@ -29,6 +32,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
 import io.github.kings1990.plugin.fastrequest.util.FrIconUtil;
+import org.intellij.plugins.markdown.structureView.MarkdownStructureElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

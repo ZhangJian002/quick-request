@@ -42,11 +42,10 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     protected FastRequestGotoContributor(@NotNull AnActionEvent event) {
         super(event);
         myProject = event.getProject();
-        requestMappingModel = new RequestMappingModel(myProject, ExtensionPointName.<ChooseByNameContributor>create("io.github.kings1990.FastRequest.requestMappingContributor").getExtensionList());
+        requestMappingModel = new RequestMappingModel(myProject, ExtensionPointName.<ChooseByNameContributor>create("idea.FastRequest.requestMappingContributor").getExtensionList());
     }
 
 
-    @Override
     public @NotNull ListCellRenderer<Object> getElementsRenderer() {
         return new SearchEverywherePsiRenderer(this){
 
@@ -93,39 +92,32 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
         };
     }
 
-    @Override
     public @Nullable @Nls String getAdvertisement() {
         return "type [/url] to search";
     }
 
-    @Override
     protected @NotNull FilteringGotoByModel<?> createModel(@NotNull Project project) {
         return requestMappingModel;
     }
 
-    @Override
     public @NotNull @Nls String getGroupName() {
         return "Fast Request";
     }
 
-    @Override
     public int getSortWeight() {
         return 1000;
     }
 
-    @Override
     public boolean showInFindResults() {
         return false;
     }
 
-    @Override
     public int getElementPriority(@NotNull Object element, @NotNull String searchPattern) {
         return super.getElementPriority(element, searchPattern) + 5;
     }
 
     static class Factory implements SearchEverywhereContributorFactory<Object>{
 
-        @Override
         public @NotNull SearchEverywhereContributor<Object> createContributor(@NotNull AnActionEvent initEvent) {
             return new FastRequestGotoContributor(initEvent);
         }

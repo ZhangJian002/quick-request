@@ -1,4 +1,4 @@
-# Restful Fast Request
+# Fast Request
 
 <a href="https://www.jetbrains.com"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width = "10%" /></a>
 <a href="https://www.jetbrains.com/idea"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/IntelliJ_IDEA_icon.svg" width = "10%" /></a>
@@ -14,7 +14,7 @@
 [![QQ群](https://img.shields.io/badge/chat-QQ群:754131222-46BC99.svg?logo=Tencent%20QQ)](https://qm.qq.com/cgi-bin/qm/qr?k=1OEJ5QST4zoEUv0x0OvOmC3TUfAIZXAO)
 [![Slack](https://img.shields.io/badge/Slack-%23Fast--Request-DD1265?logo=Slack)](https://fastrequest.slack.com)
 
-[**Restful Fast Request**](https://plugins.jetbrains.com/plugin/16988-fast-request) 是一个基于springmvc的帮助你快速生成**url**和**参数**
+[**Fast Request**](https://plugins.jetbrains.com/plugin/16988-fast-request) 是一个基于springmvc的帮助你快速生成**url**和**参数**
 的IDEA 插件。同时也是一个http client工具，你只需要按一下方法左侧的小图标(小火箭),插件就会帮你生成方法的url和参数显示在工具窗口，再点击发送请求即可在IDEA内完成API调试，并且可以保存历史请求，方便再次使用调试
 
 对比与HTTP Client，Fast Request不仅拥有HTTP Client内置的功能，还提供了友好易懂直观的界面，让使用者调试API的时候能够更加方便、简捷，同时各种类型参数也提供了不同的定制方式，更加灵活。
@@ -98,7 +98,7 @@
 
 ## 特别鸣谢
 
-为Restful Fast Request提供宣传、托管等服务
+为Fast Request提供宣传、托管等服务
 
 [![](./screenshot/org/gitee.svg)](https://gitee.com)
 [![](./screenshot/org/OSChina.svg)](https://www.oschina.net)
