@@ -338,9 +338,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         this.$$$setupUI$$$();
 
         DefaultActionGroup group = new DefaultActionGroup();
-        group.add(new OpenConfigAction());
         GotoFastRequestAction gotoFastRequestAction = (GotoFastRequestAction) ActionManager.getInstance().getAction("fastRequest.gotoFastRequest");
         group.add(gotoFastRequestAction);
+        group.add(new OpenConfigAction());
         group.addSeparator("  |  ");
         ToolbarSendRequestAction toolbarSendRequestAction = (ToolbarSendRequestAction) ActionManager.getInstance().getAction("fastRequest.sendAction");
         ToolbarSendAndDownloadRequestAction sendAndDownloadRequestAction = (ToolbarSendAndDownloadRequestAction) ActionManager.getInstance().getAction("fastRequest.sendDownloadAction");
@@ -367,8 +367,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(new SaveRequestAction());
         group.add(new RetryAction());
         group.add(new CopyCurlAction());
-        group.addSeparator("  |  ");
-        group.add(new DocAction());
+//        group.addSeparator("  |  ");
+//        group.add(new DocAction());
 //        group.add(new WhatsNewAction());
 //        group.add(new CoffeeMeAction());
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT, group, true);
@@ -3193,6 +3193,17 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             }
             // 2020.3 before
             //new NotificationGroup("toolWindowNotificationGroup", NotificationDisplayType.TOOL_WINDOW, true).createNotification("Success", NotificationType.INFORMATION).notify(myProject);
+        }
+    }
+
+    private static final class ShareAction extends AnAction {
+        public ShareAction() {
+            super(MyResourceBundleUtil.getKey("StarDocument"), MyResourceBundleUtil.getKey("StarDocument"), PluginIcons.ICON_DOC);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent event) {
+
         }
     }
 

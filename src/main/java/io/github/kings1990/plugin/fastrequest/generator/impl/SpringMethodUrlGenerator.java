@@ -136,7 +136,48 @@ public class SpringMethodUrlGenerator extends FastUrlGenerator {
         if (value == null) {
             return StringUtils.EMPTY;
         }
+        String url = getRequestMappingUrlCommon(value);
+        List<DataMapping> urlReplaceMappingList = config.getUrlReplaceMappingList();
+        for (DataMapping dataMapping : urlReplaceMappingList) {
+            url = url.replace(dataMapping.getType(), dataMapping.getValue());
+        }
+        return url.replace("\"", "");
+    }
 
+    /**
+     * 得到类的mappingUrl
+     * //@Controller("xxController") @RequestMapping("url") or @RequestMapping("url/${fixed module name}/xxx")
+     *
+     * @param psiMethod psi的方法
+     * @return {@link String }
+     * @author Kings
+     * @date 2021/05/23
+     */
+    public String getClassRequestMappingUrl(PsiMethod psiMethod) {
+        String mapping = Constant.SpringMappingConfig.REQUEST_MAPPING.getCode();
+        PsiClass containingClass = psiMethod.getContainingClass();
+        if (containingClass == null) {
+            return StringUtils.EMPTY;
+        }
+        PsiAnnotation annotationMapping = containingClass.getAnnotation(mapping);;
+
+        if (annotationMapping == null) {
+            return StringUtils.EMPTY;
+        }
+        PsiAnnotationMemberValue value = annotationMapping.findDeclaredAttributeValue("value");
+        value = value != null ? value : annotationMapping.findDeclaredAttributeValue("path");
+        if (value == null) {
+            return StringUtils.EMPTY;
+        }
+        String classUrl = getRequestMappingUrlCommon(value);
+        List<DataMapping> urlReplaceMappingList = config.getUrlReplaceMappingList();
+        for (DataMapping dataMapping : urlReplaceMappingList) {
+            classUrl = classUrl.replace(dataMapping.getType(),dataMapping.getValue());
+        }
+        return classUrl.replace("\"", "");
+    }
+
+    private String getRequestMappingUrlCommon(PsiAnnotationMemberValue value) {
         StringBuilder url;
         if(value instanceof PsiReferenceExpression){
             //value是变量类型的
@@ -173,51 +214,7 @@ public class SpringMethodUrlGenerator extends FastUrlGenerator {
         } else {
             url = new StringBuilder(value.getText());
         }
-        List<DataMapping> urlReplaceMappingList = config.getUrlReplaceMappingList();
-        for (DataMapping dataMapping : urlReplaceMappingList) {
-            url = new StringBuilder(url.toString().replace(dataMapping.getType(), dataMapping.getValue()));
-        }
-        return url.toString().replace("\"", "");
-    }
-
-    /**
-     * 得到类的mappingUrl
-     * //@Controller("xxController") @RequestMapping("url") or @RequestMapping("url/${fixed module name}/xxx")
-     *
-     * @param psiMethod psi的方法
-     * @return {@link String }
-     * @author Kings
-     * @date 2021/05/23
-     */
-    public String getClassRequestMappingUrl(PsiMethod psiMethod) {
-        String mapping = Constant.SpringMappingConfig.REQUEST_MAPPING.getCode();
-        PsiClass containingClass = psiMethod.getContainingClass();
-        if (containingClass == null) {
-            return StringUtils.EMPTY;
-        }
-        PsiAnnotation annotationMapping = containingClass.getAnnotation(mapping);;
-
-        if (annotationMapping == null) {
-            return StringUtils.EMPTY;
-        }
-        PsiAnnotationMemberValue value = annotationMapping.findDeclaredAttributeValue("value");
-        value = value != null ? value : annotationMapping.findDeclaredAttributeValue("path");
-        if (value == null) {
-            return StringUtils.EMPTY;
-        }
-        String classUrl;
-        if(value instanceof PsiReferenceExpression){
-            PsiField psiField = (PsiField) ((PsiReferenceExpressionImpl)value).resolve();
-            classUrl = psiField == null ? "" : psiField.getInitializer() == null? "" : psiField.getInitializer().getText();
-        } else {
-            classUrl = value.getText();
-        }
-
-        List<DataMapping> urlReplaceMappingList = config.getUrlReplaceMappingList();
-        for (DataMapping dataMapping : urlReplaceMappingList) {
-            classUrl = classUrl.replace(dataMapping.getType(),dataMapping.getValue());
-        }
-        return classUrl.replace("\"", "");
+        return url.toString();
     }
 
     public List<ParamNameType> getMethodBodyParamList(PsiMethod psiMethod) {
