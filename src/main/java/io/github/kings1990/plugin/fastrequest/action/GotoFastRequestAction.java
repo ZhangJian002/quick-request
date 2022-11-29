@@ -43,9 +43,10 @@ public class GotoFastRequestAction extends SearchEverywhereBaseAction implements
 
         boolean dumb = DumbService.isDumb(project);
         if (!dumb || new SymbolSearchEverywhereContributor(e).isDumbAware()) {
-            String tabID = Registry.is("search.everywhere.group.contributors.by.type")
-                    ? "SearchEverywhere.Project"
-                    : FastRequestGotoContributor.class.getSimpleName();
+//            String tabID = Registry.is("search.everywhere.group.contributors.by.type")
+//                    ? "SearchEverywhere.Project"
+//                    : FastRequestGotoContributor.class.getSimpleName();
+            String tabID = FastRequestGotoContributor.class.getSimpleName();
             showInSearchEverywherePopup(tabID, e, true, true);
         }
     }
