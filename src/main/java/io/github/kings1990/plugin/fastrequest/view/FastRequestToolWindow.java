@@ -48,17 +48,15 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.progress.util.ColorProgressBar;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
@@ -68,8 +66,6 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.ProjectScope;
-import com.intellij.psi.search.searches.AllClassesSearch;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.ui.dualView.TreeTableView;
@@ -77,7 +73,6 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
 import com.intellij.ui.treeStructure.treetable.TreeColumnInfo;
 import com.intellij.util.PsiNavigateUtil;
-import com.intellij.util.Query;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
@@ -96,8 +91,6 @@ import io.github.kings1990.plugin.fastrequest.model.*;
 import io.github.kings1990.plugin.fastrequest.service.GeneratorUrlService;
 import io.github.kings1990.plugin.fastrequest.util.*;
 import io.github.kings1990.plugin.fastrequest.view.component.*;
-import io.github.kings1990.plugin.fastrequest.view.component.tree.MethodNode;
-import io.github.kings1990.plugin.fastrequest.view.component.tree.NodeUtil;
 import io.github.kings1990.plugin.fastrequest.view.inner.HeaderGroupView;
 import io.github.kings1990.plugin.fastrequest.view.inner.SupportView;
 import org.apache.commons.lang3.StringUtils;
@@ -106,8 +99,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -143,6 +134,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     public static final String NO_ENV = "<No Env>";
     public static final String NO_PROJECT = "<No Project>";
     public static final int MAX_DATA_LENGTH = 5 * 1024 * 1024;
+
+    private final AtomicReference<Future<?>> futureAtomicReference = new AtomicReference<>();
 
     private final Project myProject;
     private JPanel panel;
@@ -363,6 +356,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         SplitButtonAction splitButtonAction = new SplitButtonAction(sendGroup);
         group.add(splitButtonAction);
 
+        group.add(new StopPositionAction());
         group.add(new FixPositionAction());
         group.add(new SaveRequestAction());
         group.add(new RetryAction());
@@ -716,7 +710,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     public void sendRequestEvent(boolean fileMode) {
-        if (!sendButtonFlag) {
+        if (!sendButtonFlag || futureAtomicReference.get() != null) {
             return;
         }
         sendButtonFlag = false;
@@ -803,11 +797,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             FileSaverDialog finalFd = fd;
             requestProgressBar.setVisible(true);
             requestProgressBar.setForeground(ColorProgressBar.GREEN);
-            Future<?> future = ThreadUtil.execAsync(() -> {
+            futureAtomicReference.set(ThreadUtil.execAsync(() -> {
                 try {
                     long start = System.currentTimeMillis();
                     HttpResponse response = request.execute();
                     long end = System.currentTimeMillis();
+                    //如果被外部中断，就不继续了
+                    boolean interrupted = Thread.currentThread().isInterrupted();
+                    if(interrupted){
+                        return;
+                    }
 
                     ApplicationManager.getApplication().invokeLater(() -> {
                         tabbedPane.setSelectedIndex(4);
@@ -885,6 +884,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     }, ModalityState.NON_MODAL);
                 } catch (Exception ee) {
                     sendButtonFlag = true;
+                    futureAtomicReference.set(null);
                     requestProgressBar.setVisible(false);
                     tabbedPane.setSelectedIndex(4);
                     responseTabbedPanel.setSelectedIndex(2);
@@ -907,9 +907,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
                 }
                 sendButtonFlag = true;
-            });
+                futureAtomicReference.set(null);
+            }));
         } catch (Exception exception) {
             sendButtonFlag = true;
+            futureAtomicReference.set(null);
             requestProgressBar.setVisible(false);
             String errorMsg = exception.getMessage();
             ApplicationManager.getApplication().invokeLater(() -> {
@@ -3050,6 +3052,33 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             }
         }
         return null;
+    }
+
+
+    private final class StopPositionAction extends AnAction {
+        public StopPositionAction() {
+            super("Stop", "Stop", AllIcons.Actions.Suspend);
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent e) {
+            e.getPresentation().setEnabled(futureAtomicReference.get() != null);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            if(futureAtomicReference.get() != null){
+                futureAtomicReference.get().cancel(true);
+                if(futureAtomicReference.get().isCancelled()){
+                    FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
+                    if(fastRequestToolWindow != null){
+                        fastRequestToolWindow.sendButtonFlag = true;
+                        fastRequestToolWindow.requestProgressBar.setVisible(false);
+                        futureAtomicReference.set(null);
+                    }
+                }
+            }
+        }
     }
 
     private final class FixPositionAction extends AnAction {
