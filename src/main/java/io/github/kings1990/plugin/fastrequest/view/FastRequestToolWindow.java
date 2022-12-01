@@ -141,7 +141,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JPanel panel;
     private JComboBox<String> envComboBox;
     private JComboBox<String> projectComboBox;
-    private JTextField urlTextField;
+    public JTextField urlTextField;
     private JComboBox<String> methodTypeComboBox;
     private JComboBox<AnAction> sendComboBox;
     private JTextArea urlParamsTextArea;

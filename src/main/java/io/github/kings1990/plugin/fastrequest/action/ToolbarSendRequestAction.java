@@ -24,6 +24,7 @@ import com.intellij.openapi.util.NlsActions;
 import icons.PluginIcons;
 import io.github.kings1990.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.kings1990.plugin.fastrequest.view.FastRequestToolWindow;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,14 +54,6 @@ public class ToolbarSendRequestAction extends DumbAwareAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        Project myProject = e.getData(LangDataKeys.PROJECT);
-        if (myProject == null) {
-            return;
-        }
-
-        FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
-        if (fastRequestToolWindow != null) {
-            e.getPresentation().setEnabled(fastRequestToolWindow.getSendButtonFlag());
-        }
+        ToolbarSendAndDownloadRequestAction.updateVisit(e);
     }
 }

@@ -23,6 +23,7 @@ import com.intellij.openapi.project.Project;
 import icons.PluginIcons;
 import io.github.kings1990.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.kings1990.plugin.fastrequest.view.FastRequestToolWindow;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class ToolbarSendAndDownloadRequestAction extends DumbAwareAction {
@@ -45,6 +46,10 @@ public class ToolbarSendAndDownloadRequestAction extends DumbAwareAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
+        updateVisit(e);
+    }
+
+    static void updateVisit(@NotNull AnActionEvent e) {
         Project myProject = e.getData(LangDataKeys.PROJECT);
         if (myProject == null) {
             return;
@@ -52,7 +57,7 @@ public class ToolbarSendAndDownloadRequestAction extends DumbAwareAction {
 
         FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
         if (fastRequestToolWindow != null) {
-            e.getPresentation().setEnabled(fastRequestToolWindow.getSendButtonFlag());
+            e.getPresentation().setEnabled(fastRequestToolWindow.getSendButtonFlag() && StringUtils.isNoneBlank(fastRequestToolWindow.urlTextField.getText()));
         }
     }
 

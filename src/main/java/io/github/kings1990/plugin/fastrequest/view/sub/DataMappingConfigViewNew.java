@@ -16,7 +16,6 @@
 
 package io.github.kings1990.plugin.fastrequest.view.sub;
 
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
@@ -237,7 +236,7 @@ public class DataMappingConfigViewNew extends AbstractConfigurableView {
                     Messages.showMessageDialog("Java Type already exist", "Error", Messages.getInformationIcon());
                     return;
                 }
-                if(!JSONUtil.isJson(dataMapping.getValue())){
+                if(!isJsonStr(dataMapping.getValue())){
                     Messages.showMessageDialog("Please enter json string", "Error", Messages.getInformationIcon());
                     return;
                 }
@@ -256,6 +255,17 @@ public class DataMappingConfigViewNew extends AbstractConfigurableView {
         toolbarDecorator.setPreferredSize(new Dimension(-1, 150));
         customDataMappingPanel = toolbarDecorator.createPanel();
         setCustomTable(table);
+    }
+
+    private boolean isJsonStr(String jsonStr){
+        String trim = jsonStr.trim();
+        if(trim.startsWith("{") && trim.endsWith("}")){
+            return true;
+        }
+        if(trim.startsWith("[") && trim.endsWith("]")){
+            return true;
+        }
+        return false;
     }
 
     /**
