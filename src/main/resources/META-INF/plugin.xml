@@ -108,12 +108,12 @@
             </action>
         </group>
 
-        <group id="fastRequest.editor.floatGroup">
-            <action id="fastRequest.format" class="io.github.kings1990.plugin.fastrequest.action.FormatAction">
-                <add-to-group group-id="EditorContextBarMenu" anchor="last"/>
-            </action>
+<!--        <group id="fastRequest.editor.floatGroup">-->
+<!--            <action id="fastRequest.format" class="io.github.kings1990.plugin.fastrequest.action.FormatAction">-->
+<!--                <add-to-group group-id="EditorContextBarMenu" anchor="last"/>-->
+<!--            </action>-->
 
-        </group>
+<!--        </group>-->
 
         <action id="fastRequest.gotoFastRequest"
                 class="io.github.kings1990.plugin.fastrequest.action.GotoFastRequestAction">
@@ -130,8 +130,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <searchEverywhereContributor
                 implementation="io.github.kings1990.plugin.fastrequest.contributor.FastRequestGotoContributor$Factory"/>
-        <searchEverywhereResultsEqualityProvider
-                implementation="io.github.kings1990.plugin.fastrequest.contributor.FastRequestEqualityProvider"/>
+<!--        <searchEverywhereResultsEqualityProvider-->
+<!--                implementation="io.github.kings1990.plugin.fastrequest.contributor.FastRequestEqualityProvider"/>-->
     </extensions>
 
     <extensions defaultExtensionNs="idea.FastRequest">

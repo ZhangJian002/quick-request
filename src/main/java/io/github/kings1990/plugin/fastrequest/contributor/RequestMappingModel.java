@@ -39,7 +39,7 @@ public class RequestMappingModel extends FilteringGotoByModel<FileType> {
 
     @Override
     public @NotNull ChooseByNameItemProvider getItemProvider(@Nullable PsiElement context) {
-        return new RequestMappingItemProvider(this);
+        return new RequestMappingItemProvider(context,this);
     }
 
     @Override

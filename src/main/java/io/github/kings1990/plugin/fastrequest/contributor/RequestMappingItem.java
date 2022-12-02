@@ -111,16 +111,12 @@ public  class RequestMappingItem implements NavigationItem {
       @Override
       @NotNull
       public String getLocationString() {
-         PsiElement psiElement = RequestMappingItem.this.getPsiElement();
-         PsiFile psiFile = psiElement.getContainingFile();
-         String fileName = psiFile != null ? psiFile.getName() : null;
+         String location = null;
          if (psiElement instanceof PsiMethod) {
-            return fileName != null ? fileName : "unknownLocation" +  "." + ((PsiMethod) psiElement).getName();
-         } else if (psiElement instanceof PsiClass){
-            return fileName != null ? fileName : "unknownLocation";
-         } else {
-            return "unknownLocation";
+            PsiMethod psiMethod = ((PsiMethod) psiElement);;
+            location = psiMethod.getContainingClass().getName().concat("#").concat(psiMethod.getName());
          }
+         return "(" + location + ")";
       }
 
       @Override

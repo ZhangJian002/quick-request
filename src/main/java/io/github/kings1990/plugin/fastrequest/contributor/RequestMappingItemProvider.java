@@ -16,9 +16,11 @@
 
 package io.github.kings1990.plugin.fastrequest.contributor;
 
+import com.intellij.ide.actions.searcheverywhere.FoundItemDescriptor;
 import com.intellij.ide.util.gotoByName.*;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.CollectConsumer;
@@ -27,23 +29,17 @@ import com.intellij.util.SynchronizedCollectConsumer;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.indexing.FindSymbolParameters;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class RequestMappingItemProvider implements ChooseByNameItemProvider {
+public class RequestMappingItemProvider extends DefaultChooseByNameItemProvider  {
     private RequestMappingModel model;
-    public RequestMappingItemProvider(RequestMappingModel model) {
+
+    public RequestMappingItemProvider(@Nullable PsiElement context, RequestMappingModel model) {
+        super(context);
         this.model = model;
     }
-
-
-
-
-    public @NotNull List<String> filterNames(@NotNull ChooseByNameViewModel base, String @NotNull [] names, @NotNull String pattern) {
-        return new ArrayList<>();
-    }
-
-
 
 
     public boolean filterElements(@NotNull ChooseByNameViewModel base, @NotNull String pattern, boolean everywhere, @NotNull ProgressIndicator indicator, @NotNull Processor<Object> consumer) {
@@ -122,6 +118,7 @@ public class RequestMappingItemProvider implements ChooseByNameItemProvider {
         return true;
     }
 
+
     private Boolean matches(String name, String pattern) {
         if (name.isBlank()) {
             return false;
@@ -147,11 +144,5 @@ public class RequestMappingItemProvider implements ChooseByNameItemProvider {
         }
     }
 
-    public @NotNull List<String> filterNames(@NotNull ChooseByNameBase base, String @NotNull [] names, @NotNull String pattern) {
-        return new ArrayList<>();
-    }
 
-    public boolean filterElements(@NotNull ChooseByNameBase base, @NotNull String pattern, boolean everywhere, @NotNull ProgressIndicator cancelled, @NotNull Processor<Object> consumer) {
-        return false;
-    }
 }
