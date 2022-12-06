@@ -31,13 +31,15 @@ patchPluginXml {
 
     <h3>v2022.11.9</h3>
     <ul>
-        <li>url支持解析常量组合（例：@RequestMapping(value=Constant.PREFIX + "/xxx" + Constant.TARGET + "/yyy")）</li>
-        <li>新增Focus定位按钮，定位当前的请求url对应的方法行</li>
-        <li>可选择是否显示完整的url（默认为请求path，完整url：http(s)://...）</li>
-        <li>可自由用外部完整url请求</li>
-        <li>Api页面新增直接请求的按钮，可以跳到指定方法并完成一次已保存的请求</li>
-        <li>去除请求类型的背景颜色（颜色看着不太舒适，回归自然）</li>
-    </ul>
+            <li>1、You can choose whether to display the complete url（Full url：http(s)://...）</li>
+            <li>2、Add the Focus location button to locate the method line corresponding to the current request url</li>
+            <li>3、URL supports parsing constant combination（example：@RequestMapping(value=Constant.PREFIX + "/xxx" + Constant.TARGET + "/yyy")）</li>
+            <li>4、Free to use external complete url request</li>
+            <li>5、The Api page adds a direct request button. You can jump to the specified method and complete a saved request</li>
+            <li>6、Remove the background color of the request type (the color looks uncomfortable and returns to nature)</li>
+            <li>7、The buttons are simple, and the interface looks simple and easy to operate</li>
+            <li>8、Search the request page and add tags to display classes and interfaces to distinguish between feign interfaces, etc</li>
+        </ul>
     
     """
 }
