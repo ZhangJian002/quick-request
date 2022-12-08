@@ -285,7 +285,7 @@ send and download: alt -
 
 ## v2.0.1
 
-* rename from Fast Request to Fast Request
+* rename from Fast Request Free to Fast Request Free
 * Json、Form URL-Encoded、Multipart Tab合并减小工具窗口宽度
 * 修复全局配置下修改配置报错
 * 将get、post、delete、put图标添加到保存的请求

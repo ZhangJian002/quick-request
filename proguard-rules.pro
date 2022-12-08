@@ -3,7 +3,7 @@
 
 
 
--keep class io.github.kings1990.plugin.fastrequest.** {*;}
+-keep class io.github.zjay.plugin.fastrequest.** {*;}
 
 
 -keep class cn.hutool.** {*;}

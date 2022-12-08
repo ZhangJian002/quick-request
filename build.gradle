@@ -4,7 +4,7 @@ plugins {
     id 'org.jetbrains.intellij' version '0.7.3'
 }
 
-group 'io.github.kings1990'
+group 'io.github.zjay'
 version '2022.11.30'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11

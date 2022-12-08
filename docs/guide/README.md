@@ -9,11 +9,11 @@
 [![QQ群](https://img.shields.io/badge/chat-QQ群:754131222-46BC99.svg?logo=Tencent%20QQ)](https://qm.qq.com/cgi-bin/qm/qr?k=1OEJ5QST4zoEUv0x0OvOmC3TUfAIZXAO)
 [![Slack](https://img.shields.io/badge/Slack-%23Fast--Request-DD1265?logo=Slack)](https://fastrequest.slack.com)
 
-[**Fast Request**](https://plugins.jetbrains.com/plugin/16988-fast-request)  是一个强大的restful
-api工具包插件，可以根据已有的方法帮助您快速生成url和params。`Fast Request = API调试工具+API管理工具`。 它有一个漂亮的界面来完成请求、检查服务器响应、存储你的api请求和导出api请求。
+[**Fast Request Free**](https://plugins.jetbrains.com/plugin/16988-fast-request)  是一个强大的restful
+api工具包插件，可以根据已有的方法帮助您快速生成url和params。`Fast Request Free = API调试工具+API管理工具`。 它有一个漂亮的界面来完成请求、检查服务器响应、存储你的api请求和导出api请求。
 插件帮助你在IDEA界面内更快更高效得调试你的API
 
-对比与HTTP Client，Fast Request不仅拥有HTTP Client内置的功能，还提供了友好易懂直观的界面，让使用者调试API的时候能够更加方便、简捷，同时各种类型参数也提供了不同的定制方式，更加灵活。
+对比与HTTP Client，Fast Request Free不仅拥有HTTP Client内置的功能，还提供了友好易懂直观的界面，让使用者调试API的时候能够更加方便、简捷，同时各种类型参数也提供了不同的定制方式，更加灵活。
 
 ::: tip 宗旨
   
@@ -33,9 +33,9 @@ JAX-RS
 
 ## 参与贡献
 
-欢迎各路好汉一起来参与完善 Fast Request，我们期待你的 PR！
+欢迎各路好汉一起来参与完善 Fast Request Free，我们期待你的 PR！
 
-* 贡献代码：代码地址 [Fast Request](https://github.com/dromara/fast-request)，欢迎提交 Issue 或者 Pull Requests
+* 贡献代码：代码地址 [Fast Request Free](https://github.com/dromara/fast-request)，欢迎提交 Issue 或者 Pull Requests
 * 维护文档：文档地址 [Document](https://github.com/dromara/fast-request/docs)，欢迎参与翻译和修订
 
 ## 建议

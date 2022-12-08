@@ -1,7 +1,7 @@
 ---
 home: true
 heroImage: /img/fastRequest.svg
-heroText: Fast Request
+heroText: Fast Request Free
 tagline: Born To Simplify Development
 action:
   - text: Get Started 💡
@@ -19,9 +19,9 @@ features:
 footer: Apache License 2.0 | Copyright © 2021-present Kings 
 meta:
   - name: keywords
-    content: Fast Request,idea plugin,http client,Restful API
+    content: Fast Request Free,idea plugin,http client,Restful API
   - name: description
-    content: Fast Request,a postman-like restful api toolkit plugin based on IDEA,Can help you quickly generate url and params according to existing methods,An API debugging tool + API management tool.Support springmvc、springboot、java-rs
+    content: Fast Request Free,a postman-like restful api toolkit plugin based on IDEA,Can help you quickly generate url and params according to existing methods,An API debugging tool + API management tool.Support springmvc、springboot、java-rs
 ---
 
 <a href="https://www.jetbrains.com"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width = "10%" /></a>

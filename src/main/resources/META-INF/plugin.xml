@@ -1,10 +1,10 @@
 <idea-plugin>
     <id>idea.FastRequest</id>
-    <name>Fast Request</name>
+    <name>Fast Request Free</name>
     <vendor email="shihuanggege@gmail.com">zjay</vendor>
 
     <description><![CDATA[
-        <p>Modified based on the open source version of Restful Fast Request, the new and optimized versions are as follows：</p>
+        <p>Modified based on the open source version of Restful Fast Request Free, the new and optimized versions are as follows：</p>
         <br/>
          <ul>
             <li>1、You can choose whether to display the complete url（Full url：http(s)://...）</li>
@@ -32,54 +32,54 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <applicationService serviceImplementation="io.github.kings1990.plugin.fastrequest.config.FastRequestComponent"
+        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestComponent"
                             order="first"/>
         <projectService
-                serviceImplementation="io.github.kings1990.plugin.fastrequest.config.FastRequestCollectionComponent"/>
+                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent"/>
         <projectService
-                serviceImplementation="io.github.kings1990.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent"/>
-        <applicationService serviceImplementation="io.github.kings1990.plugin.fastrequest.service.GeneratorUrlService"/>
+                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent"/>
+        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.service.GeneratorUrlService"/>
         <applicationService
-                serviceImplementation="io.github.kings1990.plugin.fastrequest.generator.impl.JaxRsGenerator"/>
+                serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator"/>
         <applicationService
-                serviceImplementation="io.github.kings1990.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
-        <applicationConfigurable id="p" displayName="Fast Request"
-                                 instance="io.github.kings1990.plugin.fastrequest.configurable.CommonConfigurable">
+                serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
+        <applicationConfigurable id="p" displayName="Fast Request Free"
+                                 instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
             <configurable parentId="p"
-                          instance="io.github.kings1990.plugin.fastrequest.configurable.DataMappingConfigurable"/>
+                          instance="io.github.zjay.plugin.fastrequest.configurable.DataMappingConfigurable"/>
             <configurable parentId="p"
-                          instance="io.github.kings1990.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
+                          instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
         </applicationConfigurable>
-        <toolWindow id="Fast Request" anchor="right" icon="PluginIcons.fastRequest_toolwindow"
-                    factoryClass="io.github.kings1990.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
+        <toolWindow id="Fast Request Free" anchor="right" icon="zjay.icons.PluginIcons.fastRequest_toolwindow"
+                    factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
                     secondary="false"/>
 
         <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="io.github.kings1990.plugin.fastrequest.view.linemarker.FastRequestLineMarkerProvider"/>
+                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.FastRequestLineMarkerProvider"/>
 
         <!--兼容性处理code-->
         <notificationGroup id="toolWindowNotificationGroup" displayType="TOOL_WINDOW"/>
 
-        <postStartupActivity implementation="io.github.kings1990.plugin.fastrequest.update.WhatsNewActivity"/>
+        <postStartupActivity implementation="io.github.zjay.plugin.fastrequest.update.WhatsNewActivity"/>
 
-        <!--        <iw.actionProvider implementation="io.github.kings1990.plugin.fastrequest.action.FormatActionProvider"/>-->
+        <!--        <iw.actionProvider implementation="action.io.github.zjay.plugin.fastrequest.FormatActionProvider"/>-->
 
         <!--        <editorFloatingToolbarProvider-->
         <!--                order="after DefaultFloatingToolbarProvider"-->
-        <!--                implementation="io.github.kings1990.plugin.fastrequest.editor.FastRequestFloatingToolbarProvider"-->
+        <!--                implementation="io.github.zjay.plugin.fastrequest.editor.FastRequestFloatingToolbarProvider"-->
         <!--                id="fastRequestEditorFloatingToolbarProvider"/>-->
 
 <!--        <errorHandler-->
-<!--                implementation="io.github.kings1990.plugin.fastrequest.diagnostic.FastRequestErrorReportSubmitter"/>-->
+<!--                implementation="io.github.zjay.plugin.fastrequest.diagnostic.FastRequestErrorReportSubmitter"/>-->
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <group id="generateUrlAndParam" text="FastRequest" description="FastRequest" popup="true">
+        <group id="generateUrlAndParamFree" text="FastRequestFree" description="FastRequestFree" popup="true">
             <separator/>
-            <group id="generateSubGroup"/>
+            <group id="generateSubGroupFree"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action id="fastRequest.generator" class="io.github.kings1990.plugin.fastrequest.action.GenerateUrlAction"
+            <action id="fastRequestFree.generator" class="io.github.zjay.plugin.fastrequest.action.GenerateUrlAction"
                     text="Generate URL and Param"
                     description="Generate URL and Param">
                 <add-to-group group-id="JavaGenerateGroup1" anchor="before" relative-to-action="GenerateEquals"/>
@@ -89,26 +89,26 @@
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl BACK_SLASH"/>
             </action>
 
-            <action id="fastRequest.sendAction"
-                    class="io.github.kings1990.plugin.fastrequest.action.ToolbarSendRequestAction">
+            <action id="fastRequestFree.sendAction"
+                    class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>
             </action>
 
-            <action id="fastRequest.sendDownloadAction"
-                    class="io.github.kings1990.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction">
+            <action id="fastRequestFree.sendDownloadAction"
+                    class="io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt MINUS"/>
             </action>
         </group>
 
 <!--        <group id="fastRequest.editor.floatGroup">-->
-<!--            <action id="fastRequest.format" class="io.github.kings1990.plugin.fastrequest.action.FormatAction">-->
+<!--            <action id="fastRequest.format" class="action.io.github.zjay.plugin.fastrequest.FormatAction">-->
 <!--                <add-to-group group-id="EditorContextBarMenu" anchor="last"/>-->
 <!--            </action>-->
 
 <!--        </group>-->
 
-        <action id="fastRequest.gotoFastRequest"
-                class="io.github.kings1990.plugin.fastrequest.action.GotoFastRequestAction">
+        <action id="fastRequestFree.gotoFastRequest"
+                class="io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction">
             <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
         </action>
 
@@ -121,14 +121,14 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <searchEverywhereContributor
-                implementation="io.github.kings1990.plugin.fastrequest.contributor.FastRequestGotoContributor$Factory"/>
+                implementation="io.github.zjay.plugin.fastrequest.contributor.FastRequestGotoContributor$Factory"/>
 <!--        <searchEverywhereResultsEqualityProvider-->
-<!--                implementation="io.github.kings1990.plugin.fastrequest.contributor.FastRequestEqualityProvider"/>-->
+<!--                implementation="io.github.zjay.plugin.fastrequest.contributor.FastRequestEqualityProvider"/>-->
     </extensions>
 
     <extensions defaultExtensionNs="idea.FastRequest">
         <requestMappingContributor
-                implementation="io.github.kings1990.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
+                implementation="io.github.zjay.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
 
     </extensions>
 
