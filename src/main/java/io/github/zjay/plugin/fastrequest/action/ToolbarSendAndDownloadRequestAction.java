@@ -20,7 +20,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import zjay.icons.PluginIcons;
+import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 import org.apache.commons.lang3.StringUtils;

@@ -50,7 +50,7 @@
             <configurable parentId="p"
                           instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
         </applicationConfigurable>
-        <toolWindow id="Fast Request Free" anchor="right" icon="zjay.icons.PluginIcons.fastRequest_toolwindow"
+        <toolWindow id="Fast Request Free" anchor="right" icon="free.icons.PluginIcons.fastRequest_toolwindow"
                     factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
                     secondary="false"/>
 

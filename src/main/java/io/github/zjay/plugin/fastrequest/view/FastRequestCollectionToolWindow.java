@@ -62,7 +62,7 @@ import com.intellij.util.PsiNavigateUtil;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.StatusText;
-import zjay.icons.PluginIcons;
+import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent;
 import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;

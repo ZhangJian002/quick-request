@@ -21,7 +21,7 @@ import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsActions;
-import zjay.icons.PluginIcons;
+import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 import org.jetbrains.annotations.NotNull;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package zjay.icons;
+package free.icons;
 
 import com.intellij.openapi.util.IconLoader;
 

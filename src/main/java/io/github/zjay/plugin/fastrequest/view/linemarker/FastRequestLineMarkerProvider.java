@@ -29,7 +29,7 @@ import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
 import com.intellij.ui.content.Content;
 import com.intellij.util.messages.MessageBus;
-import zjay.icons.PluginIcons;
+import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;

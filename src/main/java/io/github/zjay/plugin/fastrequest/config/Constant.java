@@ -18,7 +18,7 @@ package io.github.zjay.plugin.fastrequest.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import zjay.icons.PluginIcons;
+import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.model.MethodType;
 
 import java.util.List;

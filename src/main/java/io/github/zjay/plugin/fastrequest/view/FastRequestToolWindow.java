@@ -60,6 +60,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.pom.Navigatable;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -76,7 +77,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
-import zjay.icons.PluginIcons;
+import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction;
 import io.github.zjay.plugin.fastrequest.action.OpenConfigAction;
 import io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction;
@@ -92,6 +93,7 @@ import io.github.zjay.plugin.fastrequest.view.component.*;
 import io.github.zjay.plugin.fastrequest.view.inner.HeaderGroupView;
 import io.github.zjay.plugin.fastrequest.view.inner.SupportView;
 import io.github.zjay.plugin.fastrequest.model.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -152,6 +154,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JScrollPane urlEncodedTextPanel;
     private JPanel pathParamsPanel;
     private JPanel headerPanel;
+    /**
+     * tab：Headers、Path Param、URL params、Body ...
+     */
     private JTabbedPane tabbedPane;
     private JTabbedPane responseTabbedPanel;
     private JScrollPane responseBodyScrollPanel;
@@ -175,6 +180,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private MyLanguageTextField prettyJsonLanguageTextField;
     private MyLanguageTextField jsonParamsLanguageTextField;
 
+    private JPopupMenu tablePopupMenu;
     private JBTable urlParamsTable;
     private JBTable urlEncodedTable;
     private JBTable multipartTable;
@@ -252,6 +258,56 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         return typeJComboBox;
     }
 
+    private void setTableButtons(){
+        tablePopupMenu = new JPopupMenu();
+        JMenuItem delMenItem = new JMenuItem();
+        delMenItem.setText("  DELETE ROWS  ");
+        delMenItem.addActionListener(evt -> {
+            switch (tabbedPane.getSelectedIndex()){
+                case 0:
+                    removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
+                    break;
+                case 1:
+                    removeUrlParamsTableLines(pathParamsTable, pathParamsKeyValueList, null, null, null);
+                    break;
+                case 2:
+                    removeUrlParamsTableLines(urlParamsTable, urlParamsKeyValueList, urlParamsTextArea, urlParamsChangeFlag, null);
+                    break;
+                case 3:
+                    if(bodyTabbedPane.getSelectedIndex() == 1){
+                        removeUrlParamsTableLines(urlEncodedTable, urlEncodedKeyValueList, urlEncodedTextArea, urlEncodedParamChangeFlag, null);
+                    }else if(bodyTabbedPane.getSelectedIndex() == 2){
+                        removeUrlParamsTableLines(multipartTable, multipartKeyValueList, null, null, null);
+                    }
+                    break;
+            }
+        });
+        tablePopupMenu.add(delMenItem);
+        JMenuItem clearMenItem = new JMenuItem();
+        clearMenItem.setText("  CLEAR ROWS  ");
+        clearMenItem.addActionListener(evt -> {
+            switch (tabbedPane.getSelectedIndex()){
+                case 0:
+                    clearTableLines(headerTable, null, null, null, headerParamsKeyValueList);
+                    break;
+                case 1:
+                    clearTableLines(pathParamsTable, pathParamsKeyValueList, null, null, null);
+                    break;
+                case 2:
+                    clearTableLines(urlParamsTable, urlParamsKeyValueList, urlParamsTextArea, urlParamsChangeFlag, null);
+                    break;
+                case 3:
+                    if(bodyTabbedPane.getSelectedIndex() == 1){
+                        clearTableLines(urlEncodedTable, urlEncodedKeyValueList, urlEncodedTextArea, urlEncodedParamChangeFlag, null);
+                    }else if(bodyTabbedPane.getSelectedIndex() == 2){
+                        clearTableLines(multipartTable, multipartKeyValueList, null, null, null);
+                    }
+                    break;
+            }
+        });
+        tablePopupMenu.add(clearMenItem);
+    }
+
     private ComboBox getNormalTypeAndFileComboBox(String type) {
         ComboBox<String> typeJComboBox = new ComboBox<>();
         typeJComboBox.setRenderer(new IconListRenderer(TYPE_ICONS));
@@ -282,6 +338,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         urlParamsChangeFlag = new AtomicBoolean(true);
         urlCompleteChangeFlag = new AtomicBoolean(false);
 
+        setTableButtons();
+
         renderingHeaderTablePanel();
         renderingUrlParamsTablePanel();
         renderingUrlEncodedPanel();
@@ -289,6 +347,15 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         renderingPathParamsPanel();
         renderingResponseInfoPanel();
         renderingJsonResponsePanel();
+        //table绑定事件
+        bindTableOperations(headerTable);
+        bindTableOperations(urlParamsTable);
+        bindTableOperations(urlEncodedTable);
+        bindTableOperations(multipartTable);
+        bindTableOperations(pathParamsTable);
+
+
+
 
 
         ActionLink managerConfigLink = new ActionLink("config", e -> {
@@ -1337,6 +1404,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(headerTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
+        toolbarDecorator.addExtraAction(new ClearAction());
         toolbarDecorator.setAddAction(anActionButton -> {
                     if (headerParamsKeyValueList == null) {
                         headerParamsKeyValueList = new ArrayList<>();
@@ -1353,15 +1421,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
                 }
         ).setRemoveAction(anActionButton -> {
-            int[] selectedIndices = headerTable.getSelectionModel().getSelectedIndices();
-            List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-            indexes.removeIf(q -> q > headerParamsKeyValueList.size() - 1);
-            indexes.stream().mapToInt(i -> i).forEach(headerParamsKeyValueList::remove);
-            headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
-            headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
-            saveAndChangeHeader();
-            switchHeaderParam();
-//            refreshTable(headerTable);
+            removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
         toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("header.group.manage"), AllIcons.Actions.ListChanges) {
             @Override
@@ -1476,7 +1536,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     resizeTable(urlParamsTable);
                 }
         ).setRemoveAction(anActionButton -> {
-            removeUrlParamsTableLines();
+            removeUrlParamsTableLines(urlParamsTable, urlParamsKeyValueList, urlParamsTextArea, urlParamsChangeFlag, null);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
         urlParamsTablePanel = toolbarDecorator.createPanel();
     }
@@ -1487,36 +1547,134 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
 
         @Override
+        public void updateButton(@NotNull AnActionEvent e) {
+
+//            FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(project);
+//            fastRequestToolWindow.get
+//            e.getPresentation().setEnabled();
+        }
+
+        @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
-            urlParamsKeyValueList.forEach(paramKeyValue -> {
-                paramKeyValue.setKey("");
-                paramKeyValue.setValue("");
-            });
-            refreshTable(urlParamsTable);
-            resizeTable(urlParamsTable);
-            changeUrlParamsText();
+            int selectedIndex = tabbedPane.getSelectedIndex();
+            switch (selectedIndex){
+                case 0:
+                    headerParamsKeyValueList.forEach(dataMapping -> {
+                        dataMapping.setType("");
+                        dataMapping.setValue("");
+                    });
+                    headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
+                    headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
+                    saveAndChangeHeader();
+                    switchHeaderParam();
+                    break;
+                case 1:
+                    pathParamsKeyValueList.forEach(paramKeyValue -> {
+                        paramKeyValue.setKey("");
+                        paramKeyValue.setValue("");
+                    });
+                    refreshTable(pathParamsTable);
+                    resizeTable(pathParamsTable);
+                    break;
+                case 2:
+                    urlParamsKeyValueList.forEach(paramKeyValue -> {
+                        paramKeyValue.setKey("");
+                        paramKeyValue.setValue("");
+                    });
+                    refreshTable(urlParamsTable);
+                    resizeTable(urlParamsTable);
+                    changeUrlParamsText();
+                    break;
+                case 3:
+                    if(bodyTabbedPane.getSelectedIndex() == 1){
+                        urlEncodedKeyValueList.forEach(paramKeyValue -> {
+                            paramKeyValue.setKey("");
+                            paramKeyValue.setValue("");
+                        });
+                        refreshTable(urlEncodedTable);
+                        resizeTable(urlEncodedTable);
+                        changeUrlEncodedParamsText();
+                    }else if(bodyTabbedPane.getSelectedIndex() == 2){
+                        multipartKeyValueList.forEach(paramKeyValue -> {
+                            paramKeyValue.setKey("");
+                            paramKeyValue.setValue("");
+                        });
+                        refreshTable(multipartTable);
+                        resizeTable(multipartTable);
+                    }
+                    break;
+            }
+
         }
     }
 
-    private void removeUrlParamsTableLines() {
-        int[] selectedIndices = urlParamsTable.getSelectionModel().getSelectedIndices();
+
+
+    private void removeUrlParamsTableLines(JBTable targetTable, List<ParamKeyValue> paramsKeyValueList,
+                                           JTextArea targetArea, AtomicBoolean flag, List<DataMapping> headerParamsList) {
+        int[] selectedIndices = targetTable.getSelectionModel().getSelectedIndices();
         List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-        indexes.removeIf(q -> q > urlParamsKeyValueList.size() - 1);
-        indexes.stream().mapToInt(i -> i).forEach(urlParamsKeyValueList::remove);
-        refreshTable(urlParamsTable);
-        resizeTable(urlParamsTable);
-        urlParamsTable.getSelectionModel().clearSelection();
+        if(CollectionUtils.isNotEmpty(paramsKeyValueList)){
+            indexes.removeIf(q -> q > paramsKeyValueList.size() - 1);
+            indexes.stream().mapToInt(i -> i).forEach(paramsKeyValueList::remove);
+            refreshTable(targetTable);
+            resizeTable(targetTable);
+        }
+        if(CollectionUtils.isNotEmpty(headerParamsList)){
+            indexes.removeIf(q -> q > headerParamsList.size() - 1);
+            indexes.stream().mapToInt(i -> i).forEach(headerParamsList::remove);
+            headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
+            headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
+            saveAndChangeHeader();
+            switchHeaderParam();
+        }
+        targetTable.getSelectionModel().clearSelection();
         if(selectedIndices[0] > 0){
             int row = selectedIndices[0]-1;
-            urlParamsTable.getSelectionModel().setSelectionInterval(row, row);
-            urlParamsTable.setRowSelectionInterval(row, row);
+            targetTable.getSelectionModel().setSelectionInterval(row, row);
+            targetTable.setRowSelectionInterval(row, row);
         }else {
-            if(urlParamsTable.getRowCount() > 0){
-                urlParamsTable.getSelectionModel().setSelectionInterval(0, 0);
-                urlParamsTable.setRowSelectionInterval(0, 0);
+            if(targetTable.getRowCount() > 0){
+                targetTable.getSelectionModel().setSelectionInterval(0, 0);
+                targetTable.setRowSelectionInterval(0, 0);
             }
         }
-        changeUrlParamsText();
+        if(targetArea != null){
+            String paramStr = conventDataToString(paramsKeyValueList);
+            targetArea.setText(paramStr);
+            flag.set(false);
+        }
+    }
+
+    private void clearTableLines(JBTable targetTable, List<ParamKeyValue> paramsKeyValueList,
+                                           JTextArea targetArea, AtomicBoolean flag, List<DataMapping> headerParamsList) {
+        int[] selectedIndices = targetTable.getSelectionModel().getSelectedIndices();
+        List<Integer> indexes = Arrays.stream(selectedIndices).boxed().collect(Collectors.toList());
+        if(CollectionUtils.isNotEmpty(paramsKeyValueList)){
+            indexes.removeIf(q -> q > paramsKeyValueList.size() - 1);
+            indexes.stream().mapToInt(i -> i).forEach(index -> {
+                paramsKeyValueList.get(index).setKey("");
+                paramsKeyValueList.get(index).setValue("");
+            });
+            refreshTable(targetTable);
+            resizeTable(targetTable);
+        }
+        if(CollectionUtils.isNotEmpty(headerParamsList)){
+            indexes.removeIf(q -> q > headerParamsList.size() - 1);
+            indexes.stream().mapToInt(i -> i).forEach(index -> {
+                headerParamsList.get(index).setType("");
+                headerParamsList.get(index).setValue("");
+            });
+            headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
+            headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
+            saveAndChangeHeader();
+            switchHeaderParam();
+        }
+        if(targetArea != null){
+            String paramStr = conventDataToString(paramsKeyValueList);
+            targetArea.setText(paramStr);
+            flag.set(false);
+        }
     }
 
     public void refreshResponseTable(String body) {
@@ -1544,6 +1702,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(pathParamsTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
+        toolbarDecorator.addExtraAction(new ClearAction());
 
         toolbarDecorator.setAddAction(anActionButton -> {
                     int selectedRow = pathParamsTable.getSelectedRow();
@@ -1559,14 +1718,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     changeUrl();
                 }
         ).setRemoveAction(anActionButton -> {
-            int[] selectedIndices = pathParamsTable.getSelectionModel().getSelectedIndices();
-            List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-            indexes.removeIf(q -> q > pathParamsKeyValueList.size() - 1);
-            indexes.stream().mapToInt(i -> i).forEach(pathParamsKeyValueList::remove);
-            refreshTable(pathParamsTable);
-            //pathParamsTable.setModel(new ListTableModel<>(getPathColumnInfo(), pathParamsKeyValueList));
-            resizeTable(pathParamsTable);
-            changeUrl();
+            removeUrlParamsTableLines(pathParamsTable, pathParamsKeyValueList, null, null, null);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
         pathParamsPanel = toolbarDecorator.createPanel();
     }
@@ -1599,6 +1751,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(urlEncodedTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
+        toolbarDecorator.addExtraAction(new ClearAction());
+
 
         toolbarDecorator.setAddAction(anActionButton -> {
                     int selectedRow = urlEncodedTable.getSelectedRow();
@@ -1613,14 +1767,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     resizeTable(urlEncodedTable);
                 }
         ).setRemoveAction(anActionButton -> {
-            int[] selectedIndices = urlEncodedTable.getSelectionModel().getSelectedIndices();
-            List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-            indexes.removeIf(q -> q > urlEncodedKeyValueList.size() - 1);
-            indexes.stream().mapToInt(i -> i).forEach(urlEncodedKeyValueList::remove);
-            refreshTable(urlEncodedTable);
-            //urlEncodedTable.setModel(new ListTableModel<>(getPathColumnInfo(), urlEncodedKeyValueList));
-            resizeTable(urlEncodedTable);
-            changeUrlEncodedParamsText();
+            removeUrlParamsTableLines(urlEncodedTable, urlEncodedKeyValueList, urlEncodedTextArea, urlEncodedParamChangeFlag, null);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
         urlEncodedTablePanel = toolbarDecorator.createPanel();
     }
@@ -1647,6 +1794,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(multipartTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
+        toolbarDecorator.addExtraAction(new ClearAction());
+
 
         toolbarDecorator.setAddAction(anActionButton -> {
                     int selectedRow = multipartTable.getSelectedRow();
@@ -1661,13 +1810,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     resizeTable(multipartTable);
                 }
         ).setRemoveAction(anActionButton -> {
-            int[] selectedIndices = multipartTable.getSelectionModel().getSelectedIndices();
-            List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-            indexes.removeIf(q -> q > multipartKeyValueList.size() - 1);
-            indexes.stream().mapToInt(i -> i).forEach(multipartKeyValueList::remove);
-            refreshTable(multipartTable);
-            //multipartTable.setModel(new ListTableModel<>(getPathColumnInfo(), multipartKeyValueList));
-            resizeTable(multipartTable);
+            removeUrlParamsTableLines(multipartTable, multipartKeyValueList, null, null, null);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
         multipartTablePanel = toolbarDecorator.createPanel();
     }
@@ -3055,31 +3198,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         table.getColumnModel().getColumn(1).setMaxWidth(100);
         table.setRowHeight(35);
         table.setVisible(true);
+        urlParamsCheckBoxHeader = new CheckBoxHeader(new MyParamCheckItemListener(table));
+        return table;
+    }
 
-
-        JPopupMenu m_popupMenu = new JPopupMenu();
-        JMenuItem delMenItem = new JMenuItem();
-        delMenItem.setText("  DELETE ROWS  ");
-        delMenItem.addActionListener(evt -> {
-            removeUrlParamsTableLines();
-        });
-        m_popupMenu.add(delMenItem);
-        JMenuItem clearMenItem = new JMenuItem();
-        clearMenItem.setText("  CLEAR ROWS  ");
-        clearMenItem.addActionListener(evt -> {
-            int[] selectedIndices = urlParamsTable.getSelectionModel().getSelectedIndices();
-            List<Integer> indexes = Arrays.stream(selectedIndices).boxed().collect(Collectors.toList());
-            indexes.removeIf(q -> q > urlParamsKeyValueList.size() - 1);
-            indexes.stream().mapToInt(i -> i).forEach(index -> {
-                urlParamsKeyValueList.get(index).setKey("");
-                urlParamsKeyValueList.get(index).setValue("");
-            });
-            refreshTable(urlParamsTable);
-            resizeTable(urlParamsTable);
-            changeUrlParamsText();
-        });
-        m_popupMenu.add(clearMenItem);
-
+    private void bindTableOperations(JBTable table) {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
@@ -3094,12 +3217,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         table.setRowSelectionInterval(focusedRowIndex, focusedRowIndex);
                     }
                     //弹出菜单
-                    m_popupMenu.show(table, evt.getX(), evt.getY());
+                    tablePopupMenu.show(table, evt.getX(), evt.getY());
                 }
             }
         });
-        urlParamsCheckBoxHeader = new CheckBoxHeader(new MyParamCheckItemListener(table));
-        return table;
     }
 
     /*****getter setter*****/
