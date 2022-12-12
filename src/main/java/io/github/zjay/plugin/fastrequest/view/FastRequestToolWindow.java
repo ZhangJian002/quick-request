@@ -18,13 +18,11 @@ package io.github.zjay.plugin.fastrequest.view;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.http.Method;
+import cn.hutool.http.*;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -93,6 +91,7 @@ import io.github.zjay.plugin.fastrequest.view.component.*;
 import io.github.zjay.plugin.fastrequest.view.inner.HeaderGroupView;
 import io.github.zjay.plugin.fastrequest.view.inner.SupportView;
 import io.github.zjay.plugin.fastrequest.model.*;
+import nonapi.io.github.classgraph.utils.URLPathEncoder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -109,6 +108,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -849,7 +849,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
             if (!urlParam.isEmpty()) {
                 String queryParam = UrlQuery.of(urlParam).toString();
-                request.setUrl(request.getUrl() + "?" + queryParam);
+                request.setUrl(request.getUrl() + "?" + URLEncoder.DEFAULT.encode(queryParam, StandardCharsets.UTF_8));
             }
             if (!multipartFormParam.isEmpty() && formFlag) {
                 request.form(multipartFormParam);
@@ -878,7 +878,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         requestProgressBar.setVisible(false);
                         int status = response.getStatus();
                         //download file
-                        if (fileMode && status >= 200 && status < 300) {
+                        String header = response.header(Header.CONTENT_DISPOSITION);
+                        boolean finalFileMode = fileMode || (StringUtils.isNotBlank(header) && header.contains("attachment"));
+                        if (finalFileMode && status >= 200 && status < 300) {
                             ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
                             ((MyLanguageTextField) responseTextAreaPanel).setText("");
                             Task.Backgroundable task = new Task.Backgroundable(myProject, "Saving file...") {
