@@ -20,7 +20,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.IdeBorderFactory;
 import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.*;
@@ -74,13 +77,15 @@ public class OtherConfigView extends AbstractConfigurableView {
     private JPanel createBasePanel() {
         Boolean clickAndSend = config.getClickAndSend();
         this.clickAndSend = clickAndSend;
-        JPanel jPanel = new JPanel();
-        JCheckBox completeCheckBox = new JCheckBox("点击生成请求按钮时是否直接发起", clickAndSend != null && clickAndSend);
+        JBCheckBox completeCheckBox = new JBCheckBox(MyResourceBundleUtil.getKey("ClickAndSendConfig"), clickAndSend != null && clickAndSend);
         completeCheckBox.addItemListener(e -> {
             this.clickAndSend = e.getStateChange() == ItemEvent.SELECTED;
         });
-        jPanel.add(completeCheckBox);
-        return jPanel;
+        JPanel clickAndSendConfigPanel = UI.PanelFactory.grid()
+                .add(UI.PanelFactory.panel(completeCheckBox)).createPanel();
+        clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("ClickIconConfig")));
+        return clickAndSendConfigPanel;
+
     }
 
     private JPanel createMyTablePanel() {
