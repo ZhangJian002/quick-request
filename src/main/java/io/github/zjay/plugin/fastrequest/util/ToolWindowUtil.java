@@ -19,7 +19,14 @@ package io.github.zjay.plugin.fastrequest.util;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
 import com.intellij.ui.content.Content;
+import com.intellij.util.messages.MessageBus;
+import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
+import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
+import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
+import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 
 public class ToolWindowUtil {
@@ -32,5 +39,33 @@ public class ToolWindowUtil {
             }
         }
         return null;
+    }
+
+    public static void generatorUrl(Project project, GeneratorUrlService generatorUrlService, PsiElement methodElement) {
+        generatorUrlService.generate(methodElement);
+        //打开工具窗口
+        ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(project).getToolWindow("Fast Request Free");
+        if (fastRequestToolWindow != null && !fastRequestToolWindow.isActive()) {
+            fastRequestToolWindow.activate(null);
+            Content content = fastRequestToolWindow.getContentManager().getContent(0);
+            assert content != null;
+            fastRequestToolWindow.getContentManager().setSelectedContent(content);
+        }
+        //send message to change param
+        MessageBus messageBus = project.getMessageBus();
+        messageBus.connect();
+        ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.PARAM_CHANGE_TOPIC);
+        configChangeNotifier.configChanged(true, project.getName());
+    }
+
+    public static void generatorUrlAndSend(Project project, GeneratorUrlService generatorUrlService, PsiElement methodElement, boolean sendFlag){
+        generatorUrl(project, generatorUrlService, methodElement);
+        FastRequestConfiguration state = FastRequestComponent.getInstance().getState();
+        FastRequestToolWindow fastRequestToolWindow = getFastRequestToolWindow(project);
+        if (fastRequestToolWindow != null && state != null) {
+            if (sendFlag || (state.getClickAndSend() != null && state.getClickAndSend())) {
+                fastRequestToolWindow.sendRequestEvent(false);
+            }
+        }
     }
 }

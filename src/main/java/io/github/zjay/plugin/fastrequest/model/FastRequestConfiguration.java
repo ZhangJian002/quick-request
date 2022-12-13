@@ -53,6 +53,11 @@ public class FastRequestConfiguration implements Serializable {
     private List<String> ignoreDataMappingList = Constant.IGNORE_PARAM_PARSE_LIST;
 
     /**
+     * 是否点击并请求
+     */
+    private Boolean clickAndSend = null;
+
+    /**
      * 默认的数据映射
      */
     private List<DataMapping> defaultDataMappingList = Lists.newArrayList(
@@ -244,5 +249,13 @@ public class FastRequestConfiguration implements Serializable {
 
     public void setGlobalHeaderList(List<DataMapping> globalHeaderList) {
         this.globalHeaderList = globalHeaderList;
+    }
+
+    public Boolean getClickAndSend() {
+        return clickAndSend;
+    }
+
+    public void setClickAndSend(Boolean clickAndSend) {
+        this.clickAndSend = clickAndSend;
     }
 }

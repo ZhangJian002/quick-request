@@ -31,8 +31,16 @@ import com.intellij.ui.content.Content;
 import com.intellij.util.messages.MessageBus;
 import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.config.Constant;
+import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
+import io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
+import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
+import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
+import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
+import io.github.zjay.plugin.fastrequest.model.FastRequestCurrentProjectConfiguration;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
+import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
+import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 import org.jetbrains.annotations.NotNull;
 
 public class FastRequestLineMarkerProvider implements LineMarkerProvider {
@@ -46,29 +54,14 @@ public class FastRequestLineMarkerProvider implements LineMarkerProvider {
                 return null;
             }
             PsiMethod methodElement = (PsiMethod) element.getParent();
-            lineMarkerInfo = new LineMarkerInfo<>(element, element.getTextRange(), PluginIcons.fastRequest_editor,
+            lineMarkerInfo = new MyLineMarkerInfo<>(element, element.getTextRange(), PluginIcons.fastRequest_editor,
                     new FunctionTooltip(methodElement),
                     (e, elt) -> {
                         Project project = elt.getProject();
                         GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
-                        generatorUrlService.generate(methodElement);
-
-                        //打开工具窗口
-                        ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(project).getToolWindow("Fast Request Free");
-                        if (fastRequestToolWindow != null && !fastRequestToolWindow.isActive()) {
-                            fastRequestToolWindow.activate(null);
-                            Content content = fastRequestToolWindow.getContentManager().getContent(0);
-                            assert content != null;
-                            fastRequestToolWindow.getContentManager().setSelectedContent(content);
-                        }
-                        //send message to change param
-                        MessageBus messageBus = project.getMessageBus();
-                        messageBus.connect();
-                        ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.PARAM_CHANGE_TOPIC);
-                        configChangeNotifier.configChanged(true, project.getName());
+                        ToolWindowUtil.generatorUrlAndSend(project, generatorUrlService, methodElement, false);
                     },
                     GutterIconRenderer.Alignment.LEFT, () -> "fastRequest");
-            lineMarkerInfo.createGutterRenderer();
             return lineMarkerInfo;
         }
         return null;

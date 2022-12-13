@@ -22,7 +22,7 @@ import com.intellij.util.Function;
 
 public class FunctionTooltip implements Function<PsiElement,String> {
 
-    String msg = "generate url and params for ";
+    String msg = "Generate Request For ";
     PsiElement element;
 
     public FunctionTooltip() {
@@ -36,6 +36,6 @@ public class FunctionTooltip implements Function<PsiElement,String> {
     @Override
     public String fun(PsiElement psiElement) {
         PsiMethod psiMethod = (PsiMethod) psiElement.getParent();
-        return msg + psiMethod.getName();
+        return msg + psiMethod.getName() + "(or right-click to set)";
     }
 }

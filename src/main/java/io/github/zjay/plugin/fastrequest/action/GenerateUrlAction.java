@@ -28,6 +28,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.util.messages.MessageBus;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
+import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class GenerateUrlAction extends AnAction {
@@ -43,22 +44,6 @@ public class GenerateUrlAction extends AnAction {
         if (psiElement == null || psiElement.getNode() == null) {
             return;
         }
-
-        generatorUrlService.generate(psiElement);
-
-        //打开工具窗口
-        ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(project).getToolWindow("Fast Request Free");
-        if(fastRequestToolWindow != null && !fastRequestToolWindow.isActive()){
-            fastRequestToolWindow.activate(null);
-            Content content = fastRequestToolWindow.getContentManager().getContent(0);
-            assert content != null;
-            fastRequestToolWindow.getContentManager().setSelectedContent(content);
-        }
-
-        //send message to change param
-        MessageBus messageBus = project.getMessageBus();
-        messageBus.connect();
-        ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.PARAM_CHANGE_TOPIC);
-        configChangeNotifier.configChanged(true, project.getName());
+        ToolWindowUtil.generatorUrl(project, generatorUrlService, psiElement);
     }
 }

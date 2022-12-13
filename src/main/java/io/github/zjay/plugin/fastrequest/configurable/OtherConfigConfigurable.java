@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class OtherConfigConfigurable extends AbstractConfigConfigurable {
@@ -60,6 +61,9 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
     public boolean isModified() {
         List<DataMapping> currentUrlReplaceMappingList = view.getViewUrlReplaceMappingList();
         List<DataMapping> urlReplaceMappingList = config.getUrlReplaceMappingList();
+        if(!Objects.equals(view.getClickAndSend(), config.getClickAndSend())){
+            return true;
+        }
 
         return !judgeEqual(currentUrlReplaceMappingList, urlReplaceMappingList);
     }
@@ -69,6 +73,7 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         List<DataMapping> viewUrlReplaceMappingList = view.getViewUrlReplaceMappingList();
         List<DataMapping> changeUrlReplaceMappingList = JSONArray.parseArray(JSON.toJSONString(viewUrlReplaceMappingList), DataMapping.class);
         config.setUrlReplaceMappingList(changeUrlReplaceMappingList);
+        config.setClickAndSend(view.getClickAndSend());
     }
 
     @Override

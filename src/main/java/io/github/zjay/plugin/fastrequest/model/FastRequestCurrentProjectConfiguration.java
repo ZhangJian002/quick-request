@@ -48,4 +48,5 @@ public class FastRequestCurrentProjectConfiguration implements Serializable {
     public void setDomain(String domain) {
         this.domain = domain;
     }
+
 }

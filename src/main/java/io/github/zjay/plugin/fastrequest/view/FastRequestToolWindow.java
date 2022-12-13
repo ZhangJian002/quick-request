@@ -180,7 +180,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private MyLanguageTextField prettyJsonLanguageTextField;
     private MyLanguageTextField jsonParamsLanguageTextField;
 
-    private JPopupMenu tablePopupMenu;
+    private JBPopupMenu tablePopupMenu;
     private JBTable urlParamsTable;
     private JBTable urlEncodedTable;
     private JBTable multipartTable;
@@ -259,9 +259,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     private void setTableButtons(){
-        tablePopupMenu = new JPopupMenu();
-        JMenuItem delMenItem = new JMenuItem();
-        delMenItem.setText("  DELETE ROWS  ");
+        tablePopupMenu = new JBPopupMenu();
+        JBMenuItem delMenItem = new JBMenuItem(" Delete Rows ");
+        delMenItem.setIcon(AllIcons.General.Remove);
         delMenItem.addActionListener(evt -> {
             switch (tabbedPane.getSelectedIndex()){
                 case 0:
@@ -283,8 +283,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             }
         });
         tablePopupMenu.add(delMenItem);
-        JMenuItem clearMenItem = new JMenuItem();
-        clearMenItem.setText("  CLEAR ROWS  ");
+        JBMenuItem clearMenItem = new JBMenuItem(" Clear Rows ");
+        clearMenItem.setIcon(PluginIcons.ICON_CLEAR);
         clearMenItem.addActionListener(evt -> {
             switch (tabbedPane.getSelectedIndex()){
                 case 0:
