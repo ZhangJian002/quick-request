@@ -28,7 +28,7 @@ import com.intellij.openapi.project.Project;
 import io.github.zjay.plugin.fastrequest.contributor.FastRequestGotoContributor;
 import org.jetbrains.annotations.NotNull;
 
-public class GotoFastRequestAction extends SearchEverywhereBaseAction implements DumbAware {
+public class GotoFastRequestAction extends SearchEverywhereBaseAction {
     public GotoFastRequestAction() {
         Presentation templatePresentation = getTemplatePresentation();
         templatePresentation.setIcon(AllIcons.Actions.Find);

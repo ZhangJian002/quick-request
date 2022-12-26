@@ -99,12 +99,11 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -218,6 +217,24 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     public boolean sendButtonFlag = true;
 
+
+    public void stopCellEditing(){
+        if(this.headerTable.isEditing()){
+            this.headerTable.getCellEditor().stopCellEditing();
+        }
+        if(this.pathParamsTable.isEditing()){
+            this.pathParamsTable.getCellEditor().stopCellEditing();
+        }
+        if(this.urlParamsTable.isEditing()){
+            this.urlParamsTable.getCellEditor().stopCellEditing();
+        }
+        if(this.urlEncodedTable.isEditing()){
+            this.urlEncodedTable.getCellEditor().stopCellEditing();
+        }
+        if(this.multipartTable.isEditing()){
+            this.multipartTable.getCellEditor().stopCellEditing();
+        }
+    }
 
     private JTextField getKeyTextField(String text) {
         JTextField jTextField = new JTextField(text);
@@ -778,6 +795,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             return;
         }
         sendButtonFlag = false;
+        //首先停止正在编辑中的table
+        stopCellEditing();
         try {
             FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
             assert config != null;
@@ -3319,6 +3338,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
+            stopCellEditing();
             FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
             assert config != null;
             ParamGroup paramGroup = config.getParamGroup();
