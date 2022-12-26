@@ -930,7 +930,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         if (flag) {
             //change data
             ApplicationManager.getApplication().invokeLater(() -> {
-                ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(myProject).getToolWindow("Fast Request Free");
+                ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(myProject).getToolWindow("Quick Request");
                 Content content = fastRequestToolWindow.getContentManager().getContent(0);
                 assert content != null;
                 fastRequestToolWindow.getContentManager().setSelectedContent(content);

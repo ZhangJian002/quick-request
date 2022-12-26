@@ -359,7 +359,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
 
         ActionLink managerConfigLink = new ActionLink("config", e -> {
-            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request Free");
+            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
         });
         managerConfigLink.setExternalLinkIcon();
         manageConfigButton = managerConfigLink;
@@ -381,7 +381,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         //2020.3before
 //        manageConfigButton = new JButton();
 //        manageConfigButton.addActionListener(e->{
-//            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request Free");
+//            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
 //        });
     }
 
@@ -511,7 +511,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     int idx = config.getEnvList().indexOf(activeEnv);
                     envComboBox.setSelectedIndex(Math.max(0, idx + 1));
                     envComboBox.hidePopup();
-                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request Free");
+                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
                     return;
                 }
 
@@ -581,7 +581,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     int idx = config.getProjectList().indexOf(activeProject);
                     projectComboBox.setSelectedIndex(Math.max(0, idx + 1));
                     projectComboBox.hidePopup();
-                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request Free");
+                    ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
                     return;
                 }
                 String projectSelect = selectProject.toString();
@@ -3508,7 +3508,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //
 //        @Override
 //        public @Nullable @NlsActions.ActionText String getTemplateText() {
-//            return "Fast Request Free Send";
+//            return "Quick Request Send";
 //        }
 //
 //        @Override

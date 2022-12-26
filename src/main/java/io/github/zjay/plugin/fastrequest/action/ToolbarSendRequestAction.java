@@ -47,7 +47,7 @@ public class ToolbarSendRequestAction extends DumbAwareAction {
 
     @Override
     public @Nullable @NlsActions.ActionText String getTemplateText() {
-        return "Fast Request Free Send";
+        return "Quick Request Send";
     }
 
 

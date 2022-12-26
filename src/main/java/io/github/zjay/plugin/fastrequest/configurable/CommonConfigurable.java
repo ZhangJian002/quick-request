@@ -48,7 +48,7 @@ public class CommonConfigurable extends AbstractConfigConfigurable {
 
     @Override
     public String getDisplayName() {
-        return "Fast Request Free";
+        return "Quick Request";
     }
 
     @Override

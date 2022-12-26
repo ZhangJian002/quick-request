@@ -1,11 +1,9 @@
 <idea-plugin>
-    <id>idea.FastRequest</id>
-    <name>Fast Request Free</name>
+    <id>QuickRequest</id>
+    <name>Quick Request</name>
     <vendor email="shihuanggege@gmail.com">zjay</vendor>
 
     <description><![CDATA[
-        <p>Modified based on the open source version of Restful Fast Request Free, the new and optimized versions are as follows：</p>
-        <br/>
          <ul>
             <li>1、You can choose whether to display the complete url（Full url：http(s)://...）</li>
             <li>2、Add the Focus location button to locate the method line corresponding to the current request url</li>
@@ -43,14 +41,14 @@
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator"/>
         <applicationService
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
-        <applicationConfigurable id="p" displayName="Fast Request Free"
+        <applicationConfigurable id="p" displayName="Quick Request"
                                  instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
             <configurable parentId="p"
                           instance="io.github.zjay.plugin.fastrequest.configurable.DataMappingConfigurable"/>
             <configurable parentId="p"
                           instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
         </applicationConfigurable>
-        <toolWindow id="Fast Request Free" anchor="right" icon="free.icons.PluginIcons.fastRequest_toolwindow"
+        <toolWindow id="Quick Request" anchor="right" icon="free.icons.PluginIcons.fastRequest_toolwindow"
                     factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
                     secondary="false"/>
 
@@ -126,7 +124,7 @@
 <!--                implementation="io.github.zjay.plugin.fastrequest.contributor.FastRequestEqualityProvider"/>-->
     </extensions>
 
-    <extensions defaultExtensionNs="idea.FastRequest">
+    <extensions defaultExtensionNs="QuickRequest">
         <requestMappingContributor
                 implementation="io.github.zjay.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
 

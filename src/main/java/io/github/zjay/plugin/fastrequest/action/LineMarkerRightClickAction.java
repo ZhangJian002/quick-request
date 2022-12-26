@@ -58,7 +58,7 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
         });
         clickAndConfigItem.setIcon(AllIcons.General.Settings);
         clickAndConfigItem.addActionListener(evt -> {
-            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Fast Request Free");
+            ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
         });
         clickIconPopupMenu.add(clickAndSendItem);
         clickIconPopupMenu.addSeparator();

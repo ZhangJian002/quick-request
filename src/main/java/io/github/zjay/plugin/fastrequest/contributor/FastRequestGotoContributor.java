@@ -40,7 +40,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     protected FastRequestGotoContributor(@NotNull AnActionEvent event) {
         super(event);
         myProject = event.getProject();
-        requestMappingModel = new RequestMappingModel(myProject, ExtensionPointName.<ChooseByNameContributor>create("idea.FastRequest.requestMappingContributor").getExtensionList());
+        requestMappingModel = new RequestMappingModel(myProject, ExtensionPointName.<ChooseByNameContributor>create("QuickRequest.requestMappingContributor").getExtensionList());
     }
 
 
@@ -99,7 +99,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     }
 
     public @NotNull @Nls String getGroupName() {
-        return "Fast Request Free";
+        return "Quick Request";
     }
 
     public int getSortWeight() {

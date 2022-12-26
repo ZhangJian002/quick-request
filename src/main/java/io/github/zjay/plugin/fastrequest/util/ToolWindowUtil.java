@@ -31,7 +31,7 @@ import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 
 public class ToolWindowUtil {
     public static FastRequestToolWindow getFastRequestToolWindow(Project myProject) {
-        final ToolWindow toolWindow = ToolWindowManager.getInstance(myProject).getToolWindow("Fast Request Free");
+        final ToolWindow toolWindow = ToolWindowManager.getInstance(myProject).getToolWindow("Quick Request");
         if (toolWindow != null) {
             final Content content = toolWindow.getContentManager().getContent(0);
             if (content != null) {
@@ -44,7 +44,7 @@ public class ToolWindowUtil {
     public static void generatorUrl(Project project, GeneratorUrlService generatorUrlService, PsiElement methodElement) {
         generatorUrlService.generate(methodElement);
         //打开工具窗口
-        ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(project).getToolWindow("Fast Request Free");
+        ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(project).getToolWindow("Quick Request");
         if (fastRequestToolWindow != null && !fastRequestToolWindow.isActive()) {
             fastRequestToolWindow.activate(null);
             Content content = fastRequestToolWindow.getContentManager().getContent(0);

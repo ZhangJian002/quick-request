@@ -29,6 +29,18 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2022.12.12</h3 >
+    <ul>
+            <li>1、You can choose whether to display the complete url（Full url：http(s)://...）</li>
+            <li>2、Add the Focus location button to locate the method line corresponding to the current request url</li>
+            <li>3、URL supports parsing constant combination（example：@RequestMapping(value=Constant.PREFIX + "/xxx" + Constant.TARGET + "/yyy")）</li>
+            <li>4、Free to use external complete url request</li>
+            <li>5、The Api page adds a direct request button. You can jump to the specified method and complete a saved request</li>
+            <li>6、Remove the background color of the request type (the color looks uncomfortable and returns to nature)</li>
+            <li>7、The buttons are simple, and the interface looks simple and easy to operate</li>
+            <li>8、Search the request page and add tags to display classes and interfaces to distinguish between feign interfaces, etc</li>
+        </ul>
+
     <h3>v2022.11.9</h3>
     <ul>
             <li>1、You can choose whether to display the complete url（Full url：http(s)://...）</li>
