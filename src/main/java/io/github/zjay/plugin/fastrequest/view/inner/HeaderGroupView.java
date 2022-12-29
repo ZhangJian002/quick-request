@@ -68,7 +68,7 @@ public class HeaderGroupView extends DialogWrapper {
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
-        MyLanguageTextField languageTextField = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE);
+        MyLanguageTextField languageTextField = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false);
         languageTextField.setMinimumSize(new Dimension(-1, 120));
         languageTextField.setPreferredSize(new Dimension(-1, 120));
         languageTextField.setMaximumSize(new Dimension(-1, 1000));

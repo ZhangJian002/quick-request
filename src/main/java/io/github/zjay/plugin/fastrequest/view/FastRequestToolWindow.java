@@ -43,6 +43,7 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
@@ -66,6 +67,8 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
+import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
@@ -380,13 +383,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
         managerConfigLink.setExternalLinkIcon();
         manageConfigButton = managerConfigLink;
-        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE);
-        responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE);
-        jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE);
+        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true);
+        responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true);
+        jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false);
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
         prettyJsonEditorPanel.setPreferredSize(new Dimension(-1, 120));
         prettyJsonEditorPanel.setMaximumSize(new Dimension(-1, 1000));
+
         responseTextAreaPanel.setMinimumSize(new Dimension(-1, 120));
         responseTextAreaPanel.setPreferredSize(new Dimension(-1, 120));
         responseTextAreaPanel.setMaximumSize(new Dimension(-1, 1000));
@@ -441,7 +445,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(new FixPositionAction());
         group.add(new SaveRequestAction());
         group.add(new RetryAction());
-        group.add(new CopyCurlAction());
+//        group.add(new CopyCurlAction());
 //        group.addSeparator("  |  ");
 //        group.add(new DocAction());
 //        group.add(new WhatsNewAction());
@@ -886,8 +890,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     HttpResponse response = request.execute();
                     long end = System.currentTimeMillis();
                     //如果被外部中断，就不继续了
-                    boolean interrupted = Thread.currentThread().isInterrupted();
-                    if(interrupted){
+                    if(Thread.currentThread().isInterrupted()){
                         return;
                     }
 
@@ -928,7 +931,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                             };
                             ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
                         }
-                        if (!fileMode) {
+                        if (!finalFileMode) {
                             String body = response.body();
                             int bodyLength = StrUtil.byteLength(body, StandardCharsets.UTF_8);
                             if (bodyLength > MAX_DATA_LENGTH) {
@@ -956,9 +959,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         }
                         responseInfoParamsKeyValueList = Lists.newArrayList(
                                 new ParamKeyValue("Url", request.getUrl(), 2, TypeUtil.Type.String.name()),
-                                new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
                                 new ParamKeyValue("Response status", status + " " + Constant.HttpStatusDesc.STATUS_MAP.get(status)),
-                                new ParamKeyValue("Date", DateUtil.formatDateTime(new Date()))
+                                new ParamKeyValue("Content-Type", response.header(Header.CONTENT_TYPE), 2, TypeUtil.Type.String.name()),
+                                new ParamKeyValue("Transfer-Encoding", response.header(Header.TRANSFER_ENCODING), 2, TypeUtil.Type.String.name()),
+                                new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
+                                new ParamKeyValue("Date", response.header(Header.DATE))
                         );
                         //refreshTable(responseInfoTable);
                         responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
@@ -1453,6 +1458,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 if (currentHeaderGroup != null) {
                     idx = headerGroupList.indexOf(currentHeaderGroup);
                 }
+                stopCellEditing();
                 HeaderGroupView dialog = new HeaderGroupView(myProject, currentHeaderGroup, getActiveProject(), getActiveEnv(), config.getEnvList());
                 if (dialog.showAndGet()) {
                     HeaderGroup viewHeaderGroup = dialog.changeAndGet();
@@ -1992,14 +1998,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
             @Override
             public boolean isCellEditable(int row, int column) {
-                ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) getTableModel();
-                CustomNode node = (CustomNode) myModel.getRowValue(row);
-                return row != 0 && column == 1 && (!TypeUtil.Type.Object.name().equals(node.getType()) && !TypeUtil.Type.Array.name().equals(node.getType()));
+                return false;
+//                ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) getTableModel();
+//                CustomNode node = (CustomNode) myModel.getRowValue(row);
+//                return row != 0 && column == 1 && (!TypeUtil.Type.Object.name().equals(node.getType()) && !TypeUtil.Type.Array.name().equals(node.getType()));
             }
 
         };
         table.setRootVisible(true);
         table.setVisible(true);
+//        table.setCellSelectionEnabled(true);
         return table;
     }
 
@@ -3087,8 +3095,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             @Override
             public boolean isCellEditable(int row, int column) {
                 //默认只允许修改value不允许修改key
-                return true;
+                return false;
             }
+
 
             @Override
             public Object getValueAt(int row, int column) {
@@ -3108,6 +3117,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         };
         table.setRowHeight(35);
         table.setVisible(true);
+        table.setCellSelectionEnabled(true);
         return table;
     }
 

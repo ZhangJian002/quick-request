@@ -38,17 +38,21 @@ public class MyLanguageTextField extends LanguageTextField {
     private FileType fileType;
     private Language language;
 
-    public MyLanguageTextField(Project myProject, Language language, FileType fileType) {
+    public boolean isViewer;
+
+    public MyLanguageTextField(Project myProject, Language language, FileType fileType, boolean isViewer) {
         super(language, myProject, "", false);
         this.myProject = myProject;
         this.fileType = fileType;
         this.language = language;
+        this.isViewer = isViewer;
     }
 
     @Override
     protected @NotNull EditorEx createEditor() {
         EditorEx editor = super.createEditor();
         setUpEditor(editor);
+        editor.setViewer(isViewer);
         return editor;
     }
 
