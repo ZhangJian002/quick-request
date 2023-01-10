@@ -17,9 +17,11 @@
 package io.github.zjay.plugin.fastrequest.config;
 
 import com.google.common.collect.Lists;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.components.StoragePathMacros;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import io.github.zjay.plugin.fastrequest.model.CollectionConfiguration;
@@ -29,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-@State(name = "fastRequestCollectionFree", storages = {@Storage("fastRequestFreeCollection.xml")})
+@State(name = "quickRequestCollections", storages = {@Storage("quickRequestCollections.xml")})
 public class FastRequestCollectionComponent implements PersistentStateComponent<CollectionConfiguration> {
     private CollectionConfiguration config;
 
@@ -63,6 +65,6 @@ public class FastRequestCollectionComponent implements PersistentStateComponent<
     }
 
     public static FastRequestCollectionComponent getInstance(Project project) {
-        return project.getService(FastRequestCollectionComponent.class);
+        return ApplicationManager.getApplication().getService(FastRequestCollectionComponent.class);
     }
 }

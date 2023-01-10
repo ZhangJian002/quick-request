@@ -18,10 +18,10 @@ package io.github.zjay.plugin.fastrequest.contributor;
 
 import com.intellij.navigation.ColoredItemPresentation;
 import com.intellij.navigation.ItemPresentation;
-import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.FakePsiElement;
 import io.github.zjay.plugin.fastrequest.util.FrIconUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,13 +29,16 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 
-public  class RequestMappingItem implements NavigationItem {
+public  class RequestMappingItem extends FakePsiElement {
    private final Navigatable navigationElement;
    @NotNull
    private final PsiElement psiElement;
    private final String urlPath;
    private final String requestMethod;
 
+   public String getRequestMethod(){
+      return this.requestMethod;
+   }
    @Override
    @NotNull
    public String getName() {
@@ -68,6 +71,11 @@ public  class RequestMappingItem implements NavigationItem {
    }
 
    @Override
+   public PsiElement getParent() {
+      return psiElement.getParent();
+   }
+
+   @Override
    @NotNull
    public String toString() {
       return "RequestMappingItem(psiElement=" + this.psiElement + ", urlPath='" + this.urlPath + "', requestMethod='" + this.requestMethod + "', navigationElement=" + this.navigationElement + ')';
@@ -90,7 +98,7 @@ public  class RequestMappingItem implements NavigationItem {
       this.navigationElement = (Navigatable)var10001;
    }
 
-   public final class RequestMappingItemPresentation implements ColoredItemPresentation {
+   public final class RequestMappingItemPresentation implements ItemPresentation {
       @Override
       @NotNull
       public String getPresentableText() {
@@ -115,12 +123,6 @@ public  class RequestMappingItem implements NavigationItem {
          PsiFile psiFile = psiElement.getContainingFile();
          PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
          return FrIconUtil.getIconByMethodAndClassType(requestMethod, psiJavaFile.getClasses()[0].isInterface());
-      }
-
-      @Override
-      public @Nullable TextAttributesKey getTextAttributesKey() {
-         return null;
-//         return EditorColors.SEARCH_RESULT_ATTRIBUTES;
       }
    }
 }

@@ -107,8 +107,8 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         connect.subscribe(ConfigChangeNotifier.LOAD_REQUEST,
                 new ConfigChangeNotifier() {
                     @Override
-                    public void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName, boolean sendFlag) {
-                        windowMap.get(projectName).refreshByCollection(detail);
+                    public void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName, boolean sendFlag, boolean flag) {
+                        windowMap.get(projectName).refreshByCollection(detail, flag);
                         if(sendFlag){
                             windowMap.get(projectName).sendRequestEvent(false);
                         }

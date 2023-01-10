@@ -1,0 +1,484 @@
+package io.github.zjay.plugin.fastrequest.idea;
+
+// Copyright 2000-2021 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+import com.intellij.ide.ui.UISettings;
+import com.intellij.ide.util.*;
+import com.intellij.lang.LangBundle;
+import com.intellij.navigation.*;
+import com.intellij.openapi.application.AccessToken;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.IPopupChooserBuilder;
+import com.intellij.openapi.ui.popup.PopupChooserBuilder;
+import com.intellij.openapi.util.Iconable;
+import com.intellij.openapi.util.NlsContexts;
+import com.intellij.openapi.util.NlsSafe;
+import com.intellij.openapi.util.registry.Registry;
+import com.intellij.openapi.vcs.FileStatus;
+import com.intellij.openapi.vcs.FileStatusManager;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.problems.WolfTheProblemSolver;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiUtilCore;
+import com.intellij.ui.ColoredListCellRenderer;
+import com.intellij.ui.DirtyUI;
+import com.intellij.ui.JBColor;
+import com.intellij.ui.SimpleTextAttributes;
+import com.intellij.ui.speedSearch.SpeedSearchUtil;
+import com.intellij.util.*;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
+import com.intellij.util.text.Matcher;
+import com.intellij.util.text.MatcherHolder;
+import com.intellij.util.ui.UIUtil;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.accessibility.Accessible;
+import javax.accessibility.AccessibleContext;
+import javax.swing.*;
+import java.awt.*;
+import java.util.Comparator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
+import static com.intellij.openapi.vfs.newvfs.VfsPresentationUtil.getFileBackgroundColor;
+
+@DirtyUI
+// extends ListCellRenderer<Object> because it can render strings too
+public abstract class PsiElementListCellRenderer<T extends PsiElement> extends JPanel implements ListCellRenderer<Object> {
+    private static final Logger LOG = Logger.getInstance(com.intellij.ide.util.PsiElementListCellRenderer.class);
+    private static final String LEFT = BorderLayout.WEST;
+    private static final Pattern CONTAINER_PATTERN = Pattern.compile("(\\(in |\\()?([^)]*)(\\))?");
+    private static final SimpleTextAttributes DEFAULT_ERROR_ATTRIBUTES =
+            new SimpleTextAttributes(SimpleTextAttributes.STYLE_WAVED, UIUtil.getInactiveTextColor(), JBColor.RED);
+
+    protected int myRightComponentWidth;
+
+    protected PsiElementListCellRenderer() {
+        super(new BorderLayout());
+    }
+
+    private class MyAccessibleContext extends JPanel.AccessibleJPanel {
+        @Override
+        public String getAccessibleName() {
+            LayoutManager lm = getLayout();
+            assert lm instanceof BorderLayout;
+            Component leftCellRendererComp = ((BorderLayout)lm).getLayoutComponent(LEFT);
+            return leftCellRendererComp instanceof Accessible ?
+                    leftCellRendererComp.getAccessibleContext().getAccessibleName() : super.getAccessibleName();
+        }
+    }
+
+    @Override
+    public AccessibleContext getAccessibleContext() {
+        if (accessibleContext == null) {
+            accessibleContext = new PsiElementListCellRenderer.MyAccessibleContext();
+        }
+        return accessibleContext;
+    }
+
+    public static class ItemMatchers {
+        @Nullable public final Matcher nameMatcher;
+        @Nullable public final Matcher locationMatcher;
+
+        public ItemMatchers(@Nullable Matcher nameMatcher, @Nullable Matcher locationMatcher) {
+            this.nameMatcher = nameMatcher;
+            this.locationMatcher = locationMatcher;
+        }
+    }
+
+    private final class LeftRenderer extends ColoredListCellRenderer<Object> {
+
+        private final PsiElementListCellRenderer.ItemMatchers myMatchers;
+
+        LeftRenderer(@NotNull PsiElementListCellRenderer.ItemMatchers matchers) {
+            myMatchers = matchers;
+        }
+
+        @Override
+        protected void customizeCellRenderer(@NotNull JList<?> list, Object value, int index, boolean selected, boolean hasFocus) {
+            Color bgColor = UIUtil.getListBackground();
+            Color color = list.getForeground();
+
+            PsiElement target = value instanceof PsiElement ? (PsiElement)value :
+                    value instanceof PsiElementNavigationItem ? ((PsiElementNavigationItem)value).getTargetElement() : null;
+            VirtualFile vFile = PsiUtilCore.getVirtualFile(target);
+            boolean isProblemFile = false;
+            if (vFile != null) {
+                Project project = target.getProject();
+                isProblemFile = WolfTheProblemSolver.getInstance(project).isProblemFile(vFile);
+                FileStatus status = FileStatusManager.getInstance(project).getStatus(vFile);
+                color = status.getColor();
+
+                Color fileBgColor = getFileBackgroundColor(project, vFile);
+                bgColor = fileBgColor == null ? bgColor : fileBgColor;
+            }
+
+            if (value instanceof PsiElement) {
+                T element = (T)value;
+                @NlsContexts.Label String name = ((PsiElement)value).isValid() ? getElementText(element) : "INVALID";
+
+                TextAttributes attributes = element.isValid() ? getNavigationItemAttributes(value) : null;
+                SimpleTextAttributes nameAttributes = attributes != null ? SimpleTextAttributes.fromTextAttributes(attributes) : null;
+                if (nameAttributes == null) nameAttributes = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, color);
+
+                if (name == null) {
+                    LOG.error("Null name for PSI element " + element.getClass() + " (by " + PsiElementListCellRenderer.this + ")");
+                    name = LangBundle.message("label.unknown");
+                }
+                SpeedSearchUtil.appendColoredFragmentForMatcher(name, this, nameAttributes, myMatchers.nameMatcher, bgColor, true);
+                if (!element.isValid()) {
+                    append(" " + LangBundle.message("label.invalid"), SimpleTextAttributes.ERROR_ATTRIBUTES);
+                    return;
+                }
+                setIcon(PsiElementListCellRenderer.this.getIcon(element));
+
+                FontMetrics fm = list.getFontMetrics(list.getFont());
+                int maxWidth = list.getWidth() -
+                        fm.stringWidth(name) -
+                        16 - myRightComponentWidth - 20;
+                String containerText = getContainerTextForLeftComponent(element, name, maxWidth, fm);
+                if (containerText != null) {
+                    appendLocationText(selected, bgColor, isProblemFile, containerText);
+                }
+            }
+            else if (!customizeNonPsiElementLeftRenderer(this, list, value, index, selected, hasFocus)) {
+                setIcon(IconUtil.getEmptyIcon(false));
+                @NlsSafe String text = value == null ? "" : value.toString();
+                append(text, new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, list.getForeground()));
+            }
+            setBackground(selected ? UIUtil.getListSelectionBackground(true) : bgColor);
+        }
+
+        private void appendLocationText(boolean selected, Color bgColor, boolean isProblemFile, @Nls String containerText) {
+            SimpleTextAttributes locationAttrs = SimpleTextAttributes.GRAYED_ATTRIBUTES;
+            if (isProblemFile) {
+                SimpleTextAttributes wavedAttributes = SimpleTextAttributes.merge(getErrorAttributes(), locationAttrs);
+                java.util.regex.Matcher matcher = CONTAINER_PATTERN.matcher(containerText);
+                if (matcher.matches()) {
+                    String prefix = matcher.group(1);
+                    SpeedSearchUtil.appendColoredFragmentForMatcher(" " + ObjectUtils.notNull(prefix, ""), this, locationAttrs, myMatchers.locationMatcher, bgColor, selected);
+
+                    String strippedContainerText = matcher.group(2);
+                    SpeedSearchUtil.appendColoredFragmentForMatcher(ObjectUtils.notNull(strippedContainerText, ""), this, wavedAttributes, myMatchers.locationMatcher, bgColor, selected);
+
+                    String suffix = matcher.group(3);
+                    if (suffix != null) {
+                        SpeedSearchUtil.appendColoredFragmentForMatcher(suffix, this, locationAttrs, myMatchers.locationMatcher, bgColor, selected);
+                    }
+                    return;
+                }
+                locationAttrs = wavedAttributes;
+            }
+            SpeedSearchUtil.appendColoredFragmentForMatcher(" " + containerText, this, locationAttrs, myMatchers.locationMatcher, bgColor, selected);
+        }
+    }
+
+    @Nullable
+    protected TextAttributes getNavigationItemAttributes(Object value) {
+        return getNavigationItemAttributesStatic(value);
+    }
+
+    private static @Nullable TextAttributes getNavigationItemAttributesStatic(Object value) {
+        TextAttributes attributes = null;
+
+        if (value instanceof NavigationItem) {
+            TextAttributesKey attributesKey = null;
+            final ItemPresentation presentation = ((NavigationItem)value).getPresentation();
+            if (presentation instanceof ColoredItemPresentation) attributesKey = ((ColoredItemPresentation) presentation).getTextAttributesKey();
+
+            if (attributesKey != null) {
+                attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(attributesKey);
+            }
+        }
+        return attributes;
+    }
+
+    @Override
+    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        removeAll();
+        myRightComponentWidth = 0;
+
+        final TextWithIcon itemLocation;
+        try (AccessToken ignore = SlowOperations.allowSlowOperations(SlowOperations.RENDERING)) {
+            itemLocation = getItemLocation(value);
+        }
+        final JLabel locationComponent;
+        final JPanel spacer;
+        if (itemLocation == null) {
+            locationComponent = null;
+            spacer = null;
+        }
+        else {
+            locationComponent = new JLabel(itemLocation.getText(), itemLocation.getIcon(), SwingConstants.RIGHT);
+            locationComponent.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, UIUtil.getListCellHPadding()));
+            locationComponent.setHorizontalTextPosition(SwingConstants.LEFT);
+            locationComponent.setForeground(isSelected ? UIUtil.getListSelectionForeground(true) : UIUtil.getInactiveTextColor());
+
+            add(locationComponent, BorderLayout.EAST);
+            spacer = new JPanel();
+            spacer.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
+            add(spacer, BorderLayout.CENTER);
+            myRightComponentWidth = locationComponent.getPreferredSize().width;
+            myRightComponentWidth += spacer.getPreferredSize().width;
+        }
+
+        ListCellRenderer<Object> leftRenderer = new PsiElementListCellRenderer.LeftRenderer(value == null ? new PsiElementListCellRenderer.ItemMatchers(null, null) : getItemMatchers(list, value));
+        Component result;
+        try (AccessToken ignore = SlowOperations.allowSlowOperations(SlowOperations.RENDERING)) {
+            result = leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        }
+        final Component leftCellRendererComponent = result;
+        add(leftCellRendererComponent, LEFT);
+        final Color bg = isSelected ? UIUtil.getListSelectionBackground(true) : leftCellRendererComponent.getBackground();
+        setBackground(bg);
+        if (itemLocation != null) {
+            locationComponent.setBackground(bg);
+            spacer.setBackground(bg);
+        }
+        return this;
+    }
+
+    @NotNull
+    protected SimpleTextAttributes getErrorAttributes() {
+        return DEFAULT_ERROR_ATTRIBUTES;
+    }
+
+    @NotNull
+    public PsiElementListCellRenderer.ItemMatchers getItemMatchers(@NotNull JList list, @NotNull Object value) {
+        return new PsiElementListCellRenderer.ItemMatchers(MatcherHolder.getAssociatedMatcher(list), null);
+    }
+
+    /**
+     * @deprecated method has no effect
+     */
+    @ApiStatus.ScheduledForRemoval(inVersion = "2021.2")
+    @Deprecated
+    protected final void setFocusBorderEnabled(boolean enabled) { }
+
+    protected boolean customizeNonPsiElementLeftRenderer(ColoredListCellRenderer renderer,
+                                                         JList list,
+                                                         Object value,
+                                                         int index,
+                                                         boolean selected,
+                                                         boolean hasFocus) {
+        return false;
+    }
+
+    protected @Nullable TextWithIcon getItemLocation(Object value) {
+        if (isGetRightCellRendererOverridden) {
+            return getTextWithIcon(getRightCellRenderer(value), value);
+        }
+        if (UISettings.getInstance().getShowIconInQuickNavigation()) {
+            return getModuleTextWithIcon(value);
+        }
+        return null;
+    }
+
+    TextWithIcon getTextWithIcon(@Nullable ListCellRenderer<Object> renderer, Object element) {
+        if (renderer == null) {
+            return null;
+        }
+        Component component = renderer.getListCellRendererComponent(new JList<>(), element, -1, false, false);
+        if (!(component instanceof JLabel)) {
+            return null;
+        }
+        JLabel label = (JLabel)component;
+        return new TextWithIcon(label.getText(), label.getIcon());
+    }
+
+    private final boolean isGetRightCellRendererOverridden = ReflectionUtil.getMethodDeclaringClass(
+            getClass(), "getRightCellRenderer", Object.class
+    ) != com.intellij.ide.util.PsiElementListCellRenderer.class;
+
+    /**
+     * @deprecated override {@link #getItemLocation} instead
+     */
+    @Deprecated
+    @Nullable
+    protected DefaultListCellRenderer getRightCellRenderer(final Object value) {
+        if (!UISettings.getInstance().getShowIconInQuickNavigation()) {
+            return null;
+        }
+        final DefaultListCellRenderer renderer = ModuleRendererFactory.findInstance(value).getModuleRenderer();
+        if (renderer instanceof PlatformModuleRendererFactory.PlatformModuleRenderer) {
+            // it won't display any new information
+            return null;
+        }
+        return renderer;
+    }
+
+    @ApiStatus.Internal
+    public static @Nullable TextWithIcon getModuleTextWithIcon(Object value) {
+        ModuleRendererFactory factory = ModuleRendererFactory.findInstance(value);
+        if (factory instanceof PlatformModuleRendererFactory) {
+            // it won't display any new information
+            return null;
+        }
+        return factory.getModuleTextWithIcon(value);
+    }
+
+    public abstract @NlsSafe String getElementText(T element);
+
+    @Nullable
+    protected abstract @NlsSafe String getContainerText(T element, final String name);
+
+    @Nullable
+    protected @NlsSafe String getContainerTextForLeftComponent(T element, String name, int maxWidth, FontMetrics fm) {
+        return getContainerText(element, name);
+    }
+
+    @Iconable.IconFlags
+    protected int getIconFlags() {
+        return 0;
+    }
+
+    protected Icon getIcon(PsiElement element) {
+        return element.getIcon(getIconFlags());
+    }
+
+    public Comparator<T> getComparator() {
+        //noinspection unchecked
+        return Comparator.comparing(this::getComparingObject);
+    }
+
+    @NotNull
+    public Comparable getComparingObject(T element) {
+        return ReadAction.compute(() -> {
+            String elementText = getElementText(element);
+            String containerText = getContainerText(element, elementText);
+            TextWithIcon moduleTextWithIcon = getModuleTextWithIcon(element);
+            return (containerText == null ? elementText : elementText + " " + containerText) +
+                    (moduleTextWithIcon != null ? moduleTextWithIcon.getText() : "");
+        });
+    }
+
+    /**
+     * @deprecated use {@link #installSpeedSearch(IPopupChooserBuilder)} instead
+     */
+    @Deprecated
+    public void installSpeedSearch(PopupChooserBuilder<?> builder) {
+        installSpeedSearch((IPopupChooserBuilder)builder);
+    }
+
+    public void installSpeedSearch(IPopupChooserBuilder builder) {
+        installSpeedSearch(builder, false);
+    }
+
+    public void installSpeedSearch(IPopupChooserBuilder builder, final boolean includeContainerText) {
+        builder.setNamerForFiltering(o -> {
+            if (o instanceof PsiElement) {
+                final String elementText = getElementText((T)o);
+                if (includeContainerText) {
+                    return elementText + " " + getContainerText((T)o, elementText);
+                }
+                return elementText;
+            }
+            else {
+                return o.toString();
+            }
+        });
+    }
+
+    @ApiStatus.Internal
+    @SuppressWarnings("unchecked")
+    @RequiresReadLock
+    public final @NotNull TargetPresentation computePresentation(@NotNull PsiElement element) {
+        return targetPresentation(
+                (T)element,
+                myRenderingInfo,
+                this::getNavigationItemAttributes,
+                this::getItemLocation,
+                this::getErrorAttributes
+        );
+    }
+
+    private final PsiElementRenderingInfo<T> myRenderingInfo = new PsiElementRenderingInfo<T>() {
+
+        @Override
+        public @Nullable Icon getIcon(@NotNull T element) {
+            return PsiElementListCellRenderer.this.getIcon(element);
+        }
+
+        @Override
+        public @NotNull String getPresentableText(@NotNull T element) {
+            String elementText = getElementText(element);
+            if (elementText == null) {
+                LOG.error("Null name for PSI element " + element.getClass() + " (by " + PsiElementListCellRenderer.this + ")");
+                return LangBundle.message("label.unknown");
+            }
+            return elementText;
+        }
+
+        @Override
+        public @Nullable String getContainerText(@NotNull T element) {
+            return PsiElementListCellRenderer.this.getContainerText(element, getPresentableText(element));
+        }
+    };
+
+    static <T extends PsiElement>
+    @NotNull TargetPresentation targetPresentation(@NotNull T element, @NotNull PsiElementRenderingInfo<? super T> renderingInfo) {
+        return targetPresentation(
+                element,
+                renderingInfo,
+                PsiElementListCellRenderer::getNavigationItemAttributesStatic,
+                PsiElementListCellRenderer::getModuleTextWithIcon,
+                () -> DEFAULT_ERROR_ATTRIBUTES
+        );
+    }
+
+    private static <T extends PsiElement>
+    @NotNull TargetPresentation targetPresentation(
+            @NotNull T element,
+            @NotNull PsiElementRenderingInfo<? super T> renderingInfo,
+            @NotNull Function<? super @NotNull T, ? extends @Nullable TextAttributes> presentableAttributesProvider,
+            @NotNull Function<? super @NotNull T, ? extends @Nullable TextWithIcon> locationProvider,
+            @NotNull Supplier<? extends @NotNull SimpleTextAttributes> errorAttributesSupplier
+    ) {
+        TargetPresentationBuilder builder = TargetPresentation.builder(renderingInfo.getPresentableText(element));
+        builder = builder.icon(renderingInfo.getIcon(element));
+
+        TextAttributes elementAttributes = presentableAttributesProvider.apply(element);
+        VirtualFile vFile = PsiUtilCore.getVirtualFile(element);
+        if (vFile == null) {
+            builder = builder.presentableTextAttributes(elementAttributes);
+        }
+        else {
+            Project project = element.getProject();
+            TextAttributes presentableAttributes = elementAttributes;
+            if (presentableAttributes == null) {
+                Color color = FileStatusManager.getInstance(project).getStatus(vFile).getColor();
+                if (color != null) {
+                    presentableAttributes = new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, color).toTextAttributes();
+                }
+            }
+            if (WolfTheProblemSolver.getInstance(project).isProblemFile(vFile)) {
+                presentableAttributes = TextAttributes.merge(errorAttributesSupplier.get().toTextAttributes(), presentableAttributes);
+            }
+            builder = builder.presentableTextAttributes(presentableAttributes);
+            builder = builder.backgroundColor(getFileBackgroundColor(project, vFile));
+        }
+
+        String containerText = renderingInfo.getContainerText(element);
+        if (containerText != null) {
+            var matcher = CONTAINER_PATTERN.matcher(containerText);
+            builder = builder.containerText(matcher.matches() ? matcher.group(2) : containerText);
+        }
+
+        TextWithIcon itemLocation = locationProvider.apply(element);
+        if (itemLocation != null) {
+            builder = builder.locationText(itemLocation.getText(), itemLocation.getIcon());
+        }
+
+        return builder.presentation();
+    }
+}
+

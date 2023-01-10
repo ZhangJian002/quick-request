@@ -1156,19 +1156,26 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         return jbColor;
     }
 
-    public void refreshByCollection(CollectionConfiguration.CollectionDetail detail) {
+    /**
+     *
+     * @param detail
+     * @param flag 当前的url是否是当前的项目的
+     */
+    public void refreshByCollection(CollectionConfiguration.CollectionDetail detail, boolean flag) {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         multipartKeyValueList = new ArrayList<>();
         urlParamsTextArea.setText("");
         ((LanguageTextField) jsonParamsTextArea).setText("");
         urlEncodedTextArea.setText("");
         ParamGroupCollection paramGroup = detail.getParamGroup();
+        //更新相关信息
         assert config != null;
         ParamGroup paramGroupConfig = config.getParamGroup();
         paramGroupConfig.setOriginUrl(paramGroup.getOriginUrl());
         paramGroupConfig.setClassName(paramGroup.getClassName());
         paramGroupConfig.setMethod(paramGroup.getMethod());
         paramGroupConfig.setMethodDescription(detail.getName());
+
         String pathParamsKeyValueListJson = paramGroup.getPathParamsKeyValueListJson();
         String urlParamsKeyValueListJson = paramGroup.getUrlParamsKeyValueListJson();
         String urlParamsKeyValueListText = paramGroup.getUrlParamsKeyValueListText();
@@ -1176,8 +1183,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String urlEncodedKeyValueListJson = paramGroup.getUrlEncodedKeyValueListJson();
         String urlEncodedKeyValueListText = paramGroup.getUrlEncodedKeyValueListText();
         String multipartKeyValueListJson = paramGroup.getMultipartKeyValueListJson();
-        String domain = detail.getDomain();
-        String url = paramGroup.getUrl();
 
         pathParamsKeyValueList = JSON.parseObject(pathParamsKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
         });
@@ -1258,7 +1263,17 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         setCheckBoxHeader(multipartTable, multipartCheckBoxHeader);
         //默认不刷第一个url 这里与complete冲突
 //        urlTextField.setText(url);
-        changeUrl();
+        if(flag){
+            changeUrl();
+        }else {
+            String url = paramGroup.getUrl();
+            if(!UrlUtil.isHttpURL(url)){
+                urlTextField.setText(detail.getDomain()+ url);
+            }else {
+                urlTextField.setText(url);
+            }
+        }
+
     }
 
     private void setCheckBoxHeader(JTable table, CheckBoxHeader header) {
@@ -1282,7 +1297,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String mid = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
         CollectionConfiguration.CollectionDetail detail = filterById(mid, collectionConfiguration.getDetail());
         if (detail != null && !regenerate) {
-            refreshByCollection(detail);
+            refreshByCollection(detail, true);
             return;
         }
 
@@ -1395,6 +1410,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         if(StringUtils.isBlank(originUrl)){
             return;
         }
+
         String url = buildPathParamUrl(originUrl);
         url = ((url.startsWith("/") || "".equals(url)) ? "" : "/") + url;
         if(!UrlUtil.isHttpURL(url) && urlCompleteChangeFlag.get()){

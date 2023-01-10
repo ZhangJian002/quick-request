@@ -502,6 +502,17 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 return true;
             }
         });
+        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton("Refresh", AllIcons.Actions.Refresh) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                refresh();
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+        });
         toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.exportToPostman"), PluginIcons.ICON_POSTMAN) {
 
             @Override
@@ -926,21 +937,19 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     }
 
     private void loadAncChangeTab(boolean flag, CollectionConfiguration.CollectionDetail detail, boolean sendFlag) {
-        //切换tab
-        if (flag) {
-            //change data
-            ApplicationManager.getApplication().invokeLater(() -> {
-                ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(myProject).getToolWindow("Quick Request");
-                Content content = fastRequestToolWindow.getContentManager().getContent(0);
-                assert content != null;
-                fastRequestToolWindow.getContentManager().setSelectedContent(content);
+        //change data
+        ApplicationManager.getApplication().invokeLater(() -> {
+            //切换tab
+            ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(myProject).getToolWindow("Quick Request");
+            Content content = fastRequestToolWindow.getContentManager().getContent(0);
+            assert content != null;
+            fastRequestToolWindow.getContentManager().setSelectedContent(content);
 
-                MessageBus messageBus = myProject.getMessageBus();
-                messageBus.connect();
-                ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.LOAD_REQUEST);
-                configChangeNotifier.loadRequest(detail, myProject.getName(), sendFlag);
-            });
-        }
+            MessageBus messageBus = myProject.getMessageBus();
+            messageBus.connect();
+            ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.LOAD_REQUEST);
+            configChangeNotifier.loadRequest(detail, myProject.getName(), sendFlag, flag);
+        });
     }
 
     private void refreshTable() {

@@ -16,14 +16,9 @@
 
 package io.github.zjay.plugin.fastrequest.idea;
 
-import com.intellij.ide.ui.LafManagerListener;
-import com.intellij.ide.util.PsiElementListCellRenderer;
 import com.intellij.ide.util.gotoByName.GotoFileCellRenderer;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.colors.EditorColorsManager;
-import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.util.SystemInfo;
@@ -32,14 +27,13 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFilePathWrapper;
 import com.intellij.openapi.vfs.newvfs.VfsPresentationUtil;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiFileSystemItem;
-import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.*;
 import com.intellij.psi.presentation.java.SymbolPresentationUtil;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.ui.ColoredListCellRenderer;
 import com.intellij.util.ObjectUtils;
+import io.github.zjay.plugin.fastrequest.contributor.RequestMappingItem;
+import io.github.zjay.plugin.fastrequest.util.FrIconUtil;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -49,14 +43,14 @@ import java.util.LinkedList;
 import java.util.Optional;
 
 public class SearchEverywherePsiRenderer extends PsiElementListCellRenderer<PsiElement> {
-  private EditorColorsScheme scheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
+//  private EditorColorsScheme scheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
 
   public SearchEverywherePsiRenderer(Disposable parent) {
     setLayout(new SELayout());
 
-    ApplicationManager.getApplication().getMessageBus().connect(parent).subscribe(LafManagerListener.TOPIC, __ -> {
-      scheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
-    });
+//    ApplicationManager.getApplication().getMessageBus().connect(parent).subscribe(LafManagerListener.TOPIC, __ -> {
+//      scheme = EditorColorsManager.getInstance().getSchemeForCurrentUITheme();
+//    });
   }
 
 
@@ -75,7 +69,6 @@ public class SearchEverywherePsiRenderer extends PsiElementListCellRenderer<PsiE
         .orElse(null);
       if (name != null) return name;
     }
-
     String name = element instanceof PsiNamedElement ? ((PsiNamedElement)element).getName() : null;
     return StringUtil.notNullize(name, "<unnamed>");
   }
@@ -89,6 +82,7 @@ public class SearchEverywherePsiRenderer extends PsiElementListCellRenderer<PsiE
   @Nullable
   @Override
   protected String getContainerTextForLeftComponent(PsiElement element, String name, int maxWidth, FontMetrics fm) {
+//    SpeedSearchUtil.applySpeedSearchHighlighting(this, , false, true);
     String presentablePath = extractPresentablePath(element);
     String text = ObjectUtils.chooseNotNull(presentablePath, SymbolPresentationUtil.getSymbolContainerText(element));
 
@@ -175,6 +169,16 @@ public class SearchEverywherePsiRenderer extends PsiElementListCellRenderer<PsiE
   @Override
   protected int getIconFlags() {
     return Iconable.ICON_FLAG_READ_STATUS;
+  }
+
+  @Override
+  protected Icon getIcon(PsiElement element) {
+    if(element instanceof RequestMappingItem){
+      RequestMappingItem requestMappingItem = (RequestMappingItem) element;
+      PsiJavaFile psiJavaFile = (PsiJavaFile) requestMappingItem.getPsiElement().getContainingFile();
+      return FrIconUtil.getIconByMethodAndClassType(requestMappingItem.getRequestMethod(), psiJavaFile.getClasses()[0].isInterface());
+    }
+    return super.getIcon(element);
   }
 
   public static class SELayout extends BorderLayout {

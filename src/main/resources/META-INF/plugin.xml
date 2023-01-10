@@ -32,7 +32,7 @@
         <!-- Add your extensions here -->
         <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestComponent"
                             order="first"/>
-        <projectService
+        <applicationService
                 serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent"/>
         <projectService
                 serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent"/>
