@@ -439,13 +439,17 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         });
         toolbarDecorator.setRemoveAction(e -> {
-            int i = Messages.showOkCancelDialog("Delete it?", "Delete", "Delete", "Cancel", Messages.getInformationIcon());
+            int i = Messages.showOkCancelDialog("Delete it(contains children)?", "Delete", "Delete", "Cancel", Messages.getInformationIcon());
             if (i == 0) {
                 int selectedRow = collectionTable.getSelectedRow();
                 CollectionCustomNode node = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
                 CollectionCustomNode parent = (CollectionCustomNode) node.getParent();
                 parent.remove(node);
-                collectionTable.setRowSelectionInterval(selectedRow - 1, selectedRow - 1);
+                if(selectedRow > 1){
+                    collectionTable.setRowSelectionInterval(selectedRow - 1, selectedRow - 1);
+                }else {
+                    collectionTable.setRowSelectionInterval(0, 0);
+                }
                 refreshTable();
                 CollectionConfiguration.CollectionDetail parentDetail = filterById(parent.getId(), rootDetail);
                 parentDetail.getChildList().removeIf(q -> q.getId().equals(node.getId()));
@@ -628,7 +632,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             public boolean isCellEditable(int row, int column) {
                 ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) getTableModel();
                 CollectionCustomNode node = (CollectionCustomNode) myModel.getRowValue(row);
-                return (column == 0 && row > 1) || (column == 2 && node.getType() != 1);
+                return column == 0 || (column == 2 && node.getType() != 1);
             }
 
             @Override
@@ -669,7 +673,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         table.setRowSelectionAllowed(false);
         table.setCellSelectionEnabled(true);
         table.setTransferHandler(new TransferHelper());
-        table.setRootVisible(true);
+        table.setRootVisible(false);
         table.setVisible(true);
 //        table.addMouseListener(new MouseAdapter() {
 //            @Override
@@ -844,6 +848,19 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             append(node.getName());
             if (node.getType() == 2) {
                 setIcon(FrIconUtil.getIconByMethodType(node.getDetail().getParamGroup().getMethodType()));
+            }else if(node.getType() == 1 && !node.isRoot()){
+                if(node.getChildCount() == 0){
+                    return;
+                }
+                TreeNode firstChild = node.getFirstChild();
+                if(firstChild != null){
+                    CollectionCustomNode firstChildNode = (CollectionCustomNode) firstChild;
+                    if(firstChildNode.getType() == 1){
+                        setIcon(AllIcons.Nodes.Module);
+                    }else {
+                        setIcon(AllIcons.Nodes.Package);
+                    }
+                }
             }
         }
     }
@@ -856,9 +873,17 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         node.setDetail(detail);
         List<CollectionConfiguration.CollectionDetail> child = detail.getChildList();
         if (CollectionUtils.isNotEmpty(child)) {
+            CollectionConfiguration.CollectionDetail defaultGroup = null;
             for (CollectionConfiguration.CollectionDetail d : child) {
+                if(Objects.equals("1", d.getId())){
+                    defaultGroup = d;
+                    continue;
+                }
                 CollectionCustomNode nodeIn = convertToNode(d);
                 node.add(nodeIn);
+            }
+            if(defaultGroup != null){
+                detail.getChildList().remove(defaultGroup);
             }
         }
         return node;

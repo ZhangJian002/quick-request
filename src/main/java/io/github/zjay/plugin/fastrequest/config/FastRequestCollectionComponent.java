@@ -17,12 +17,18 @@
 package io.github.zjay.plugin.fastrequest.config;
 
 import com.google.common.collect.Lists;
+import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.components.StoragePathMacros;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.impl.file.PsiDirectoryFactory;
+import com.intellij.util.xml.DomManager;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import io.github.zjay.plugin.fastrequest.model.CollectionConfiguration;
 import io.github.zjay.plugin.fastrequest.model.ParamGroupCollection;
@@ -46,13 +52,13 @@ public class FastRequestCollectionComponent implements PersistentStateComponent<
             detail.setName("Root");
             detail.setParamGroup(new ParamGroupCollection());
 
-            CollectionConfiguration.CollectionDetail defaultGroup = new CollectionConfiguration.CollectionDetail();
-            defaultGroup.setType(1);
-            defaultGroup.setId("1");
-            defaultGroup.setGroupId("1");
-            defaultGroup.setGroupId("1");
-            defaultGroup.setName("Default Group");
-            detail.setChildList(Lists.newArrayList(defaultGroup));
+//            CollectionConfiguration.CollectionDetail defaultGroup = new CollectionConfiguration.CollectionDetail();
+//            defaultGroup.setType(1);  
+//            defaultGroup.setId("1");
+//            defaultGroup.setGroupId("1");
+//            defaultGroup.setGroupId("1");
+//            defaultGroup.setName("Default Group");
+//            detail.setChildList(Lists.newArrayList(defaultGroup));
             config.setDetail(detail);
             return config;
         }
@@ -65,6 +71,14 @@ public class FastRequestCollectionComponent implements PersistentStateComponent<
     }
 
     public static FastRequestCollectionComponent getInstance(Project project) {
+//        ApplicationManager.getApplication().saveAll();
         return ApplicationManager.getApplication().getService(FastRequestCollectionComponent.class);
+    }
+
+    public void generatXML(Project project){
+        DomManager domManager = DomManager.getDomManager(project);
+        PsiDirectory psiDirectory = PsiDirectoryFactory.getInstance(project).createDirectory(project.getWorkspaceFile());
+        PsiFile psiFile = PsiFileFactory.getInstance(project).createFileFromText("", XMLLanguage.INSTANCE, "");
+        psiDirectory.add(psiFile);
     }
 }

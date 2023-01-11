@@ -16,7 +16,9 @@
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
-        <properties/>
+        <properties>
+          <visible value="true"/>
+        </properties>
         <border type="none"/>
         <children>
           <component id="8813f" class="javax.swing.JLabel" binding="warnLabel2">
@@ -27,6 +29,7 @@
               <foreground color="-4475862"/>
               <text resource-bundle="io/github/zjay/fastrequest/18n/fr" key="warnItem2"/>
               <toolTipText value=""/>
+              <visible value="false"/>
             </properties>
           </component>
           <grid id="1b906" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
@@ -110,6 +113,7 @@
             <properties>
               <foreground color="-4475862"/>
               <text resource-bundle="io/github/zjay/fastrequest/18n/fr" key="warnItem1"/>
+              <visible value="false"/>
             </properties>
           </component>
           <component id="777ab" class="javax.swing.JButton" binding="manageConfigButton" custom-create="true" default-binding="true">
@@ -118,6 +122,7 @@
             </constraints>
             <properties>
               <text resource-bundle="io/github/zjay/fastrequest/18n/fr" key="ManageConfig"/>
+              <visible value="false"/>
             </properties>
           </component>
         </children>

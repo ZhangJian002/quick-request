@@ -463,9 +463,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         FastRequestCurrentProjectConfiguration projectConfig = FastRequestCurrentProjectConfigComponent.getInstance(project).getState();
         assert projectConfig != null;
 
-        warnLabel1.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
+//        warnLabel1.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
         manageConfigButton.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
-        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
+//        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
 
 
         //method 颜色渲染
@@ -1070,7 +1070,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
      * @date 2021/05/23
      */
     private void setDomain(FastRequestConfiguration config) {
-        warnLabel1.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
+//        warnLabel1.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
         manageConfigButton.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
 
         FastRequestCurrentProjectConfiguration projectConfig = FastRequestCurrentProjectConfigComponent.getInstance(myProject).getState();
@@ -1081,13 +1081,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         if (StringUtils.isEmpty(activeEnv)) {
             config.setDomain(StringUtils.EMPTY);
             projectConfig.setDomain(StringUtils.EMPTY);
-            warnLabel2.setVisible(true);
+//            warnLabel2.setVisible(true);
             return;
         }
         if (StringUtils.isEmpty(activeProject)) {
             config.setDomain(StringUtils.EMPTY);
             projectConfig.setDomain(StringUtils.EMPTY);
-            warnLabel2.setVisible(true);
+//            warnLabel2.setVisible(true);
             return;
         }
         NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
@@ -1115,9 +1115,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String activeEnv = getActiveEnv();
         String activeProject = getActiveProject();
 
-        warnLabel1.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
+//        warnLabel1.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
         manageConfigButton.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
-        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
+//        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
 
 
         ArrayList<String> projectListClone = Lists.newArrayList(NO_PROJECT);
@@ -1420,7 +1420,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             urlTextField.setText(url);
             paramGroup.setUrl(url);
         }
-        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
+//        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
     }
 
     private String buildPathParamUrl(String url) {
