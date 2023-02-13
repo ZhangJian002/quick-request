@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2022.12.12'
+version '2023.1.8'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -21,7 +21,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    plugins = ['java', "org.intellij.plugins.markdown"]
+    plugins = ['java', "org.intellij.plugins.markdown", "Git4Idea"]
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
     downloadSources true

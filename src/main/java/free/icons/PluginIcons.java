@@ -82,4 +82,6 @@ public interface PluginIcons {
     Icon ICON_LOCAL_SCOPE_LARGE = IconLoader.getIcon("/free.icon/localScope-large.svg", PluginIcons.class);
 
     Icon ICON_CLEAR = IconLoader.getIcon("/free.icon/clear.svg", PluginIcons.class);
+
+    Icon ICON_SYNC = IconLoader.getIcon("/free.icon/sync.svg", PluginIcons.class);
 }

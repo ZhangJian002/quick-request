@@ -548,7 +548,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                     public @NotNull String getDefaultFilePath() {
                         VirtualFile virtualFile = ProjectUtil.guessProjectDir(myProject);
                         if(virtualFile != null){
-                            return virtualFile.getPath() + File.separator + "FastRequest("+myProject.getName()+").postman_collection_v21.json";
+                            return virtualFile.getPath() + File.separator + "QuickRequest.postman_collection.json";
                         }
                         return "";
                     }

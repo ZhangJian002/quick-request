@@ -32,6 +32,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.intellij.conversion.WorkspaceSettings;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.json.JsonFileType;
@@ -54,6 +55,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.progress.util.ColorProgressBar;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.*;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -79,6 +81,9 @@ import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import free.icons.PluginIcons;
+import git4idea.commands.Git;
+import git4idea.repo.GitRepository;
+import git4idea.repo.GitRepositoryManager;
 import io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction;
 import io.github.zjay.plugin.fastrequest.action.OpenConfigAction;
 import io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction;
@@ -94,6 +99,7 @@ import io.github.zjay.plugin.fastrequest.view.component.*;
 import io.github.zjay.plugin.fastrequest.view.inner.HeaderGroupView;
 import io.github.zjay.plugin.fastrequest.view.inner.SupportView;
 import io.github.zjay.plugin.fastrequest.model.*;
+import io.github.zjay.plugin.fastrequest.view.inner.SyncView;
 import nonapi.io.github.classgraph.utils.URLPathEncoder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -445,6 +451,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(new FixPositionAction());
         group.add(new SaveRequestAction());
         group.add(new RetryAction());
+        group.add(new SynchronizationAction());
 //        group.add(new CopyCurlAction());
 //        group.addSeparator("  |  ");
 //        group.add(new DocAction());
@@ -3600,6 +3607,38 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         public void actionPerformed(@NotNull AnActionEvent event) {
             SupportView supportView = new SupportView();
             supportView.show();
+        }
+    }
+
+    private static final class SynchronizationAction extends AnAction {
+        public SynchronizationAction() {
+            super(MyResourceBundleUtil.getKey("synchronization"), MyResourceBundleUtil.getKey("synchronization"), PluginIcons.ICON_SYNC);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent event) {
+            //PropertiesComponent读取state
+//            com.intellij.ide.util.PropertiesComponent.getInstance().
+//            String workspacePath = WorkspaceSettings.getPath().toString();
+//            System.out.println(workspacePath);
+//            File projectDir = new File(workspacePath);
+//            File[] files = projectDir.listFiles();
+//            if (files != null) {
+//                for (File file : files) {
+//                    if (file.isDirectory() && new File(file, ".idea").exists()&& new File(file, ".git").exists()) {
+//                        // 该目录是一个项目
+//                        Project project = ProjectManager.getInstance().lo(file.getPath());
+//                        // 在这里处理项目
+//                    }
+//                }
+//            }
+
+            SyncView syncView = new SyncView();
+            if(syncView.showAndGet()){
+                System.out.println(syncView.changeAndGet());
+//                GitRepositoryManager.getInstance();
+//                ProjectManager.getInstance().
+            }
         }
     }
 

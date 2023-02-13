@@ -30,6 +30,7 @@ import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.util.xml.DomManager;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import git4idea.commands.Git;
 import io.github.zjay.plugin.fastrequest.model.CollectionConfiguration;
 import io.github.zjay.plugin.fastrequest.model.ParamGroupCollection;
 import org.jetbrains.annotations.NotNull;
