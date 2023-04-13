@@ -3673,7 +3673,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     private class RetryAction extends AnAction {
         public RetryAction() {
-            super(MyResourceBundleUtil.getKey("regenerate"), MyResourceBundleUtil.getKey("regenerate"), AllIcons.Actions.Redo);
+            super(MyResourceBundleUtil.getKey("regenerate"), MyResourceBundleUtil.getKey("regenerate"), PluginIcons.ICON_REDO);
         }
 
         @Override
