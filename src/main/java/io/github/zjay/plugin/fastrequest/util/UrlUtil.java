@@ -45,6 +45,7 @@ public class UrlUtil {
 
     public static boolean isHttpURL(String url) {
         try {
+            new URL(url).toURI();
             return  (url.startsWith("http://") || url.startsWith("https://"));
         } catch (Exception e) {
             return false;

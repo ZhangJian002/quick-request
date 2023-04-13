@@ -18,7 +18,7 @@
     </description>
 
     <!--    2019.2-->
-    <idea-version since-build="203"/>
+    <idea-version since-build="203.5981.155"/>
     <!--    <idea-version since-build="192"/>-->
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html

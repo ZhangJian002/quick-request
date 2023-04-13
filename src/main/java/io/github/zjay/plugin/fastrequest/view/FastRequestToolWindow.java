@@ -16,8 +16,8 @@
 
 package io.github.zjay.plugin.fastrequest.view;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.net.url.UrlQuery;
 import cn.hutool.core.thread.ThreadUtil;
@@ -32,7 +32,6 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.intellij.conversion.WorkspaceSettings;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.json.JsonFileType;
@@ -44,7 +43,6 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
@@ -55,13 +53,11 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.progress.util.ColorProgressBar;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.*;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.pom.Navigatable;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -69,8 +65,6 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
-import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
@@ -81,9 +75,6 @@ import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import free.icons.PluginIcons;
-import git4idea.commands.Git;
-import git4idea.repo.GitRepository;
-import git4idea.repo.GitRepositoryManager;
 import io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction;
 import io.github.zjay.plugin.fastrequest.action.OpenConfigAction;
 import io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction;
@@ -100,7 +91,6 @@ import io.github.zjay.plugin.fastrequest.view.inner.HeaderGroupView;
 import io.github.zjay.plugin.fastrequest.view.inner.SupportView;
 import io.github.zjay.plugin.fastrequest.model.*;
 import io.github.zjay.plugin.fastrequest.view.inner.SyncView;
-import nonapi.io.github.classgraph.utils.URLPathEncoder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -108,7 +98,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import javax.swing.tree.*;
 import java.awt.*;
@@ -116,7 +105,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -809,227 +797,268 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         //首先停止正在编辑中的table
         stopCellEditing();
         try {
-            FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
-            assert config != null;
-            NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
-            HostGroup defaultHostGroup = new HostGroup(StringUtils.EMPTY, StringUtils.EMPTY);
-            String domain = config.getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
-                    .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
-            String sendUrl;
-            //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
-            if(UrlUtil.isHttpURL(urlTextField.getText())){
-                sendUrl = urlTextField.getText();
-            }else {
-                //如果不是url 就给加
-                sendUrl = domain + urlTextField.getText();
-            }
-
-            if (!UrlUtil.isURL(sendUrl)) {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required");
-                });
-                tabbedPane.setSelectedIndex(4);
-                responseTabbedPanel.setSelectedIndex(2);
-                sendButtonFlag = true;
-                ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
-                return;
-            }
-            String methodType = (String) methodTypeComboBox.getSelectedItem();
-            HttpRequest request = HttpUtil.createRequest(Method.valueOf(methodType), sendUrl);
-            request.setMaxRedirectCount(10);
-            headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
-            List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
-            globalHeaderList = globalHeaderList == null ? new ArrayList<>() : globalHeaderList;
-            Map<String, List<String>> globalHeaderMap = globalHeaderList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
-            Map<String, List<String>> headerMap = headerParamsKeyValueList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
-            globalHeaderMap.putAll(headerMap);
-            request.header(globalHeaderMap);
-            Map<String, Object> multipartFormParam = multipartKeyValueList.stream().filter(ParamKeyValue::getEnabled)
-                    .collect(HashMap::new, (m, v) -> {
-                        Object value = v.getValue();
-                        String key = v.getKey();
-                        if (TypeUtil.Type.File.name().equals(v.getType())) {
-                            if (value != null && !StringUtils.isBlank(value.toString())) {
-                                m.put(key, new File(value.toString()));
-                            } else {
-                                m.put(key, null);
-                            }
-                        } else {
-                            m.put(key, value);
-                        }
-                    }, HashMap::putAll);
-
-            Map<String, Object> urlParam = urlParamsKeyValueList.stream().filter(ParamKeyValue::getEnabled).collect(Collectors.toMap(ParamKeyValue::getKey, ParamKeyValue::getValue, (existing, replacement) -> existing));
-            String jsonParam = ((LanguageTextField) jsonParamsTextArea).getText();
-            StringBuilder urlEncodedParam = new StringBuilder("");
-            urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> {
-                urlEncodedParam.append(q.getKey()).append("=").append(q.getValue()).append("&");
-            });
-
-            boolean formFlag = true;
-            //json优先
-            if (StringUtils.isNotEmpty(urlEncodedParam)) {
-                request.body(StringUtils.removeEnd(urlEncodedParam.toString(), "&"));
-                formFlag = false;
-            }
-            if (StringUtils.isNotEmpty(jsonParam)) {
-                request.body(JSON.toJSONString(JSON.parse(jsonParam)));
-                formFlag = false;
-            }
-
-            if (!urlParam.isEmpty()) {
-                String queryParam = UrlQuery.of(urlParam).toString();
-                request.setUrl(request.getUrl() + "?" + URLEncoder.DEFAULT.encode(queryParam, StandardCharsets.UTF_8));
-            }
-            if (!multipartFormParam.isEmpty() && formFlag) {
-                request.form(multipartFormParam);
-            }
-            FileSaverDialog fd = null;
-            if (fileMode) {
-                fd = FileChooserFactory.getInstance().createSaveFileDialog(new FileSaverDescriptor("Save As", ""), myProject);
-            }
-            FileSaverDialog finalFd = fd;
-            requestProgressBar.setVisible(true);
-            requestProgressBar.setForeground(ColorProgressBar.GREEN);
-            futureAtomicReference.set(ThreadUtil.execAsync(() -> {
-                try {
-                    long start = System.currentTimeMillis();
-                    HttpResponse response = request.execute();
-                    long end = System.currentTimeMillis();
-                    //如果被外部中断，就不继续了
-                    if(Thread.currentThread().isInterrupted()){
-                        return;
-                    }
-
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        tabbedPane.setSelectedIndex(4);
-                        String duration = String.valueOf(end - start);
-                        requestProgressBar.setVisible(false);
-                        int status = response.getStatus();
-                        //download file
-                        String header = response.header(Header.CONTENT_DISPOSITION);
-                        boolean finalFileMode = fileMode || (StringUtils.isNotBlank(header) && header.contains("attachment"));
-                        if (finalFileMode && status >= 200 && status < 300) {
-                            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
-                            ((MyLanguageTextField) responseTextAreaPanel).setText("");
-                            Task.Backgroundable task = new Task.Backgroundable(myProject, "Saving file...") {
-                                @Override
-                                public void run(@NotNull ProgressIndicator indicator) {
-                                    ApplicationManager.getApplication().invokeLater(() -> {
-                                        sendButtonFlag = false;
-                                        try {
-                                            File f = new File(myProject.getBasePath());
-                                            File finalFile = response.completeFileNameFromHeader(f);
-                                            response.writeBody(finalFile);
-                                            VirtualFileWrapper fileWrapper = finalFd.save(finalFile.getName());
-                                            if (fileWrapper != null) {
-                                                File file = fileWrapper.getFile();
-                                                FileUtil.move(finalFile, file, true);
-                                                NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Success", MessageType.INFO)
-                                                        .addAction(new GotoFile(file))
-                                                        .notify(myProject);
-                                            }
-                                            finalFile.delete();
-                                        } catch (Exception ignored) {
-                                        }
-                                        sendButtonFlag = true;
-                                    });
-                                }
-                            };
-                            ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
-                        }
-                        if (!finalFileMode) {
-                            String body = response.body();
-                            int bodyLength = StrUtil.byteLength(body, StandardCharsets.UTF_8);
-                            if (bodyLength > MAX_DATA_LENGTH) {
-                                ((MyLanguageTextField) responseTextAreaPanel).setText(body);
-                                ((MyLanguageTextField) prettyJsonEditorPanel).setText(body);
-                                refreshResponseTable("");
-                            } else {
-                                if (JSONUtil.isJson(body)) {
-                                    responseTabbedPanel.setSelectedIndex(1);
-                                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(body.isBlank() ? "" : body);
-                                    ((MyLanguageTextField) responseTextAreaPanel).setText(body);
-                                    refreshResponseTable(body);
-                                } else {
-                                    responseTabbedPanel.setSelectedIndex(2);
-                                    String subBody = body.substring(0, Math.min(body.length(), 32768));
-                                    if (body.length() > 32768) {
-                                        subBody += "\n\ntext too large only show 32768 characters\n.............";
-                                    }
-                                    String finalSubBody = subBody;
-                                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(finalSubBody);
-                                    ((MyLanguageTextField) responseTextAreaPanel).setText(subBody);
-                                    refreshResponseTable("");
-                                }
-                            }
-                        }
-                        responseInfoParamsKeyValueList = Lists.newArrayList(
-                                new ParamKeyValue("Url", request.getUrl(), 2, TypeUtil.Type.String.name()),
-                                new ParamKeyValue("Response status", status + " " + Constant.HttpStatusDesc.STATUS_MAP.get(status)),
-                                new ParamKeyValue("Content-Type", response.header(Header.CONTENT_TYPE), 2, TypeUtil.Type.String.name()),
-                                new ParamKeyValue("Transfer-Encoding", response.header(Header.TRANSFER_ENCODING), 2, TypeUtil.Type.String.name()),
-                                new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
-                                new ParamKeyValue("Date", response.header(Header.DATE))
-                        );
-                        //refreshTable(responseInfoTable);
-                        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
-                        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-                        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
-//                        responseStatusComboBox.setSelectedItem(status);
-//                        responseStatusComboBox.setBackground((status >= 200 && status < 300) ? MyColor.green : MyColor.red);
-                    }, ModalityState.NON_MODAL);
-                } catch (Exception ee) {
-                    sendButtonFlag = true;
-                    futureAtomicReference.set(null);
-                    requestProgressBar.setVisible(false);
-                    tabbedPane.setSelectedIndex(4);
-                    responseTabbedPanel.setSelectedIndex(2);
-//                    responseStatusComboBox.setSelectedItem(0);
-                    String errorMsg = ee.getMessage();
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        ((MyLanguageTextField) responseTextAreaPanel).setText(errorMsg);
-                        ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
-                    });
-//                    responseStatusComboBox.setBackground(MyColor.red);
-                    responseInfoParamsKeyValueList = Lists.newArrayList(
-                            new ParamKeyValue("Url", request.getUrl(), 2, TypeUtil.Type.String.name()),
-                            new ParamKeyValue("Error", errorMsg)
-                    );
-                    //refreshTable(responseInfoTable);
-                    responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
-                    responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-                    responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
-                    CustomNode root = new CustomNode("Root", "");
-                    ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
-                }
-                sendButtonFlag = true;
-                futureAtomicReference.set(null);
-            }));
+            //新建、组装请求
+            HttpRequest request = buildRequest();
+            if(request == null) return;
+            //请求进程条设置
+            requestProgressBarSetting();
+            //发起请求并处理返回结果
+            sendAndHandleResponse(request, fileMode);
         } catch (Exception exception) {
-            sendButtonFlag = true;
-            futureAtomicReference.set(null);
-            requestProgressBar.setVisible(false);
-            String errorMsg = exception.getMessage();
-            ApplicationManager.getApplication().invokeLater(() -> {
-                ((MyLanguageTextField) responseTextAreaPanel).setText(errorMsg);
-                ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
-            });
-//            responseStatusComboBox.setSelectedItem(0);
-//            responseStatusComboBox.setBackground(MyColor.red);
-            responseInfoParamsKeyValueList = Lists.newArrayList(
-                    new ParamKeyValue("Error", errorMsg)
-            );
-            //refreshTable(responseInfoTable);
-            responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
-            responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-            responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
-            CustomNode root = new CustomNode("Root", "");
-            ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
-            tabbedPane.setSelectedIndex(4);
-            responseTabbedPanel.setSelectedIndex(2);
+            requestExceptionHandler(exception);
         }
 
+    }
+
+    private void requestExceptionHandler(Exception exception) {
+        sendButtonFlag = true;
+        futureAtomicReference.set(null);
+        requestProgressBar.setVisible(false);
+        String errorMsg = exception.getMessage();
+        ApplicationManager.getApplication().invokeLater(() -> {
+            ((MyLanguageTextField) responseTextAreaPanel).setText(errorMsg);
+            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+        });
+//            responseStatusComboBox.setSelectedItem(0);
+//            responseStatusComboBox.setBackground(MyColor.red);
+        responseInfoParamsKeyValueList = Lists.newArrayList(
+                new ParamKeyValue("Error", errorMsg)
+        );
+        //refreshTable(responseInfoTable);
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
+        CustomNode root = new CustomNode("Root", "");
+        ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
+        tabbedPane.setSelectedIndex(4);
+        responseTabbedPanel.setSelectedIndex(2);
+    }
+
+    private void sendAndHandleResponse(HttpRequest request, boolean fileMode) {
+        futureAtomicReference.set(ThreadUtil.execAsync(() -> {
+            try {
+                long start = System.currentTimeMillis();
+                HttpResponse response = request.execute();
+                long end = System.currentTimeMillis();
+                //如果被外部中断，就不继续了
+                if(Thread.currentThread().isInterrupted()){
+                    return;
+                }
+                //结果处理
+                responseHandler(response, start, end, request, fileMode);
+            } catch (Exception ee) {
+                //异常处理
+                exceptionHandler(ee, request);
+            }
+            sendButtonFlag = true;
+            futureAtomicReference.set(null);
+        }));
+    }
+
+    private void requestProgressBarSetting() {
+        requestProgressBar.setVisible(true);
+        requestProgressBar.setForeground(ColorProgressBar.GREEN);
+    }
+
+    private HttpRequest buildRequest() {
+        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+        assert config != null;
+        NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
+        HostGroup defaultHostGroup = new HostGroup(StringUtils.EMPTY, StringUtils.EMPTY);
+        String domain = config.getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
+                .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
+        String sendUrl;
+        //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
+        if(UrlUtil.isHttpURL(urlTextField.getText())){
+            sendUrl = urlTextField.getText();
+        }else {
+            //如果不是url 就给加
+            sendUrl = domain + urlTextField.getText();
+        }
+
+        if (!UrlUtil.isURL(sendUrl)) {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required");
+            });
+            tabbedPane.setSelectedIndex(4);
+            responseTabbedPanel.setSelectedIndex(2);
+            sendButtonFlag = true;
+            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+            return null;
+        }
+        String methodType = (String) methodTypeComboBox.getSelectedItem();
+        HttpRequest request = HttpUtil.createRequest(Method.valueOf(methodType), sendUrl);
+        request.setMaxRedirectCount(10);
+        headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
+        List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
+        globalHeaderList = globalHeaderList == null ? new ArrayList<>() : globalHeaderList;
+        Map<String, List<String>> globalHeaderMap = globalHeaderList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
+        Map<String, List<String>> headerMap = headerParamsKeyValueList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
+        globalHeaderMap.putAll(headerMap);
+        request.header(globalHeaderMap);
+        Map<String, Object> multipartFormParam = multipartKeyValueList.stream().filter(ParamKeyValue::getEnabled)
+                .collect(HashMap::new, (m, v) -> {
+                    Object value = v.getValue();
+                    String key = v.getKey();
+                    if (TypeUtil.Type.File.name().equals(v.getType())) {
+                        if (value != null && !StringUtils.isBlank(value.toString())) {
+                            m.put(key, new File(value.toString()));
+                        } else {
+                            m.put(key, null);
+                        }
+                    } else {
+                        m.put(key, value);
+                    }
+                }, HashMap::putAll);
+
+        Map<String, Object> urlParam = urlParamsKeyValueList.stream().filter(ParamKeyValue::getEnabled).collect(Collectors.toMap(ParamKeyValue::getKey, ParamKeyValue::getValue, (existing, replacement) -> existing));
+        String jsonParam = ((LanguageTextField) jsonParamsTextArea).getText();
+        StringBuilder urlEncodedParam = new StringBuilder("");
+        urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> {
+            urlEncodedParam.append(q.getKey()).append("=").append(q.getValue()).append("&");
+        });
+
+        boolean formFlag = true;
+        //json优先
+        if (StringUtils.isNotEmpty(urlEncodedParam)) {
+            request.body(StringUtils.removeEnd(urlEncodedParam.toString(), "&"));
+            formFlag = false;
+        }
+        if (StringUtils.isNotEmpty(jsonParam)) {
+            request.body(JSON.toJSONString(JSON.parse(jsonParam)));
+            formFlag = false;
+        }
+
+        if (!urlParam.isEmpty()) {
+            String queryParam = UrlQuery.of(urlParam).toString();
+            request.setUrl(request.getUrl() + "?" + URLEncoder.DEFAULT.encode(queryParam, StandardCharsets.UTF_8));
+        }
+        if (!multipartFormParam.isEmpty() && formFlag) {
+            request.form(multipartFormParam);
+        }
+        return request;
+    }
+
+    private void exceptionHandler(Exception ee, HttpRequest request) {
+        sendButtonFlag = true;
+        futureAtomicReference.set(null);
+        requestProgressBar.setVisible(false);
+        tabbedPane.setSelectedIndex(4);
+        responseTabbedPanel.setSelectedIndex(2);
+//                    responseStatusComboBox.setSelectedItem(0);
+        String errorMsg = ee.getMessage();
+        ApplicationManager.getApplication().invokeLater(() -> {
+            ((MyLanguageTextField) responseTextAreaPanel).setText(errorMsg);
+            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+        });
+//                    responseStatusComboBox.setBackground(MyColor.red);
+        responseInfoParamsKeyValueList = Lists.newArrayList(
+                new ParamKeyValue("Url", request.getUrl(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Error", errorMsg)
+        );
+        //refreshTable(responseInfoTable);
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
+        CustomNode root = new CustomNode("Root", "");
+        ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
+    }
+
+    private void responseHandler(HttpResponse response, long start, long end, HttpRequest request, boolean fileMode) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            tabbedPane.setSelectedIndex(4);
+            String duration = String.valueOf(end - start);
+            requestProgressBar.setVisible(false);
+            int status = response.getStatus();
+            String header = response.header(Header.CONTENT_DISPOSITION);
+            boolean finalFileMode = fileMode || (StringUtils.isNotBlank(header) && header.contains("attachment"));
+            //download file
+            fileHandler(finalFileMode, status, response);
+            //not a file
+            resultHandler(finalFileMode, response);
+            //response渲染
+            responsePageHandler(request, response, status, duration);
+
+        }, ModalityState.NON_MODAL);
+    }
+
+    private void responsePageHandler(HttpRequest request, HttpResponse response, int status, String duration) {
+        responseInfoParamsKeyValueList = Lists.newArrayList(
+                new ParamKeyValue("Url", request.getUrl(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Response status", status + " " + Constant.HttpStatusDesc.STATUS_MAP.get(status)),
+                new ParamKeyValue("Content-Type", response.header(Header.CONTENT_TYPE), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Transfer-Encoding", response.header(Header.TRANSFER_ENCODING), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Date", response.header(Header.DATE))
+        );
+        //refreshTable(responseInfoTable);
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
+//                        responseStatusComboBox.setSelectedItem(status);
+//                        responseStatusComboBox.setBackground((status >= 200 && status < 300) ? MyColor.green : MyColor.red);
+    }
+
+    private void resultHandler(boolean finalFileMode, HttpResponse response) {
+        if (!finalFileMode) {
+            String body = response.body();
+            int bodyLength = StrUtil.byteLength(body, StandardCharsets.UTF_8);
+            if (bodyLength > MAX_DATA_LENGTH) {
+                ((MyLanguageTextField) responseTextAreaPanel).setText(body);
+                ((MyLanguageTextField) prettyJsonEditorPanel).setText(body);
+                refreshResponseTable("");
+            } else {
+                if (JSONUtil.isJson(body)) {
+                    responseTabbedPanel.setSelectedIndex(1);
+                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(body.isBlank() ? "" : body);
+                    ((MyLanguageTextField) responseTextAreaPanel).setText(body);
+                    refreshResponseTable(body);
+                } else {
+                    responseTabbedPanel.setSelectedIndex(2);
+                    String subBody = body.substring(0, Math.min(body.length(), 32768));
+                    if (body.length() > 32768) {
+                        subBody += "\n\ntext too large only show 32768 characters\n.............";
+                    }
+                    String finalSubBody = subBody;
+                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(finalSubBody);
+                    ((MyLanguageTextField) responseTextAreaPanel).setText(subBody);
+                    refreshResponseTable("");
+                }
+            }
+        }
+    }
+
+    private void fileHandler(boolean finalFileMode, int status, HttpResponse response) {
+        if (finalFileMode && status >= 200 && status < 300) {
+            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+            ((MyLanguageTextField) responseTextAreaPanel).setText("");
+            Task.Backgroundable task = new Task.Backgroundable(myProject, "Saving file...") {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        sendButtonFlag = false;
+                        try {
+                            FileSaverDialog fd = FileChooserFactory.getInstance().createSaveFileDialog(new FileSaverDescriptor("Save As", ""), myProject);
+                            File f = new File(myProject.getBasePath());
+                            File finalFile = response.completeFileNameFromHeader(f);
+                            response.writeBody(finalFile);
+                            VirtualFileWrapper fileWrapper = fd.save(URLDecoder.decode(finalFile.getName(), StandardCharsets.UTF_8));
+                            if (fileWrapper != null) {
+                                File file = fileWrapper.getFile();
+                                FileUtil.move(finalFile, file, true);
+                                NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Success", MessageType.INFO)
+                                        .addAction(new GotoFile(file))
+                                        .notify(myProject);
+                            }
+                            finalFile.delete();
+                        } catch (Exception ignored) {
+                        }
+                        sendButtonFlag = true;
+                    });
+                }
+            };
+            ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
+        }
     }
 
 
