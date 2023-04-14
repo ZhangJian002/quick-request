@@ -439,7 +439,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(new FixPositionAction());
         group.add(new SaveRequestAction());
         group.add(new RetryAction());
-        group.add(new SynchronizationAction());
+//        group.add(new SynchronizationAction());
 //        group.add(new CopyCurlAction());
 //        group.addSeparator("  |  ");
 //        group.add(new DocAction());
@@ -1506,7 +1506,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             public void actionPerformed(@NotNull AnActionEvent e) {
                 int idx = -1;
                 List<HeaderGroup> headerGroupList = config.getHeaderGroupList();
-                HeaderGroup currentHeaderGroup = headerGroupList.stream().filter(q -> getActiveProject().equals(q.getProjectName())).findFirst().orElse(null);
+                HeaderGroup currentHeaderGroup = headerGroupList.stream().filter(q -> Objects.equals(getActiveProject(), q.getProjectName())).findFirst().orElse(null);
                 if (currentHeaderGroup != null) {
                     idx = headerGroupList.indexOf(currentHeaderGroup);
                 }
