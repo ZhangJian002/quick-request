@@ -18,12 +18,9 @@ gradle-app.setting
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 
-.idea
-PluginInfoUtil.java
-
-node_modules/
-dist
-/out/
+# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
+# should NOT be excluded as they contain compiler settings and other important
+# information for Eclipse / Flash Builder.
 
 ### Java template
 # Compiled class file
