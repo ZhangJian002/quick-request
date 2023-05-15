@@ -86,4 +86,6 @@ public interface PluginIcons {
     Icon ICON_REDO = IconLoader.getIcon("/free.icon/redo.svg", PluginIcons.class);
 
     Icon ICON_SYNC = IconLoader.getIcon("/free.icon/sync.svg", PluginIcons.class);
+
+    Icon ICON_HISTORY = IconLoader.getIcon("/free.icon/history.svg", PluginIcons.class);
 }
