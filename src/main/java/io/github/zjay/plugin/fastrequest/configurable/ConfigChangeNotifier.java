@@ -18,6 +18,7 @@ package io.github.zjay.plugin.fastrequest.configurable;
 
 import com.intellij.util.messages.Topic;
 import io.github.zjay.plugin.fastrequest.model.CollectionConfiguration;
+import io.github.zjay.plugin.fastrequest.model.HistoryTableData;
 
 public interface ConfigChangeNotifier {
 
@@ -28,6 +29,8 @@ public interface ConfigChangeNotifier {
 
     Topic<ConfigChangeNotifier> LOAD_REQUEST = Topic.create("load request", ConfigChangeNotifier.class);
 
+    Topic<ConfigChangeNotifier> LOAD_REQUEST_HISTORY = Topic.create("load request history", ConfigChangeNotifier.class);
+
     Topic<ConfigChangeNotifier> FILTER_MODULE = Topic.create("filter module", ConfigChangeNotifier.class);
 
     default void configChanged(boolean active, String projectName) {
@@ -35,6 +38,10 @@ public interface ConfigChangeNotifier {
     }
 
     default void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName, boolean sendFlag, boolean flag) {
+
+    }
+
+    default void loadRequestHistory(HistoryTableData data, String projectName, boolean sendFlag, boolean flag) {
 
     }
 

@@ -26,6 +26,7 @@ import com.intellij.ui.content.ContentFactory;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import io.github.zjay.plugin.fastrequest.model.CollectionConfiguration;
+import io.github.zjay.plugin.fastrequest.model.HistoryTableData;
 import io.github.zjay.plugin.fastrequest.view.AllApisNavToolWindow;
 import io.github.zjay.plugin.fastrequest.view.FastRequestCollectionToolWindow;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
@@ -109,6 +110,18 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
                     @Override
                     public void loadRequest(CollectionConfiguration.CollectionDetail detail, String projectName, boolean sendFlag, boolean flag) {
                         windowMap.get(projectName).refreshByCollection(detail, flag);
+                        if(sendFlag){
+                            windowMap.get(projectName).sendRequestEvent(false);
+                        }
+//                    window.refreshByCollection(detail);
+                    }
+                });
+
+        connect.subscribe(ConfigChangeNotifier.LOAD_REQUEST_HISTORY,
+                new ConfigChangeNotifier() {
+                    @Override
+                    public void loadRequestHistory(HistoryTableData data, String projectName, boolean sendFlag, boolean flag) {
+                        windowMap.get(projectName).refreshByHisCollection(data, flag);
                         if(sendFlag){
                             windowMap.get(projectName).sendRequestEvent(false);
                         }

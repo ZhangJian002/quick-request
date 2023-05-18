@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
 import com.intellij.ide.ExporterToTextFile;
@@ -53,6 +54,7 @@ import com.intellij.ui.components.fields.ExtendableTextComponent;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.popup.PopupFactoryImpl;
+import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
 import com.intellij.ui.treeStructure.treetable.TreeColumnInfo;
@@ -61,10 +63,12 @@ import com.intellij.util.BooleanFunction;
 import com.intellij.util.PsiNavigateUtil;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.StatusText;
 import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent;
 import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
+import io.github.zjay.plugin.fastrequest.config.FastRequestHistoryCollectionComponent;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.idea.ExportToFileUtil;
 import io.github.zjay.plugin.fastrequest.util.*;
@@ -82,9 +86,7 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
@@ -95,7 +97,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -108,12 +109,33 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     private JPanel collectionPanel;
     private JLabel helpLabel;
     private JPanel searchPanel;
+    private JTabbedPane apiTab;
+    private JPanel jPanel1;
+    private JPanel jPanel2;
+    private JLabel helpLabel2;
+    private JPanel searchPanel2;
+    private JPanel collectionPanel2;
     private TreeTableView collectionTable;
+
+    private JBTable collectionTable2;
+
+    private List<HistoryTableData> historyTableDataList;
+
     private CollectionConfiguration.CollectionDetail rootDetail;
+
+    private CollectionConfiguration.CollectionDetail rootDetail2;
     private DefaultActionGroup myInstalledSearchGroup;
+
+    private DefaultActionGroup myInstalledSearchGroup2;
     private Consumer<SearchOptionAction> mySearchCallback;
+
+    private Consumer<SearchOption2Action> mySearchCallback2;
     private SearchTextField jbSearchPanelText;
+
+    private SearchTextField jbSearchPanelText2;
     private Tree tree;
+
+    private Tree tree2;
 
     public FastRequestCollectionToolWindow(Project project, ToolWindow toolWindow) {
         super(true, false);
@@ -123,7 +145,11 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         helpLabel.setIcon(PluginIcons.ICON_CONTEXT_HELP);
         new HelpTooltip().setDescription(MyResourceBundleUtil.getKey("CollectionSearchHelp")).installOn(helpLabel);
 
+        helpLabel2.setIcon(PluginIcons.ICON_CONTEXT_HELP);
+        new HelpTooltip().setDescription(MyResourceBundleUtil.getKey("CollectionSearchHelp")).installOn(helpLabel2);
+
         refresh();
+        refresh2();
 
         myInstalledSearchGroup = new DefaultActionGroup();
         for (SearchTypeEnum option : SearchTypeEnum.values()) {
@@ -131,6 +157,15 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 myInstalledSearchGroup.addSeparator("  " + option.name().split("_")[1]);
             } else {
                 myInstalledSearchGroup.add(new SearchOptionAction(option));
+            }
+        }
+
+        myInstalledSearchGroup2 = new DefaultActionGroup();
+        for (SearchTypeEnum option : SearchTypeEnum.values()) {
+            if (option.name().startsWith("separator")) {
+                myInstalledSearchGroup2.addSeparator("  " + option.name().split("_")[1]);
+            } else {
+                myInstalledSearchGroup2.add(new SearchOption2Action(option));
             }
         }
 
@@ -145,10 +180,22 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             jbSearchPanelText.setText(rule + query);
             filterRequest();
         };
+        mySearchCallback2 = updateAction -> {
+            String query = jbSearchPanelText2.getText();
+            String rule = "";
+            if (updateAction.myState) {
+                rule = updateAction.getQuery();
+            } else {
+                query = query.replace(updateAction.getQuery(), "");
+            }
+            jbSearchPanelText2.setText(rule + query);
+            filterRequest2();
+        };
     }
 
     private void createUIComponents() {
         renderingCollectionTablePanel();
+        renderingCollectionTablePanel2();
         searchPanel = new SearchTextField(true);
         searchPanel.setFocusable(false);
         jbSearchPanelText = (SearchTextField) this.searchPanel;
@@ -161,15 +208,37 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                         () -> showRightBottomPopup(searchTextField, "By", myInstalledSearchGroup)));
         searchTextField.putClientProperty("JTextField.variant", null);
         searchTextField.putClientProperty("JTextField.variant", "search");
-        searchTextField.getDocument().addDocumentListener(new DelayedDocumentListener());
+        searchTextField.getDocument().addDocumentListener(new DelayedDocumentListener(1));
+        setSearchPanel2();
+
+    }
+
+    private void setSearchPanel2() {
+        searchPanel2 = new SearchTextField(true);
+        searchPanel2.setFocusable(false);
+        jbSearchPanelText2 = (SearchTextField) this.searchPanel2;
+        JBTextField searchTextField2 = jbSearchPanelText2.getTextEditor();
+        searchTextField2.putClientProperty("StatusVisibleFunction", (BooleanFunction<JBTextField>) field -> field.getText().isEmpty());
+        StatusText emptyText2 = searchTextField2.getEmptyText();
+        emptyText2.appendText("Search by name or url ->", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, ListPluginComponent.GRAY_COLOR));
+        searchTextField2.putClientProperty("search.extension", ExtendableTextComponent.Extension
+                .create(AllIcons.Actions.More, AllIcons.Actions.More, "Search options",
+                        () -> showRightBottomPopup(searchTextField2, "By", myInstalledSearchGroup2)));
+        searchTextField2.putClientProperty("JTextField.variant", null);
+        searchTextField2.putClientProperty("JTextField.variant", "search");
+        searchTextField2.getDocument().addDocumentListener(new DelayedDocumentListener(2));
     }
 
     private class DelayedDocumentListener implements DocumentListener {
 
         private final Timer timer;
 
-        public DelayedDocumentListener() {
-            timer = new Timer(500, e -> filterRequest());
+        public DelayedDocumentListener(Integer type) {
+            if(type == 1){
+                timer = new Timer(500, e -> filterRequest());
+            }else {
+                timer = new Timer(500, e -> filterRequest2());
+            }
             timer.setRepeats(false);
         }
 
@@ -225,6 +294,15 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         columnModel.getColumn(2).setMaxWidth(80);
         columnModel.getColumn(2).setPreferredWidth(80);
+    }
+
+    public void refresh2() {
+        HistoryTable historyTable = FastRequestHistoryCollectionComponent.getInstance(myProject).getState();
+        assert historyTable != null;
+        List<HistoryTableData> list = historyTable.getList();
+        historyTableDataList = list;
+        ListTableModel model = (ListTableModel)collectionTable2.getModel();
+        model.setItems(list);
     }
 
     private void filterRequest(String query, String rule) {
@@ -286,6 +364,20 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         SwingUtil.expandAll(collectionTable.getTree(), new TreePath(root), true);
     }
 
+    private void filterRequest2() {
+        String search = ((SearchTextField) searchPanel2).getText();
+        ListTableModel model = (ListTableModel)collectionTable2.getModel();
+        if (StringUtils.isBlank(search)) {
+            checkRule2("");
+        } else {
+            Map<String, String> queryMap = getQuery(search);
+            String query = queryMap.get("query");
+            String rule = queryMap.get("rule");
+            //选择或去除rule
+            checkRule2(rule);
+        }
+    }
+
     private void checkRule(String rule) {
         AnAction[] children = myInstalledSearchGroup.getChildren(null);
         for (AnAction anAction : children) {
@@ -293,6 +385,21 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 continue;
             }
             SearchOptionAction child = (SearchOptionAction) anAction;
+            if (rule.contains(child.myOption.name())) {
+                child.myState = true;
+            } else {
+                child.myState = false;
+            }
+        }
+    }
+
+    private void checkRule2(String rule) {
+        AnAction[] children = myInstalledSearchGroup2.getChildren(null);
+        for (AnAction anAction : children) {
+            if (anAction instanceof Separator) {
+                continue;
+            }
+            SearchOption2Action child = (SearchOption2Action) anAction;
             if (rule.contains(child.myOption.name())) {
                 child.myState = true;
             } else {
@@ -570,6 +677,87 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         collectionPanel = toolbarDecorator.createPanel();
     }
 
+    private void renderingCollectionTablePanel2() {
+        collectionTable2 = createCollectionTable2();
+        ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(collectionTable2);
+        toolbarDecorator.setAddAction(null);
+        toolbarDecorator.setMoveDownAction(null);
+        toolbarDecorator.setMoveUpAction(null);
+        toolbarDecorator.setRemoveAction(e -> {
+            int i = Messages.showOkCancelDialog("Confirm deletion ?", "Delete", "Delete", "Cancel", Messages.getInformationIcon());
+            if (i == 0) {
+                int[] selectedRows = collectionTable2.getSelectedRows();
+                collectionTable2.setRowSelectionInterval(0, 0);
+                for (int selectedRow : selectedRows) {
+                    historyTableDataList.remove(selectedRow);
+                }
+                refreshTable2();
+            }
+        });
+        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton("Refresh", AllIcons.Actions.Refresh) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                refresh2();
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+        });
+//        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.exportToPostman"), PluginIcons.ICON_POSTMAN) {
+//
+//            @Override
+//            public void actionPerformed(@NotNull AnActionEvent e) {
+//
+//                List<DataMapping> headerParamsKeyValueList;
+//                FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
+//                if(fastRequestToolWindow == null){
+//                    headerParamsKeyValueList = new ArrayList<>();
+//                } else {
+//                    headerParamsKeyValueList = fastRequestToolWindow.getHeaderParamsKeyValueList();
+//                }
+//                FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+//                assert config != null;
+//                List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
+//                List<DataMapping> globalHeaderListNew = JSONArray.parseArray(JSON.toJSONString(globalHeaderList), DataMapping.class);
+//                globalHeaderListNew.removeIf(q->headerParamsKeyValueList.stream().anyMatch(p->p.getType().equals(q.getType())));
+//                headerParamsKeyValueList.addAll(globalHeaderListNew);
+//
+//                PostmanCollection postmanCollection = PostmanExportUtil.getPostmanCollection(headerParamsKeyValueList,rootDetail2,myProject.getName());
+//                ExporterToTextFile exporterToTextFile = new ExporterToTextFile(){
+//
+//                    @Override
+//                    public @NotNull String getReportText() {
+//                        return JSON.toJSONString(postmanCollection, SerializerFeature.DisableCircularReferenceDetect);
+//                    }
+//
+//                    @Override
+//                    public @NotNull String getDefaultFilePath() {
+//                        VirtualFile virtualFile = ProjectUtil.guessProjectDir(myProject);
+//                        if(virtualFile != null){
+//                            return virtualFile.getPath() + File.separator + "QuickRequest.postman_collection.json";
+//                        }
+//                        return "";
+//                    }
+//
+//                    @Override
+//                    public boolean canExport() {
+//                        return true;
+//                    }
+//                };
+//                ExportToFileUtil.chooseFileAndExport(myProject,exporterToTextFile);
+//            }
+//
+//            @Override
+//            public boolean isEnabled() {
+//                return true;
+//            }
+//        });
+        toolbarDecorator.setToolbarPosition(ActionToolbarPosition.TOP);
+        collectionPanel2 = toolbarDecorator.createPanel();
+    }
+
     private TreeTableView createCollectionTable() {
         //初始化为空
         CollectionCustomNode root = new CollectionCustomNode("0", "Root", 1);
@@ -696,6 +884,99 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         return table;
     }
 
+    private JBTable createCollectionTable2() {
+        ColumnInfo<Object, Object>[] columns = getHistoryColumnInfo();
+        HistoryTable historyTable = FastRequestHistoryCollectionComponent.getInstance(myProject).getState();
+        assert historyTable != null;
+        List<HistoryTableData> list = historyTable.getList();
+        historyTableDataList = list;
+        ListTableModel<HistoryTableData> model = new ListTableModel<>(columns, list);
+        JBTable jbTable = new JBTable(model) {
+
+            @Override
+            public @NotNull Component prepareRenderer(@NotNull TableCellRenderer renderer, int row, int column) {
+                if (column == 3) {
+                    renderer = new TableButtonRenderer();
+                }
+                return super.prepareRenderer(renderer, row, column);
+            }
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                if(column == 3){
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void setValueAt(Object aValue, int row, int column) {
+//                if (column == 0) {
+//                    HistoryTableData historyTableData = historyTableDataList.get(row);
+//                    historyTableData.setType(aValue.toString());
+//                }else if(column == 1){
+//                    HistoryTableData historyTableData = historyTableDataList.get(row);
+//                    historyTableData.setUrl(aValue.toString());
+//                }
+            }
+
+            @Override
+            public Object getValueAt(int row, int column) {
+                if (historyTableDataList.isEmpty()) {
+                    return StringUtils.EMPTY;
+                }
+                HistoryTableData historyTableData = historyTableDataList.get(row);
+                if (historyTableData == null) {
+                    return StringUtils.EMPTY;
+                }
+                if (column == 0) {
+                    return historyTableData.getType();
+                } else if (column == 1) {
+                    return historyTableData.getUrl();
+                } else if (column == 2) {
+                    return historyTableData.getTime();
+                } else {
+
+                }
+                return null;
+            }
+
+            @Override
+            public TableCellEditor getCellEditor(int row, int column) {
+//                if (column == 0) {
+//                    String url = (String) getValueAt(row, column);
+//                    return new DefaultCellEditor(new JTextField(url));
+//                } else if (column == 2) {
+//                    return new TableButtonEditor(new JCheckBox());
+//                }
+                if(column == 3){
+                    return new TableButtonEditor(new JCheckBox());
+                }
+                return super.getCellEditor(row, column);
+            }
+        };
+        jbTable.getColumnModel().getColumn(0).setMaxWidth(65);
+        jbTable.getColumnModel().getColumn(1).setMaxWidth(310);
+        jbTable.getColumnModel().getColumn(2).setMaxWidth(135);
+        jbTable.getColumnModel().getColumn(3).setMaxWidth(125);
+        jbTable.setRowHeight(35);
+        return jbTable;
+    }
+    private ColumnInfo<Object, Object>[] getHistoryColumnInfo() {
+        ColumnInfo<Object, Object>[] columnArray = new ColumnInfo[4];
+        List<String> titleList = Lists.newArrayList("Method","Url", "Time", "Operation");
+        for (int i = 0; i < titleList.size(); i++) {
+            ColumnInfo<Object, Object> envColumn = new ColumnInfo<>(titleList.get(i)) {
+                @Override
+                public @Nullable Object valueOf(Object o) {
+                    return o;
+                }
+            };
+            columnArray[i] = envColumn;
+        }
+        return columnArray;
+    }
+
     private void navigate(TreeTableView table){
         int row = table.getSelectedRow();
         ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) collectionTable.getTableModel();
@@ -759,6 +1040,62 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             return renderButtons(jbPanel, row);
         }
     }
+
+
+    class TableButtonRenderer extends JBPanel implements TableCellRenderer {
+        public TableButtonRenderer() {
+
+        }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
+            return renderTableButtons(this, row);
+        }
+
+    }
+
+    public JBPanel renderTableButtons(JBPanel jbPanel, int row){
+        BorderLayout borderLayout = new BorderLayout();
+        jbPanel.setLayout(borderLayout);
+        Dimension dimension = new Dimension(60, 20);
+        JButton jButton = new JButton();
+        jButton.setPreferredSize(dimension);
+        jButton.setIcon(PluginIcons.ICON_LOCAL_SCOPE);
+        JBColor jbColor = new JBColor(JBColor.WHITE, new Color(60, 63, 65));
+        jButton.setBackground(jbColor);
+        jButton.addActionListener(e-> {
+            ListTableModel model = (ListTableModel)collectionTable2.getModel();
+            HistoryTableData historyTableData = (HistoryTableData)model.getRowValue(row);
+            loadDataFromHistory(historyTableData, false);
+        });
+        JButton jButton1 = new JButton();
+        jButton1.setPreferredSize(dimension);
+        jButton1.setIcon(PluginIcons.ICON_SEND_MINI);
+        jButton1.setBackground(jbColor);
+        jButton1.addActionListener(e-> {
+            ListTableModel model = (ListTableModel)collectionTable2.getModel();
+            HistoryTableData historyTableData = (HistoryTableData)model.getRowValue(row);
+            loadDataFromHistory(historyTableData, true);
+        });
+        jbPanel.add(jButton, BorderLayout.WEST);
+        jbPanel.add(jButton1, BorderLayout.EAST);
+        return jbPanel;
+    }
+
+    class TableButtonEditor extends DefaultCellEditor {
+        private JBPanel jbPanel;
+        public TableButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            jbPanel = new JBPanel();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                                                     boolean isSelected, int row, int column) {
+            return renderTableButtons(jbPanel, row);
+        }
+    }
+
 
     class TransferHelper extends TransferHandler {
         public int getSourceActions(JComponent c) {
@@ -961,6 +1298,24 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 //        ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
     }
 
+    private void loadDataFromHistory(HistoryTableData data, boolean sendFlag) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            ApplicationManager.getApplication().runReadAction(() -> {
+                loadFromHistoryAndChangeTab(false, data, sendFlag);
+            });
+        });
+
+//
+//        Task.Backgroundable task = new Task.Backgroundable(myProject, "") {
+//≤
+//            @Override
+//            public void run(@NotNull ProgressIndicator indicator) {
+//
+//            }
+//        };
+//        ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
+    }
+
     private void loadAncChangeTab(boolean flag, CollectionConfiguration.CollectionDetail detail, boolean sendFlag) {
         //change data
         ApplicationManager.getApplication().invokeLater(() -> {
@@ -977,8 +1332,28 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         });
     }
 
+    private void loadFromHistoryAndChangeTab(boolean flag, HistoryTableData data, boolean sendFlag) {
+        //change data
+        ApplicationManager.getApplication().invokeLater(() -> {
+            //切换tab
+            ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(myProject).getToolWindow("Quick Request");
+            Content content = fastRequestToolWindow.getContentManager().getContent(0);
+            assert content != null;
+            fastRequestToolWindow.getContentManager().setSelectedContent(content);
+
+            MessageBus messageBus = myProject.getMessageBus();
+            messageBus.connect();
+            ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.LOAD_REQUEST_HISTORY);
+            configChangeNotifier.loadRequestHistory(data, myProject.getName(), sendFlag, flag);
+        });
+    }
+
     private void refreshTable() {
         SwingUtilities.invokeLater(() -> collectionTable.updateUI());
+    }
+
+    private void refreshTable2() {
+        SwingUtilities.invokeLater(() -> collectionTable2.updateUI());
     }
 
     private enum SearchTypeEnum {
@@ -1019,6 +1394,32 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         public void setSelected(@NotNull AnActionEvent e, boolean state) {
             myState = state;
             mySearchCallback.accept(this);
+        }
+
+        @NotNull
+        public String getQuery() {
+            return StringUtil.decapitalize(myOption.name() + "|");
+        }
+    }
+
+    private final class SearchOption2Action extends ToggleAction implements DumbAware {
+        private final SearchTypeEnum myOption;
+        private boolean myState;
+
+        private SearchOption2Action(@NotNull SearchTypeEnum option) {
+            super(option.name());
+            myOption = option;
+        }
+
+        @Override
+        public boolean isSelected(@NotNull AnActionEvent e) {
+            return myState;
+        }
+
+        @Override
+        public void setSelected(@NotNull AnActionEvent e, boolean state) {
+            myState = state;
+            mySearchCallback2.accept(this);
         }
 
         @NotNull

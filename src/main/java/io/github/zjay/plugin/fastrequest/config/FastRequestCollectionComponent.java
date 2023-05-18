@@ -53,13 +53,13 @@ public class FastRequestCollectionComponent implements PersistentStateComponent<
             detail.setName("Root");
             detail.setParamGroup(new ParamGroupCollection());
 
-//            CollectionConfiguration.CollectionDetail defaultGroup = new CollectionConfiguration.CollectionDetail();
-//            defaultGroup.setType(1);  
-//            defaultGroup.setId("1");
-//            defaultGroup.setGroupId("1");
-//            defaultGroup.setGroupId("1");
-//            defaultGroup.setName("Default Group");
-//            detail.setChildList(Lists.newArrayList(defaultGroup));
+            CollectionConfiguration.CollectionDetail defaultGroup = new CollectionConfiguration.CollectionDetail();
+            defaultGroup.setType(1);
+            defaultGroup.setId("1");
+            defaultGroup.setGroupId("1");
+            defaultGroup.setGroupId("1");
+            defaultGroup.setName("Default Group");
+            detail.setChildList(Lists.newArrayList(defaultGroup));
             config.setDetail(detail);
             return config;
         }

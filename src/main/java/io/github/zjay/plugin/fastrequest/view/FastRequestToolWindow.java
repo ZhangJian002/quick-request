@@ -79,10 +79,7 @@ import io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction;
 import io.github.zjay.plugin.fastrequest.action.OpenConfigAction;
 import io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction;
 import io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction;
-import io.github.zjay.plugin.fastrequest.config.Constant;
-import io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent;
-import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
-import io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent;
+import io.github.zjay.plugin.fastrequest.config.*;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.fastrequest.util.*;
@@ -107,6 +104,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.Future;
@@ -863,18 +862,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private HttpRequest buildRequest() {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
-        NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
-        HostGroup defaultHostGroup = new HostGroup(StringUtils.EMPTY, StringUtils.EMPTY);
-        String domain = config.getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
-                .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
-        String sendUrl;
-        //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
-        if(UrlUtil.isHttpURL(urlTextField.getText())){
-            sendUrl = urlTextField.getText();
-        }else {
-            //如果不是url 就给加
-            sendUrl = domain + urlTextField.getText();
-        }
+        String sendUrl = getSendUrl();
 
         if (!UrlUtil.isURL(sendUrl)) {
             ApplicationManager.getApplication().invokeLater(() -> {
@@ -939,6 +927,22 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         return request;
     }
 
+    private String getSendUrl() {
+        NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
+        HostGroup defaultHostGroup = new HostGroup(StringUtils.EMPTY, StringUtils.EMPTY);
+        String domain = FastRequestComponent.getInstance().getState().getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
+                .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
+        String sendUrl;
+        //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
+        if(UrlUtil.isHttpURL(urlTextField.getText())){
+            sendUrl = urlTextField.getText();
+        }else {
+            //如果不是url 就给加
+            sendUrl = domain + urlTextField.getText();
+        }
+        return sendUrl;
+    }
+
     private void exceptionHandler(Exception ee, HttpRequest request) {
         sendButtonFlag = true;
         futureAtomicReference.set(null);
@@ -978,8 +982,43 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             resultHandler(finalFileMode, response);
             //response渲染
             responsePageHandler(request, response, status, duration);
+            ApplicationManager.getApplication().invokeLater(()->{
+                if (getActiveDomain().isBlank()) {
+                    return;
+                }
+                if (urlTextField.getText().isBlank()) {
+                    return;
+                }
+                //saveToHistory
+                saveTableRequest(request);
+            });
 
         }, ModalityState.NON_MODAL);
+    }
+
+    private void saveTableRequest(HttpRequest request) {
+        HistoryTable historyTable = FastRequestHistoryCollectionComponent.getInstance(myProject).getState();
+        LocalDateTime now = LocalDateTime.now();
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // 格式化当前时间
+        String formattedDateTime = now.format(formatter);
+        HistoryTableData historyTableData = new HistoryTableData(request.getMethod().name(), getSendUrl(), formattedDateTime);
+        historyTableData.setHeaders(JSONArray.toJSONString(headerParamsKeyValueList));
+        if(CollectionUtils.isNotEmpty(pathParamsKeyValueList)){
+            historyTableData.setPathParams(JSONArray.toJSONString(pathParamsKeyValueList));
+        }
+        if(CollectionUtils.isNotEmpty(urlParamsKeyValueList)){
+            historyTableData.setUrlParams(JSONArray.toJSONString(urlParamsKeyValueList));
+        }
+        if(CollectionUtils.isNotEmpty(urlEncodedKeyValueList)){
+            historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
+        }
+        historyTableData.setJsonParam(((LanguageTextField) jsonParamsTextArea).getText());
+        if(CollectionUtils.isNotEmpty(multipartKeyValueList)){
+            historyTableData.setMultipart(JSONArray.toJSONString(multipartKeyValueList));
+        }
+        historyTable.getList().add(0, historyTableData);
     }
 
     private void responsePageHandler(HttpRequest request, HttpResponse response, int status, String duration) {
@@ -1312,6 +1351,144 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     }
 
+    /**
+     *
+     * @param data
+     * @param flag 当前的url是否是当前的项目的
+     */
+    public void refreshByHisCollection(HistoryTableData data, boolean flag) {
+        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+        multipartKeyValueList = new ArrayList<>();
+        urlParamsTextArea.setText("");
+        ((LanguageTextField) jsonParamsTextArea).setText("");
+        urlEncodedTextArea.setText("");
+        //更新相关信息
+
+        String pathParamsKeyValueListJson = data.getPathParams();
+        String urlParamsKeyValueListJson = data.getUrlParams();
+//        String urlParamsKeyValueListText = data.getUrlParams();
+        String bodyKeyValueListJson = data.getJsonParam();
+        String urlEncodedKeyValueListJson = data.getUrlEncoded();
+//        String urlEncodedKeyValueListText = data.getUrlEncoded();
+        String multipartKeyValueListJson = data.getMultipart();
+        String headers = data.getHeaders();
+        if(StringUtils.isNotBlank(headers)){
+            headerParamsKeyValueList = JSON.parseObject(headers, new TypeReference<List<DataMapping>>() {
+            });
+        }else {
+            headerParamsKeyValueList = new ArrayList<>();
+        }
+        if(StringUtils.isNotBlank(pathParamsKeyValueListJson)){
+            pathParamsKeyValueList = JSON.parseObject(pathParamsKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
+            });
+        }else {
+            pathParamsKeyValueList = new ArrayList<>();
+        }
+        if(StringUtils.isNotBlank(urlParamsKeyValueListJson)){
+            urlParamsKeyValueList = JSON.parseObject(urlParamsKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
+            });
+        }else {
+            urlParamsKeyValueList = new ArrayList<>();
+        }
+        if(StringUtils.isNotBlank(urlEncodedKeyValueListJson)){
+            urlEncodedKeyValueList = JSON.parseObject(urlEncodedKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
+            });
+        }else {
+            urlEncodedKeyValueList = new ArrayList<>();
+        }
+        if(StringUtils.isNotBlank(multipartKeyValueListJson)){
+            multipartKeyValueList = JSON.parseObject(multipartKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
+            });
+        }else {
+            multipartKeyValueList = new ArrayList<>();
+        }
+
+        String methodType = data.getType();
+
+//        methodTypeComboBox.setBackground(buildMethodColor(methodType));
+
+        //method
+        methodTypeComboBox.setSelectedItem(methodType);
+
+        //headers默认取最新的
+//        calcHeaderList();
+
+        if ("GET".equals(methodType)) {
+//            urlParamsTextArea.setText(urlParamsKeyValueListText);
+            List<String> urlParamsList = urlParamsKeyValueList.stream().filter(ParamKeyValue::getEnabled).map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.toList());
+            urlParamsTextArea.setText(StringUtils.join(urlParamsList, "\n&"));
+            if (pathParamsKeyValueList.isEmpty()) {
+                tabbedPane.setSelectedIndex(2);
+            } else {
+                tabbedPane.setSelectedIndex(1);
+            }
+            urlParamsTabbedPane.setSelectedIndex(0);
+            //get请求urlencoded param参数为空
+            urlEncodedKeyValueList = new ArrayList<>();
+            urlEncodedTextArea.setText("");
+            ((LanguageTextField) jsonParamsTextArea).setText("");
+        } else {
+            //body param
+            if (!bodyKeyValueListJson.isBlank()) {
+                //json
+                ((LanguageTextField) jsonParamsTextArea).setText(bodyKeyValueListJson);
+                tabbedPane.setSelectedIndex(3);
+                bodyTabbedPane.setSelectedIndex(0);
+                urlEncodedTextArea.setText("");
+                urlEncodedKeyValueList = new ArrayList<>();
+            } else {
+                boolean isMultipart = multipartKeyValueList.stream().anyMatch(q -> TypeUtil.Type.File.name().equals(q.getType()));
+                if (isMultipart) {
+                    tabbedPane.setSelectedIndex(3);
+                    bodyTabbedPane.setSelectedIndex(2);
+                    urlEncodedTextArea.setText("");
+                    urlEncodedKeyValueList = new ArrayList<>();
+                } else {
+                    //urlencoded
+//                    urlEncodedTextArea.setText(urlEncodedKeyValueListText);
+                    List<String> urlEncodedList = urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.toList());
+                    urlEncodedTextArea.setText(StringUtils.join(urlEncodedList, "\n&"));
+                    tabbedPane.setSelectedIndex(3);
+                    bodyTabbedPane.setSelectedIndex(1);
+                }
+                //json设置为空
+                ((LanguageTextField) jsonParamsTextArea).setText("");
+                //如果是非get请求则request Param为空转到url Encoded参数下
+                urlParamsKeyValueList = new ArrayList<>();
+                urlParamsTextArea.setText("");
+            }
+        }
+
+        //刷新table
+        headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
+        resizeHeaderTable(headerTable);
+
+        pathParamsTable.setModel(new ListTableModel<>(getPathColumnInfo(), pathParamsKeyValueList));
+        resizeTable(pathParamsTable);
+        setCheckBoxHeader(pathParamsTable, pathParamsCheckBoxHeader);
+
+        urlParamsTable.setModel(new ListTableModel<>(getPathColumnInfo(), urlParamsKeyValueList));
+        resizeTable(urlParamsTable);
+        setCheckBoxHeader(urlParamsTable, urlParamsCheckBoxHeader);
+
+        urlEncodedTable.setModel(new ListTableModel<>(getPathColumnInfo(), urlEncodedKeyValueList));
+        resizeTable(urlEncodedTable);
+        setCheckBoxHeader(urlEncodedTable, urlEncodedCheckBoxHeader);
+
+        multipartTable.setModel(new ListTableModel<>(getPathColumnInfo(), multipartKeyValueList));
+        resizeTable(multipartTable);
+        setCheckBoxHeader(multipartTable, multipartCheckBoxHeader);
+        //默认不刷第一个url 这里与complete冲突
+//        urlTextField.setText(url);
+        if(flag){
+            changeUrl();
+        }else {
+            String url = data.getUrl();
+            urlTextField.setText(url);
+        }
+
+    }
+
     private void setCheckBoxHeader(JTable table, CheckBoxHeader header) {
         TableColumn checkBoxColumn = table.getColumnModel().getColumn(0);
         checkBoxColumn.setHeaderRenderer(header);
@@ -1435,6 +1612,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         table.setRowHeight(35);
         table.getColumnModel().getColumn(2).setPreferredWidth((int) Math.round(table.getWidth() * 0.3));
         table.getColumnModel().getColumn(3).setPreferredWidth((int) Math.round(table.getWidth() * 0.55));
+    }
+
+    public void resizeHeaderTable(JBTable table) {
+        table.getColumnModel().getColumn(0).setMaxWidth(30);
+        table.setRowHeight(35);
     }
 
 
@@ -3401,9 +3583,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
             stopCellEditing();
-            FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
-            assert config != null;
-            ParamGroup paramGroup = config.getParamGroup();
             if (getActiveDomain().isBlank()) {
                 Messages.showMessageDialog(MyResourceBundleUtil.getKey("msg_currentDomain_null"), "Error", Messages.getInformationIcon());
                 return;
@@ -3414,77 +3593,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             }
 
             CollectionConfiguration collectionConfiguration = FastRequestCollectionComponent.getInstance(myProject).getState();
-            assert collectionConfiguration != null;
-
-            CollectionConfiguration.CollectionDetail collectionDetail;
-            String id = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
-            collectionDetail = filterById(id, collectionConfiguration.getDetail());
-            boolean insertFlag = collectionDetail == null;
-            if (insertFlag) {
-                //插入
-                collectionDetail = new CollectionConfiguration.CollectionDetail();
-                String mid = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
-                collectionDetail.setId(mid);
-            }
-            ParamGroupCollection paramGroupCollection = new ParamGroupCollection();
-            collectionDetail.setEnableEnv(getActiveEnv());
-            collectionDetail.setEnableProject(getActiveProject());
-            collectionDetail.setDomain(getActiveDomain());
-            collectionDetail.setName(StringUtils.isBlank(paramGroup.getMethodDescription()) ? "New Request" : paramGroup.getMethodDescription());
-            collectionDetail.setType(2);
-            paramGroupCollection.setOriginUrl(paramGroup.getOriginUrl());
-            paramGroupCollection.setUrl(urlTextField.getText());
-            paramGroupCollection.setMethodType((String) methodTypeComboBox.getSelectedItem());
-            paramGroupCollection.setMethodDescription(StringUtils.isBlank(paramGroup.getMethodDescription()) ? "New Request" : paramGroup.getMethodDescription());
-            paramGroupCollection.setClassName(paramGroup.getClassName());
-            paramGroupCollection.setMethod(paramGroup.getMethod());
-            paramGroupCollection.setPathParamsKeyValueListJson(JSON.toJSONString(pathParamsKeyValueList));
-            paramGroupCollection.setUrlParamsKeyValueListJson(JSON.toJSONString(urlParamsKeyValueList));
-            paramGroupCollection.setUrlParamsKeyValueListText(urlParamsTextArea.getText());
-            paramGroupCollection.setUrlEncodedKeyValueListJson(JSON.toJSONString(urlEncodedKeyValueList));
-            paramGroupCollection.setUrlEncodedKeyValueListText(urlEncodedTextArea.getText());
-            paramGroupCollection.setBodyKeyValueListJson(((LanguageTextField) jsonParamsTextArea).getText());
-            paramGroupCollection.setMultipartKeyValueListJson(JSON.toJSONString(multipartKeyValueList));
-            collectionDetail.setParamGroup(paramGroupCollection);
-            collectionDetail.setHeaderList(headerParamsKeyValueList);
-
-            String apiClassName = paramGroup.getClassName().substring(paramGroup.getClassName().lastIndexOf(".") + 1);
-            CollectionConfiguration.CollectionDetail classNameGroup = filterClassGroupByName(apiClassName, collectionConfiguration.getDetail());
-
-            if (insertFlag) {
-                String module = paramGroup.getModule();
-                CollectionConfiguration.CollectionDetail root = collectionConfiguration.getDetail();
-                List<CollectionConfiguration.CollectionDetail> rootChildren = root.getChildList();
-                CollectionConfiguration.CollectionDetail defaultGroup = rootChildren.get(0);
-                CollectionConfiguration.CollectionDetail group;
-                if (module == null) {
-                    group = defaultGroup;
-                } else {
-                    group = rootChildren.stream().filter(q -> module.equals(q.getName())).findFirst().orElse(null);
-                    if(group == null){
-                        group = new CollectionConfiguration.CollectionDetail();
-                        group.setId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
-                        group.setName(module);
-                        group.setType(1);
-                        rootChildren.add(group);
-                    }
-                }
-
-
-                //classGroup
-                if(classNameGroup == null){
-                    CollectionConfiguration.CollectionDetail groupDetail = new CollectionConfiguration.CollectionDetail();
-                    groupDetail.setId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
-                    groupDetail.setName(apiClassName);
-                    groupDetail.setType(1);
-                    groupDetail.setChildList(Lists.newArrayList(collectionDetail));
-                    List<CollectionConfiguration.CollectionDetail> childList = group.getChildList();
-                    childList.add(groupDetail);
-                    group.setChildList(childList);
-                } else {
-                    classNameGroup.getChildList().add(collectionDetail);
-                }
-            }
+            //保存请求
+            saveTreeRequest(collectionConfiguration);
 
             //send message to change param
             MessageBus messageBus = myProject.getMessageBus();
@@ -3495,6 +3605,93 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Success", MessageType.INFO).notify(myProject);
             // 2020.3 before
             //new NotificationGroup("toolWindowNotificationGroup", NotificationDisplayType.TOOL_WINDOW, true).createNotification("Success", NotificationType.INFORMATION).notify(myProject);
+        }
+    }
+
+    private void saveTreeRequest(CollectionConfiguration collectionConfiguration) {
+        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+        assert config != null;
+        ParamGroup paramGroup = config.getParamGroup();
+        assert collectionConfiguration != null;
+
+        CollectionConfiguration.CollectionDetail collectionDetail;
+        String id = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
+        collectionDetail = filterById(id, collectionConfiguration.getDetail());
+        boolean insertFlag = collectionDetail == null;
+        if (insertFlag) {
+            //插入
+            collectionDetail = new CollectionConfiguration.CollectionDetail();
+            String mid = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
+            collectionDetail.setId(mid);
+        }
+        ParamGroupCollection paramGroupCollection = new ParamGroupCollection();
+        collectionDetail.setEnableEnv(getActiveEnv());
+        collectionDetail.setEnableProject(getActiveProject());
+        collectionDetail.setDomain(getActiveDomain());
+        collectionDetail.setName(StringUtils.isBlank(paramGroup.getMethodDescription()) ? "New Request" : paramGroup.getMethodDescription());
+        collectionDetail.setType(2);
+        paramGroupCollection.setOriginUrl(paramGroup.getOriginUrl());
+        paramGroupCollection.setUrl(urlTextField.getText());
+        paramGroupCollection.setMethodType((String) methodTypeComboBox.getSelectedItem());
+        paramGroupCollection.setMethodDescription(StringUtils.isBlank(paramGroup.getMethodDescription()) ? "New Request" : paramGroup.getMethodDescription());
+        paramGroupCollection.setClassName(paramGroup.getClassName());
+        paramGroupCollection.setMethod(paramGroup.getMethod());
+        paramGroupCollection.setPathParamsKeyValueListJson(JSON.toJSONString(pathParamsKeyValueList));
+        paramGroupCollection.setUrlParamsKeyValueListJson(JSON.toJSONString(urlParamsKeyValueList));
+        paramGroupCollection.setUrlParamsKeyValueListText(urlParamsTextArea.getText());
+        paramGroupCollection.setUrlEncodedKeyValueListJson(JSON.toJSONString(urlEncodedKeyValueList));
+        paramGroupCollection.setUrlEncodedKeyValueListText(urlEncodedTextArea.getText());
+        paramGroupCollection.setBodyKeyValueListJson(((LanguageTextField) jsonParamsTextArea).getText());
+        paramGroupCollection.setMultipartKeyValueListJson(JSON.toJSONString(multipartKeyValueList));
+        collectionDetail.setParamGroup(paramGroupCollection);
+        collectionDetail.setHeaderList(headerParamsKeyValueList);
+
+        String apiClassName = paramGroup.getClassName().substring(paramGroup.getClassName().lastIndexOf(".") + 1);
+        CollectionConfiguration.CollectionDetail classNameGroup = filterClassGroupByName(apiClassName, collectionConfiguration.getDetail());
+
+        if (insertFlag) {
+            String module = paramGroup.getModule();
+            CollectionConfiguration.CollectionDetail root = collectionConfiguration.getDetail();
+            List<CollectionConfiguration.CollectionDetail> rootChildren = root.getChildList();
+            CollectionConfiguration.CollectionDetail defaultGroup;
+            if(CollectionUtils.isEmpty(rootChildren)){
+                defaultGroup = new CollectionConfiguration.CollectionDetail();
+                defaultGroup.setType(1);
+                defaultGroup.setId("1");
+                defaultGroup.setGroupId("1");
+                defaultGroup.setGroupId("1");
+                defaultGroup.setName("Default Group");
+            }else {
+                defaultGroup = rootChildren.get(0);
+            }
+            CollectionConfiguration.CollectionDetail group;
+            if (module == null) {
+                group = defaultGroup;
+            } else {
+                group = rootChildren.stream().filter(q -> module.equals(q.getName())).findFirst().orElse(null);
+                if(group == null){
+                    group = new CollectionConfiguration.CollectionDetail();
+                    group.setId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
+                    group.setName(module);
+                    group.setType(1);
+                    rootChildren.add(group);
+                }
+            }
+
+
+            //classGroup
+            if(classNameGroup == null){
+                CollectionConfiguration.CollectionDetail groupDetail = new CollectionConfiguration.CollectionDetail();
+                groupDetail.setId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
+                groupDetail.setName(apiClassName);
+                groupDetail.setType(1);
+                groupDetail.setChildList(Lists.newArrayList(collectionDetail));
+                List<CollectionConfiguration.CollectionDetail> childList = group.getChildList();
+                childList.add(groupDetail);
+                group.setChildList(childList);
+            } else {
+                classNameGroup.getChildList().add(collectionDetail);
+            }
         }
     }
 
