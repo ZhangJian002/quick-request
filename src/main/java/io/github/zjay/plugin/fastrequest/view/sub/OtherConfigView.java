@@ -48,8 +48,16 @@ public class OtherConfigView extends AbstractConfigurableView {
     private List<DataMapping> viewUrlReplaceMappingList = new LinkedList<>();
 
     private Boolean clickAndSend = null;
+
+    private Integer connectionTimeout = null;
+
+    private Integer readTimeout = null;
     private JBTable urlReplaceTable;
     private FastRequestConfiguration configOld;
+
+    private JTextField connectionTimeoutText;
+
+    private JTextField readTimeoutText;
 
 
     public OtherConfigView(FastRequestConfiguration config) {
@@ -69,9 +77,62 @@ public class OtherConfigView extends AbstractConfigurableView {
                 .setDefaultInsets(JBUI.insets(0, 0, 4, 10))
                 .setDefaultWeightX(1)
                 .setDefaultFill(GridBagConstraints.HORIZONTAL);
+        panel.add(createConnectionPanel(), gb.nextLine().fillCell().weighty(1.0));
         panel.add(createMyTablePanel(), gb.nextLine().fillCell().weighty(1.0));
         panel.add(createBasePanel(), gb.nextLine().fillCell().weighty(1.0));
         return panel;
+    }
+
+    private JPanel createConnectionPanel() {
+        connectionTimeout = config.getConnectionTimeout();
+        readTimeout = config.getReadTimeout();
+        connectionTimeoutText = new JTextField("30");
+        readTimeoutText = new JTextField("30");
+        if(connectionTimeout != null){
+            connectionTimeoutText.setText(connectionTimeout + "");
+        }
+        if(readTimeout != null){
+            readTimeoutText.setText(readTimeout + "");
+        }
+        connectionTimeoutText.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                String text = connectionTimeoutText.getText();
+                try {
+                    connectionTimeout = Integer.parseInt(text);
+                    if(connectionTimeout < 0){
+                        throw new Exception("Positive integer required");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                    connectionTimeoutText.setText("30");
+                    return false;
+                }
+            }
+        });
+        readTimeoutText.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                String text = readTimeoutText.getText();
+                try {
+                    readTimeout = Integer.parseInt(text);
+                    if(readTimeout < 0){
+                        throw new Exception("Positive integer required");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                    readTimeoutText.setText("30");
+                    return false;
+                }
+            }
+        });
+        JPanel connectionConfigPanel = UI.PanelFactory.grid()
+                .add(UI.PanelFactory.panel(connectionTimeoutText).withLabel("ConnectionTimeout"))
+                .add(UI.PanelFactory.panel(readTimeoutText).withLabel("ReadTimeout"))
+                .createPanel();
+        return connectionConfigPanel;
     }
 
     private JPanel createBasePanel() {
@@ -183,5 +244,37 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     public void setClickAndSend(Boolean clickAndSend) {
         this.clickAndSend = clickAndSend;
+    }
+
+    public Integer getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(Integer connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public Integer getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Integer readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    public JTextField getConnectionTimeoutText() {
+        return connectionTimeoutText;
+    }
+
+    public void setConnectionTimeoutText(JTextField connectionTimeoutText) {
+        this.connectionTimeoutText = connectionTimeoutText;
+    }
+
+    public JTextField getReadTimeoutText() {
+        return readTimeoutText;
+    }
+
+    public void setReadTimeoutText(JTextField readTimeoutText) {
+        this.readTimeoutText = readTimeoutText;
     }
 }

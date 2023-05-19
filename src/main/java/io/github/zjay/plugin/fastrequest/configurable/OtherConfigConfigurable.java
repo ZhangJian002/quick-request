@@ -64,6 +64,12 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         if(!Objects.equals(view.getClickAndSend(), config.getClickAndSend())){
             return true;
         }
+        if(!Objects.equals(view.getConnectionTimeoutText().getText(), config.getConnectionTimeout() + "")){
+            return true;
+        }
+        if(!Objects.equals(view.getReadTimeoutText().getText(), config.getReadTimeout() + "")){
+            return true;
+        }
 
         return !judgeEqual(currentUrlReplaceMappingList, urlReplaceMappingList);
     }
@@ -74,6 +80,8 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         List<DataMapping> changeUrlReplaceMappingList = JSONArray.parseArray(JSON.toJSONString(viewUrlReplaceMappingList), DataMapping.class);
         config.setUrlReplaceMappingList(changeUrlReplaceMappingList);
         config.setClickAndSend(view.getClickAndSend());
+        config.setConnectionTimeout(view.getConnectionTimeout());
+        config.setReadTimeout(view.getReadTimeout());
     }
 
     @Override
@@ -85,6 +93,9 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
             view.setViewUrlReplaceMappingList(oldUrlReplaceMappingListNew);
             view.getUrlReplaceTable().setModel(new ListTableModel<>(view.getColumnInfo(), oldUrlReplaceMappingListNew));
         }
+        view.setReadTimeout(30);
+        view.setConnectionTimeout(30);
+        view.setClickAndSend(false);
     }
 
     public boolean judgeEqual(List<DataMapping> list1, List<DataMapping> list2) {

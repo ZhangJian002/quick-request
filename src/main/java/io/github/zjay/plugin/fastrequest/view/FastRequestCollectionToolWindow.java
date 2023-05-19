@@ -22,6 +22,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.DataManager;
 import com.intellij.ide.ExporterToTextFile;
 import com.intellij.ide.HelpTooltip;
@@ -86,6 +87,7 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.RowSorterEvent;
 import javax.swing.table.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
@@ -101,6 +103,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
@@ -112,7 +115,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     private JTabbedPane apiTab;
     private JPanel jPanel1;
     private JPanel jPanel2;
-    private JLabel helpLabel2;
     private JPanel searchPanel2;
     private JPanel collectionPanel2;
     private TreeTableView collectionTable;
@@ -123,7 +125,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     private CollectionConfiguration.CollectionDetail rootDetail;
 
-    private CollectionConfiguration.CollectionDetail rootDetail2;
     private DefaultActionGroup myInstalledSearchGroup;
 
     private DefaultActionGroup myInstalledSearchGroup2;
@@ -135,7 +136,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     private SearchTextField jbSearchPanelText2;
     private Tree tree;
 
-    private Tree tree2;
 
     public FastRequestCollectionToolWindow(Project project, ToolWindow toolWindow) {
         super(true, false);
@@ -144,9 +144,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         helpLabel.setIcon(PluginIcons.ICON_CONTEXT_HELP);
         new HelpTooltip().setDescription(MyResourceBundleUtil.getKey("CollectionSearchHelp")).installOn(helpLabel);
-
-        helpLabel2.setIcon(PluginIcons.ICON_CONTEXT_HELP);
-        new HelpTooltip().setDescription(MyResourceBundleUtil.getKey("CollectionSearchHelp")).installOn(helpLabel2);
 
         refresh();
         refresh2();
@@ -162,11 +159,10 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         myInstalledSearchGroup2 = new DefaultActionGroup();
         for (SearchTypeEnum option : SearchTypeEnum.values()) {
-            if (option.name().startsWith("separator")) {
-                myInstalledSearchGroup2.addSeparator("  " + option.name().split("_")[1]);
-            } else {
-                myInstalledSearchGroup2.add(new SearchOption2Action(option));
+            if(option == SearchTypeEnum.name || option == SearchTypeEnum.url || option == SearchTypeEnum.separator_Method){
+                continue;
             }
+            myInstalledSearchGroup2.add(new SearchOption2Action(option));
         }
 
         mySearchCallback = updateAction -> {
@@ -220,10 +216,10 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         JBTextField searchTextField2 = jbSearchPanelText2.getTextEditor();
         searchTextField2.putClientProperty("StatusVisibleFunction", (BooleanFunction<JBTextField>) field -> field.getText().isEmpty());
         StatusText emptyText2 = searchTextField2.getEmptyText();
-        emptyText2.appendText("Search by name or url ->", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, ListPluginComponent.GRAY_COLOR));
-        searchTextField2.putClientProperty("search.extension", ExtendableTextComponent.Extension
-                .create(AllIcons.Actions.More, AllIcons.Actions.More, "Search options",
-                        () -> showRightBottomPopup(searchTextField2, "By", myInstalledSearchGroup2)));
+        emptyText2.appendText("Search by url", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, ListPluginComponent.GRAY_COLOR));
+//        searchTextField2.putClientProperty("search.extension", ExtendableTextComponent.Extension
+//                .create(AllIcons.Actions.More, AllIcons.Actions.More, "Search options",
+//                        () -> showRightBottomPopup(searchTextField2, "By", myInstalledSearchGroup2)));
         searchTextField2.putClientProperty("JTextField.variant", null);
         searchTextField2.putClientProperty("JTextField.variant", "search");
         searchTextField2.getDocument().addDocumentListener(new DelayedDocumentListener(2));
@@ -235,9 +231,9 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         public DelayedDocumentListener(Integer type) {
             if(type == 1){
-                timer = new Timer(500, e -> filterRequest());
+                timer = new Timer(10, e -> filterRequest());
             }else {
-                timer = new Timer(500, e -> filterRequest2());
+                timer = new Timer(10, e -> filterRequest2());
             }
             timer.setRepeats(false);
         }
@@ -256,6 +252,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         public void changedUpdate(DocumentEvent e) {
             timer.restart();
         }
+
 
     }
 
@@ -366,15 +363,33 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     private void filterRequest2() {
         String search = ((SearchTextField) searchPanel2).getText();
-        ListTableModel model = (ListTableModel)collectionTable2.getModel();
-        if (StringUtils.isBlank(search)) {
-            checkRule2("");
-        } else {
-            Map<String, String> queryMap = getQuery(search);
-            String query = queryMap.get("query");
-            String rule = queryMap.get("rule");
-            //选择或去除rule
-            checkRule2(rule);
+        TableRowSorter<TableModel> rowSorter = (TableRowSorter)collectionTable2.getRowSorter();
+        rowSorter.setRowFilter(new RowFilter<>() {
+            @Override
+            public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
+                int rowIndex = entry.getIdentifier();
+                HistoryTableData historyTableData = (HistoryTableData) entry.getModel().getValueAt(rowIndex, 0);
+                if(StringUtils.isNotBlank(search) && !historyTableData.getUrl().toLowerCase().contains(search.toLowerCase())){
+                    return false;
+                }
+                return true;
+            }
+        });
+        collectionTable2.repaint();
+    }
+
+    private class HighlightCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            // 调用父类的渲染方法，以保留原有的样式
+            Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            // 根据匹配条件设置高亮样式
+            String searchKeyword = ((SearchTextField) searchPanel2).getText(); // 替换成你的匹配关键字
+            String cellValue = String.valueOf(value);
+            if(cellValue.toLowerCase().contains(searchKeyword.toLowerCase())){
+                ((JLabel)component).setText("<html>" + cellValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>")  + "</html>");
+            }
+            return component;
         }
     }
 
@@ -686,11 +701,10 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setRemoveAction(e -> {
             int i = Messages.showOkCancelDialog("Confirm deletion ?", "Delete", "Delete", "Cancel", Messages.getInformationIcon());
             if (i == 0) {
-                int[] selectedRows = collectionTable2.getSelectedRows();
-                collectionTable2.setRowSelectionInterval(0, 0);
-                for (int selectedRow : selectedRows) {
-                    historyTableDataList.remove(selectedRow);
-                }
+                int[] selectedIndices = collectionTable2.getSelectionModel().getSelectedIndices();
+                ListTableModel model = (ListTableModel)collectionTable2.getModel();
+                List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+                indexes.forEach(model::removeRow);
                 refreshTable2();
             }
         });
@@ -897,6 +911,8 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             public @NotNull Component prepareRenderer(@NotNull TableCellRenderer renderer, int row, int column) {
                 if (column == 3) {
                     renderer = new TableButtonRenderer();
+                }else if(column == 1){
+                    renderer = new HighlightCellRenderer();
                 }
                 return super.prepareRenderer(renderer, row, column);
             }
@@ -909,16 +925,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 return false;
             }
 
-            @Override
-            public void setValueAt(Object aValue, int row, int column) {
-//                if (column == 0) {
-//                    HistoryTableData historyTableData = historyTableDataList.get(row);
-//                    historyTableData.setType(aValue.toString());
-//                }else if(column == 1){
-//                    HistoryTableData historyTableData = historyTableDataList.get(row);
-//                    historyTableData.setUrl(aValue.toString());
-//                }
-            }
+
 
             @Override
             public Object getValueAt(int row, int column) {
@@ -935,33 +942,34 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                     return historyTableData.getUrl();
                 } else if (column == 2) {
                     return historyTableData.getTime();
-                } else {
-
                 }
                 return null;
             }
 
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-//                if (column == 0) {
-//                    String url = (String) getValueAt(row, column);
-//                    return new DefaultCellEditor(new JTextField(url));
-//                } else if (column == 2) {
-//                    return new TableButtonEditor(new JCheckBox());
-//                }
                 if(column == 3){
                     return new TableButtonEditor(new JCheckBox());
                 }
                 return super.getCellEditor(row, column);
             }
         };
-        jbTable.getColumnModel().getColumn(0).setMaxWidth(65);
-        jbTable.getColumnModel().getColumn(1).setMaxWidth(310);
-        jbTable.getColumnModel().getColumn(2).setMaxWidth(135);
-        jbTable.getColumnModel().getColumn(3).setMaxWidth(125);
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
+        jbTable.setRowSorter(sorter);
+        sorter.setSortable(0, false);
+        sorter.setSortable(1, false);
+        sorter.setSortable(2, false);
+        sorter.setSortable(3, false);
+        jbTable.getColumnModel().getColumn(0).setMinWidth(70);
+        jbTable.getColumnModel().getColumn(0).setMaxWidth(70);
+        jbTable.getColumnModel().getColumn(2).setMinWidth(150);
+        jbTable.getColumnModel().getColumn(2).setMaxWidth(150);
+        jbTable.getColumnModel().getColumn(3).setMinWidth(120);
+        jbTable.getColumnModel().getColumn(3).setMaxWidth(120);
         jbTable.setRowHeight(35);
         return jbTable;
     }
+
     private ColumnInfo<Object, Object>[] getHistoryColumnInfo() {
         ColumnInfo<Object, Object>[] columnArray = new ColumnInfo[4];
         List<String> titleList = Lists.newArrayList("Method","Url", "Time", "Operation");

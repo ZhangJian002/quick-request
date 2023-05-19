@@ -877,6 +877,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String methodType = (String) methodTypeComboBox.getSelectedItem();
         HttpRequest request = HttpUtil.createRequest(Method.valueOf(methodType), sendUrl);
         request.setMaxRedirectCount(10);
+        Integer connectionTimeout = config.getConnectionTimeout();
+        Integer readTimeout = config.getReadTimeout();
+        if(connectionTimeout != null && connectionTimeout != 0){
+            request.setConnectionTimeout(connectionTimeout);
+        }
+        if(readTimeout != null && readTimeout != 0){
+            request.setReadTimeout(readTimeout);
+        }
         headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
         List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
         globalHeaderList = globalHeaderList == null ? new ArrayList<>() : globalHeaderList;

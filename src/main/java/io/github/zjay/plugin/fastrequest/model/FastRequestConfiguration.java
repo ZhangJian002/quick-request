@@ -57,6 +57,10 @@ public class FastRequestConfiguration implements Serializable {
      */
     private Boolean clickAndSend = null;
 
+    private Integer connectionTimeout = null;
+
+    private Integer readTimeout = null;
+
     /**
      * 默认的数据映射
      */
@@ -257,5 +261,21 @@ public class FastRequestConfiguration implements Serializable {
 
     public void setClickAndSend(Boolean clickAndSend) {
         this.clickAndSend = clickAndSend;
+    }
+
+    public Integer getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(Integer connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public Integer getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Integer readTimeout) {
+        this.readTimeout = readTimeout;
     }
 }
