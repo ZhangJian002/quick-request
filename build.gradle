@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.5.15'
+version '2023.5.20'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -27,6 +27,15 @@ intellij {
     downloadSources true
 }
 patchPluginXml {
+    changeNotes """
+
+    <h3>v2023.5.20</h3 >
+    <ul>
+            <li>1、Add history query and request in APIs tab</li>
+            <li>2、Add a request timeout setting in the configuration</li>
+            <li>3、Other optimizations and bug fixes.(520happy)</li>
+        </ul>
+    """
 }
 test {
     useJUnitPlatform()
