@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.5.20'
+version '2023.5.21'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -28,6 +28,11 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+
+    <h3>v2023.5.21</h3 >
+    <ul>
+            <li>Version compatibility is relaxed, and restrictions can support more versions</li>
+        </ul>
 
     <h3>v2023.5.20</h3 >
     <ul>

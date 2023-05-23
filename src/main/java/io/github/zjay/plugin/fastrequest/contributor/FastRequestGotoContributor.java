@@ -16,17 +16,18 @@
 
 package io.github.zjay.plugin.fastrequest.contributor;
 
-import com.intellij.icons.AllIcons;
+import com.intellij.ide.actions.SearchEverywherePsiRenderer;
 import com.intellij.ide.actions.searcheverywhere.*;
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel;
+import com.intellij.ide.util.gotoByName.GotoFileModel;
 import com.intellij.navigation.ChooseByNameContributor;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.extensions.ExtensionPointName;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import io.github.zjay.plugin.fastrequest.idea.SearchEverywherePsiRenderer;
+import com.intellij.psi.PsiFileSystemItem;
+import com.intellij.psi.PsiJavaFile;
+import io.github.zjay.plugin.fastrequest.util.FrIconUtil;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,41 +38,65 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     private Project myProject;
     private final RequestMappingModel requestMappingModel;
 
+    private final GotoFileModel myModelForRenderer;
+
     protected FastRequestGotoContributor(@NotNull AnActionEvent event) {
         super(event);
         myProject = event.getProject();
+        myModelForRenderer = new GotoFileModel(myProject);
         requestMappingModel = new RequestMappingModel(myProject, ExtensionPointName.<ChooseByNameContributor>create("QuickRequest.requestMappingContributor").getExtensionList());
     }
 
 
     public @NotNull ListCellRenderer<Object> getElementsRenderer() {
-        return new SearchEverywherePsiRenderer(this){
+        return new SearchEverywherePsiRenderer(this) {
+            @NotNull
+            @Override
+            public ItemMatchers getItemMatchers(@NotNull JList list, @NotNull Object value) {
+                ItemMatchers defaultMatchers = super.getItemMatchers(list, value);
+                if (!(value instanceof PsiFileSystemItem) || myModelForRenderer == null) {
+                    return defaultMatchers;
+                }
+
+                return GotoFileModel.convertToFileItemMatchers(defaultMatchers, (PsiFileSystemItem)value, myModelForRenderer);
+            }
 
             @Override
-            protected DefaultListCellRenderer getRightCellRenderer(final Object value) {
-                if(value instanceof RequestMappingItem){
-                    RequestMappingItem item = (RequestMappingItem) value;
-                    PsiElement psiElement = item.getPsiElement();
-                    Module module = ModuleUtil.findModuleForPsiElement(psiElement);
-                    if(module == null){
-                        return super.getRightCellRenderer(value);
-                    }
-
-
-                    return new DefaultListCellRenderer(){
-                        @Override
-                        public Icon getIcon() {
-                            return AllIcons.Nodes.Module;
-                        }
-
-                        @Override
-                        public String getText() {
-                            return module.getName();
-                        }
-                    };
+            protected Icon getIcon(PsiElement element) {
+                if(element instanceof RequestMappingItem){
+                    return getMethodIcon((RequestMappingItem)element);
                 }
-                return super.getRightCellRenderer(value);
+                return super.getIcon(element);
             }
+        };
+//        return new QuickRequestRender(myProject);
+//        return new SearchEverywherePsiRenderer(this){
+//
+//            @Override
+//            protected DefaultListCellRenderer getRightCellRenderer(final Object value) {
+//                if(value instanceof RequestMappingItem){
+//                    RequestMappingItem item = (RequestMappingItem) value;
+//                    PsiElement psiElement = item.getPsiElement();
+//                    Module module = ModuleUtil.findModuleForPsiElement(psiElement);
+//                    if(module == null){
+//                        return super.getRightCellRenderer(value);
+//                    }
+//
+//
+//                    return new DefaultListCellRenderer(){
+//                        @Override
+//                        public Icon getIcon() {
+//                            return AllIcons.Nodes.Module;
+//                        }
+//
+//                        @Override
+//                        public String getText() {
+//                            return module.getName();
+//                        }
+//                    };
+//                }
+//                return super.getRightCellRenderer(value);
+//            }
 
             /**
             protected @Nullable TextWithIcon getItemLocation(Object value) {
@@ -87,7 +112,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
                 return super.getItemLocation(value);
             }
 //             */
-        };
+//        };
     }
 
     public @Nullable @Nls String getAdvertisement() {
@@ -112,6 +137,11 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
 
     public int getElementPriority(@NotNull Object element, @NotNull String searchPattern) {
         return super.getElementPriority(element, searchPattern) + 5;
+    }
+
+    private Icon getMethodIcon(RequestMappingItem requestMappingItem) {
+        PsiJavaFile psiJavaFile = (PsiJavaFile) requestMappingItem.getPsiElement().getContainingFile();
+        return FrIconUtil.getIconByMethodAndClassType(requestMappingItem.getRequestMethod(), psiJavaFile.getClasses()[0].isInterface());
     }
 
     static class Factory implements SearchEverywhereContributorFactory<Object>{

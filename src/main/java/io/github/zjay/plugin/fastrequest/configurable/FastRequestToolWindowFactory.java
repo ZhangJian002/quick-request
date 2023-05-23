@@ -17,6 +17,7 @@
 package io.github.zjay.plugin.fastrequest.configurable;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -56,7 +57,7 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         apiWindowMap.put(project.getName(), collectionToolWindow);
         allApisNavToolWindowMap.put(project.getName(), allApisNavToolWindow);
 
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        ContentFactory contentFactory = ApplicationManager.getApplication().getService(ContentFactory.class);
         window.getComponent().add(window.getContent());
         Content content = contentFactory.createContent(window, "Request", true);
         content.setIcon(AllIcons.General.RunWithCoverage);

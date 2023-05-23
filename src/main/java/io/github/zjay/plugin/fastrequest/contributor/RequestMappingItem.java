@@ -125,4 +125,8 @@ public  class RequestMappingItem extends FakePsiElement {
          return FrIconUtil.getIconByMethodAndClassType(requestMethod, psiJavaFile.getClasses()[0].isInterface());
       }
    }
+
+   public String getUrlPath() {
+      return urlPath;
+   }
 }
