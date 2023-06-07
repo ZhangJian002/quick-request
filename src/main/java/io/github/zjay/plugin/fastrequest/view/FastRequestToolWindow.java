@@ -43,6 +43,8 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
@@ -66,6 +68,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.ui.dualView.TreeTableView;
+import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
 import com.intellij.ui.treeStructure.treetable.TreeColumnInfo;
@@ -92,6 +95,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jsoup.Jsoup;
+import org.jsoup.parser.Parser;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -376,9 +381,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
         managerConfigLink.setExternalLinkIcon();
         manageConfigButton = managerConfigLink;
-        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true);
-        responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true);
-        jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false);
+        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true, true);
+        responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false);
+
+        jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, false);
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
         prettyJsonEditorPanel.setPreferredSize(new Dimension(-1, 120));
@@ -409,12 +415,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         this.$$$setupUI$$$();
 
         DefaultActionGroup group = new DefaultActionGroup();
-        GotoFastRequestAction gotoFastRequestAction = (GotoFastRequestAction) ActionManager.getInstance().getAction("fastRequestFree.gotoFastRequest");
+        GotoFastRequestAction gotoFastRequestAction = (GotoFastRequestAction) ActionManager.getInstance().getAction("quickRequest.gotoFastRequest");
         group.add(gotoFastRequestAction);
         group.add(new OpenConfigAction());
         group.addSeparator("  |  ");
-        ToolbarSendRequestAction toolbarSendRequestAction = (ToolbarSendRequestAction) ActionManager.getInstance().getAction("fastRequestFree.sendAction");
-        ToolbarSendAndDownloadRequestAction sendAndDownloadRequestAction = (ToolbarSendAndDownloadRequestAction) ActionManager.getInstance().getAction("fastRequestFree.sendDownloadAction");
+        ToolbarSendRequestAction toolbarSendRequestAction = (ToolbarSendRequestAction) ActionManager.getInstance().getAction("quickRequest.sendAction");
+        ToolbarSendAndDownloadRequestAction sendAndDownloadRequestAction = (ToolbarSendAndDownloadRequestAction) ActionManager.getInstance().getAction("quickRequest.sendDownloadAction");
 
 // todo idea暂时有bug
 //        DefaultActionGroup sendGroup = DefaultActionGroup.createPopupGroupWithEmptyText();
@@ -880,10 +886,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         Integer connectionTimeout = config.getConnectionTimeout();
         Integer readTimeout = config.getReadTimeout();
         if(connectionTimeout != null && connectionTimeout != 0){
-            request.setConnectionTimeout(connectionTimeout);
+            request.setConnectionTimeout(connectionTimeout * 1000);
         }
         if(readTimeout != null && readTimeout != 0){
-            request.setReadTimeout(readTimeout);
+            request.setReadTimeout(readTimeout * 1000);
         }
         headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
         List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
@@ -1062,16 +1068,23 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     refreshResponseTable(body);
                 } else {
                     responseTabbedPanel.setSelectedIndex(2);
-                    String subBody = body.substring(0, Math.min(body.length(), 32768));
-                    if (body.length() > 32768) {
-                        subBody += "\n\ntext too large only show 32768 characters\n.............";
-                    }
-                    String finalSubBody = subBody;
-                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(finalSubBody);
-                    ((MyLanguageTextField) responseTextAreaPanel).setText(subBody);
+//                    String subBody = body.substring(0, Math.min(body.length(), 32768));
+//                    if (body.length() > 32768) {
+//                        subBody += "\n\ntext too large only show 32768 characters\n.............";
+//                    }
+                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(body);
+                    ((MyLanguageTextField) responseTextAreaPanel).setText(body);
                     refreshResponseTable("");
                 }
             }
+//            try {
+//                org.jsoup.nodes.Document document = Jsoup.parse(body, "", Parser.htmlParser());
+//                // 判断是否成功解析为 HTML
+//                JBCefBrowser browser = new JBCefBrowser();
+//                browser.loadURL("http://www.baidu.com");
+//            }catch (Exception e){
+//                //ignore
+//            }
         }
     }
 

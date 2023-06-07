@@ -69,50 +69,6 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
                 return super.getIcon(element);
             }
         };
-//        return new QuickRequestRender(myProject);
-//        return new SearchEverywherePsiRenderer(this){
-//
-//            @Override
-//            protected DefaultListCellRenderer getRightCellRenderer(final Object value) {
-//                if(value instanceof RequestMappingItem){
-//                    RequestMappingItem item = (RequestMappingItem) value;
-//                    PsiElement psiElement = item.getPsiElement();
-//                    Module module = ModuleUtil.findModuleForPsiElement(psiElement);
-//                    if(module == null){
-//                        return super.getRightCellRenderer(value);
-//                    }
-//
-//
-//                    return new DefaultListCellRenderer(){
-//                        @Override
-//                        public Icon getIcon() {
-//                            return AllIcons.Nodes.Module;
-//                        }
-//
-//                        @Override
-//                        public String getText() {
-//                            return module.getName();
-//                        }
-//                    };
-//                }
-//                return super.getRightCellRenderer(value);
-//            }
-
-            /**
-            protected @Nullable TextWithIcon getItemLocation(Object value) {
-                if(value instanceof RequestMappingItem){
-                    RequestMappingItem item = (RequestMappingItem) value;
-                    PsiElement psiElement = item.getPsiElement();
-                    Module module = ModuleUtil.findModuleForPsiElement(psiElement);
-                    if(module == null){
-                        return super.getItemLocation(value);
-                    }
-                    return new TextWithIcon(module.getName(), AllIcons.Nodes.Module);
-                }
-                return super.getItemLocation(value);
-            }
-//             */
-//        };
     }
 
     public @Nullable @Nls String getAdvertisement() {

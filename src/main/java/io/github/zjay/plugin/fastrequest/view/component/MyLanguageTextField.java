@@ -16,21 +16,59 @@
 
 package io.github.zjay.plugin.fastrequest.view.component;
 
+import cn.hutool.json.JSONSupport;
+import com.alibaba.fastjson.JSONObject;
+import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.highlighter.HtmlFileType;
+import com.intellij.ide.highlighter.XmlFileType;
+import com.intellij.json.JsonFileType;
+import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
+import com.intellij.lang.html.HTMLLanguage;
+import com.intellij.lang.xhtml.XHTMLLanguage;
+import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorSettings;
+import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.editor.event.EditorMouseEvent;
+import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.impl.EditorTabbedContainer;
+import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
+import com.intellij.openapi.fileTypes.PlainTextLanguage;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.JBPopup;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowId;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.ui.ErrorStripeEditorCustomization;
 import com.intellij.ui.LanguageTextField;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.jcef.JBCefBrowser;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import free.icons.PluginIcons;
+import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
+import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
+import org.cef.browser.CefBrowser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jsoup.Jsoup;
+import org.jsoup.parser.Parser;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class MyLanguageTextField extends LanguageTextField {
 
@@ -40,12 +78,17 @@ public class MyLanguageTextField extends LanguageTextField {
 
     public boolean isViewer;
 
-    public MyLanguageTextField(Project myProject, Language language, FileType fileType, boolean isViewer) {
+    public boolean needPretty;
+
+    JButton button;
+
+    public MyLanguageTextField(Project myProject, Language language, FileType fileType, boolean isViewer, boolean needPretty) {
         super(language, myProject, "", false);
         this.myProject = myProject;
         this.fileType = fileType;
         this.language = language;
         this.isViewer = isViewer;
+        this.needPretty = needPretty;
     }
 
     @Override
@@ -58,9 +101,9 @@ public class MyLanguageTextField extends LanguageTextField {
 
     @Override
     public void setText(@Nullable String text) {
-        super.setFileType(fileType);
+        Language finalLanguage = getLanguage(text);
         ReadAction.nonBlocking(() -> {
-        Document document = createDocument(text, language, myProject, new SimpleDocumentCreator());
+        Document document = createDocument(text, finalLanguage, myProject, new SimpleDocumentCreator());
         setDocument(document);
         PsiFile psiFile = PsiDocumentManager.getInstance(myProject).getPsiFile(document);
         if (psiFile != null) {
@@ -72,6 +115,33 @@ public class MyLanguageTextField extends LanguageTextField {
             );
         }
         }).executeSynchronously();
+    }
+
+    private Language getLanguage(String text) {
+        if(!needPretty){
+            return language;
+        }
+        Language myLanguage = null;
+        try {
+            JSONObject.parseObject(text);
+            myLanguage = JsonLanguage.INSTANCE;
+            super.setFileType(JsonFileType.INSTANCE);
+        }catch (Exception e){
+            //ignore
+        }
+        if(myLanguage == null){
+            if(text.matches("<\\s*html[\\s\\S]*>")){
+                myLanguage = HTMLLanguage.INSTANCE;
+                super.setFileType(HtmlFileType.INSTANCE);
+            }else if(text.matches("<\\s*[A-Za-z][A-Za-z0-9_]*[\\s\\S]*>")){
+                myLanguage = XMLLanguage.INSTANCE;
+                super.setFileType(XmlFileType.INSTANCE);
+            }else {
+                myLanguage = PlainTextLanguage.INSTANCE;
+                super.setFileType(PlainTextFileType.INSTANCE);
+            }
+        }
+        return myLanguage;
     }
 
     private void setUpEditor(EditorEx editor) {
@@ -97,6 +167,7 @@ public class MyLanguageTextField extends LanguageTextField {
         settings.setCaretRowShown(true);
         settings.setLineMarkerAreaShown(true);
         settings.setDndEnabled(true);
+
         //开启右侧的错误条纹
         ErrorStripeEditorCustomization.ENABLED.customize(editor);
     }
@@ -113,5 +184,7 @@ public class MyLanguageTextField extends LanguageTextField {
     public void setLanguage(Language language) {
         this.language = language;
     }
+
+
 
 }
