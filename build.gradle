@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.5.21'
+version '2023.6.9'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -29,6 +29,13 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.6.9</h3 >
+    <ul>
+       <li>Add automatic spring generation method(right click choose Generate Spring Method or alt \"): 
+       
+       You only need to fill out a form according to the requirements, which will automatically generate code for the controller layer and service layer for you</li>
+    </ul>
+
     <h3>v2023.5.21</h3 >
     <ul>
             <li>Version compatibility is relaxed, and restrictions can support more versions</li>
@@ -38,7 +45,7 @@ patchPluginXml {
     <ul>
             <li>1、Add history query and request in APIs tab</li>
             <li>2、Add a request timeout setting in the configuration</li>
-            <li>3、Other optimizations and bug fixes.(520happy with Qian ^v^)</li>
+            <li>3、Other optimizations and bug fixes.</li>
         </ul>
     """
 }

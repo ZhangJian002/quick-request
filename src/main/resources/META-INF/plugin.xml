@@ -88,7 +88,7 @@
             <action id="quickRequest.generatorMethod" class="io.github.zjay.plugin.fastrequest.action.GenerateMethodAction"
                     text="Generate Spring Method"
                     description="Generate spring method">
-<!--                <keyboard-shortcut keymap="$default" first-keystroke="alt \"/>-->
+                <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
             </action>
             <action id="quickRequest.generator" class="io.github.zjay.plugin.fastrequest.action.GenerateUrlAction"
                     text="Generate URL and Param"

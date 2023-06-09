@@ -18,7 +18,6 @@ package io.github.zjay.plugin.fastrequest.action;
 
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.*;
-import com.intellij.ide.actions.searcheverywhere.AutoCompletionCommand;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -27,50 +26,47 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.popup.ActiveIcon;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.openapi.ui.popup.ListPopup;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.patterns.PlatformPatterns;
-import com.intellij.patterns.PsiClassPattern;
-import com.intellij.patterns.PsiElementPattern;
-import com.intellij.patterns.PsiMemberPattern;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
-import com.intellij.psi.impl.java.stubs.index.JavaShortClassNameIndex;
-import com.intellij.psi.impl.source.PsiImportListImpl;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.search.searches.AllClassesSearch;
-import com.intellij.ui.DocumentAdapter;
-import com.intellij.ui.awt.RelativePoint;
-import com.intellij.ui.components.JBList;
-import com.intellij.util.IconUtil;
-import com.intellij.util.ProcessingContext;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilBase;
+import com.intellij.ui.UIBundle;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.TextFieldCompletionProvider;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
+import com.intellij.util.ui.GridBag;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UI;
+import free.icons.PluginIcons;
+import io.github.zjay.plugin.fastrequest.util.KeywordUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 public class GenerateMethodAction extends AnAction {
+
+    private static final Pattern PATTERN = Pattern.compile("[a-zA-Z_$][a-zA-Z0-9_$]*");
+
 
     JBPopup popup;
 
@@ -90,12 +86,13 @@ public class GenerateMethodAction extends AnAction {
         MyCustomForm form = new MyCustomForm(project);
 
         // 创建一个弹出窗口，并将表单窗口添加到其中
-        popup = JBPopupFactory.getInstance().createComponentPopupBuilder(form.getMainPanel(), form.textField)
+        popup = JBPopupFactory.getInstance().createComponentPopupBuilder(form.getMainPanel(), form.nameTextField)
                 .setTitle("Generate Spring Method")
                 .setResizable(true)
                 .setMovable(true)
                 .setCancelOnClickOutside(false)
                 .setFocusable(true)
+                .setTitleIcon(new ActiveIcon(PluginIcons.fastRequest_toolwindow))
                 .setRequestFocus(true)
                 .createPopup();
         popup.showInBestPositionFor(editor);
@@ -104,8 +101,10 @@ public class GenerateMethodAction extends AnAction {
 
     class MyCustomForm {
         private JPanel mainPanel;
-        private JTextField textField;
-        private JButton button;
+        private JTextField nameTextField;
+        private JButton generateButton;
+
+        private JButton cancelButton;
 
         TextFieldWithCompletion returnTextField;
 
@@ -113,238 +112,458 @@ public class GenerateMethodAction extends AnAction {
 
         JTextField urlTextField;
 
+        JBCheckBox needGenerateSub;
+
         TextFieldWithCompletion serviceTextField;
 
         TextFieldWithCompletion paramTextField;
 
         Project project;
 
+        private ClassComplete paramComplete;
+
+        private ClassComplete returnComplete;
+
+        private ClassComplete serviceComplete;
+
+        private String methodfirstLine;
+
+        List<PsiClass> realNeedImportList;
+
         public MyCustomForm(Project project) {
             this.project = project;
+            this.realNeedImportList = new LinkedList<>();
             buttonBindAction();
             buildPanel();
         }
 
         private void buildPanel() {
-            textField = new JTextField();
-            textField.setPreferredSize(new Dimension(300, 30));
-            JLabel label = new JLabel("Name:");
-            mainPanel = new JPanel(new GridBagLayout());
-            // 创建 GridBagConstraints 对象来设置组件的位置和约束
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 0; // 列索引为 0
-            gbc.gridy = 0; // 行索引为 0
-            gbc.anchor = GridBagConstraints.LINE_START; // 组件对齐方式为左对齐
-            gbc.insets = JBUI.insets(5); // 设置组件之间的间距
-            mainPanel.add(label, gbc); // 将标签添加到面板
-
-            gbc.gridx = 1; // 列索引为 1
-            gbc.gridy = 0; // 行索引为 0
-            gbc.fill = GridBagConstraints.HORIZONTAL; // 水平拉伸组件
-            gbc.weightx = 1.0; // 设置组件在水平方向上的拉伸权重
-            mainPanel.add(textField, gbc);
-
-            JLabel typeLabel = new JLabel("Type:");
+//            setNameTextField();
+            nameTextField = new JTextField();
+            nameTextField.setPreferredSize(new Dimension(500, 30));
             String[] methodType = {"Get", "Post", "Put", "Delete", "Other"};
             methodTypes = new ComboBox<>(methodType);
-
-            gbc.gridx = 0; // 列索引为 0
-            gbc.gridy = 1; // 行索引为 0
-            gbc.anchor = GridBagConstraints.LINE_START; // 组件对齐方式为左对齐
-            gbc.insets = JBUI.insets(5); // 设置组件之间的间距
-            mainPanel.add(typeLabel, gbc); // 将标签添加到面板
-
-            gbc.gridx = 1; // 列索引为 1
-            gbc.gridy = 1; // 行索引为 0
-            gbc.fill = GridBagConstraints.HORIZONTAL; // 水平拉伸组件
-            gbc.weightx = 1.0; // 设置组件在水平方向上的拉伸权重
-            mainPanel.add(methodTypes, gbc);
-
-            JLabel urlLabel = new JLabel("Url:");
             urlTextField = new JTextField();
+            paramTextField = new TextFieldWithCompletion(project, (paramComplete=new ClassComplete(project, true, 1)), "", true, true, true);
+            paramComplete.setTextField(paramTextField);
+            returnTextField = new TextFieldWithCompletion(project, (returnComplete=new ClassComplete(project, false, 2)), "", true, true, true);
+            returnComplete.setTextField(returnTextField);
+            serviceTextField = new TextFieldWithCompletion(project, (serviceComplete=new ClassComplete(project, false, 3)), "", true, true, true);
+            serviceComplete.setTextField(serviceTextField);
+            needGenerateSub = new JBCheckBox("Generate methods in the bean class", true);
+            JPanel buttonJPanel = new JPanel(new GridBagLayout());
+            buttonJPanel.add(generateButton);
+            buttonJPanel.add(cancelButton);
+            JPanel panel = UI.PanelFactory.grid()
+                    .add(UI.PanelFactory.panel(nameTextField).withLabel("Name:").withComment("Enter your method name"))
+                    .add(UI.PanelFactory.panel(paramTextField).withLabel("Parameters:").withComment("Multiple parameters, separated by commas (auto-complete)"))
+                    .add(UI.PanelFactory.panel(methodTypes).withLabel("Type:").withComment("Select method type"))
+                    .add(UI.PanelFactory.panel(urlTextField).withLabel("Url:").withComment("Enter request url"))
+                    .add(UI.PanelFactory.panel(returnTextField).withLabel("Return class:").withComment("Enter method return class (auto-complete)"))
+                    .add(UI.PanelFactory.panel(serviceTextField).withLabel("Bean class:").withComment("The bean called in the 'return' statement (auto-complete), and generate bean class method"))
+                    .add(UI.PanelFactory.panel(needGenerateSub).withComment("Selected representatives need to be generated"))
+                    .add(UI.PanelFactory.panel(buttonJPanel).withTooltip("Name and url are required, the field for automatic completion needs to be selected and entered, generics only support one type"))
+                    .createPanel();
+            mainPanel = new JPanel(new GridBagLayout());
+            GridBag gb = new GridBag()
+                    .setDefaultInsets(JBUI.insets(5, 10, 3, 10))
+                    .setDefaultWeightX(1)
+                    .setDefaultFill(GridBagConstraints.HORIZONTAL);
+            mainPanel.add(panel, gb.nextLine().fillCell().weighty(1.0));
 
-            gbc.gridx = 0; // 列索引为 0
-            gbc.gridy = 2; // 行索引为 0
-            gbc.anchor = GridBagConstraints.LINE_START; // 组件对齐方式为左对齐
-            gbc.insets = JBUI.insets(5); // 设置组件之间的间距
-            mainPanel.add(urlLabel, gbc); // 将标签添加到面板
-
-            gbc.gridx = 1; // 列索引为 1
-            gbc.gridy = 2; // 行索引为 0
-            gbc.fill = GridBagConstraints.HORIZONTAL; // 水平拉伸组件
-            gbc.weightx = 1.0; // 设置组件在水平方向上的拉伸权重
-            mainPanel.add(urlTextField, gbc);
-
-            JLabel paramLabel = new JLabel("Parameters:");
-            paramTextField = new TextFieldWithCompletion(project, new ClassComplete(project, true), "", true, true, true);
-
-            gbc.gridx = 0; // 列索引为 0
-            gbc.gridy = 3; // 行索引为 0
-            gbc.anchor = GridBagConstraints.LINE_START; // 组件对齐方式为左对齐
-            gbc.insets = JBUI.insets(5); // 设置组件之间的间距
-            mainPanel.add(paramLabel, gbc); // 将标签添加到面板
-
-            gbc.gridx = 1; // 列索引为 1
-            gbc.gridy = 3; // 行索引为 0
-            gbc.fill = GridBagConstraints.HORIZONTAL; // 水平拉伸组件
-            gbc.weightx = 1.0; // 设置组件在水平方向上的拉伸权重
-            mainPanel.add(paramTextField, gbc);
-
-
-            JLabel returnLabel = new JLabel("Return:");
-            returnTextField = new TextFieldWithCompletion(project, new ClassComplete(project, false), "", true, true, true);
-
-            gbc.gridx = 0; // 列索引为 0
-            gbc.gridy = 4; // 行索引为 0
-            gbc.anchor = GridBagConstraints.LINE_START; // 组件对齐方式为左对齐
-            gbc.insets = JBUI.insets(5); // 设置组件之间的间距
-            mainPanel.add(returnLabel, gbc); // 将标签添加到面板
-
-            gbc.gridx = 1; // 列索引为 1
-            gbc.gridy = 4; // 行索引为 0
-            gbc.fill = GridBagConstraints.HORIZONTAL; // 水平拉伸组件
-            gbc.weightx = 1.0; // 设置组件在水平方向上的拉伸权重
-            mainPanel.add(returnTextField, gbc);
-
-            JLabel serviceLabel = new JLabel("Service Name:");
-            serviceTextField = new TextFieldWithCompletion(project, new ClassComplete(project, false), "", true, true, true);
-            gbc.gridx = 0; // 列索引为 0
-            gbc.gridy = 5; // 行索引为 0
-            gbc.anchor = GridBagConstraints.LINE_START; // 组件对齐方式为左对齐
-            gbc.insets = JBUI.insets(5); // 设置组件之间的间距
-            mainPanel.add(serviceLabel, gbc); // 将标签添加到面板
-
-            gbc.gridx = 1; // 列索引为 1
-            gbc.gridy = 5; // 行索引为 0
-            gbc.fill = GridBagConstraints.HORIZONTAL; // 水平拉伸组件
-            gbc.weightx = 1.0; // 设置组件在水平方向上的拉伸权重
-            mainPanel.add(serviceTextField, gbc);
-
-            gbc.gridx = 0; // 列索引为 0
-            gbc.gridy = 6; // 行索引为 1
-            gbc.fill = GridBagConstraints.HORIZONTAL; // 水平拉伸组件
-            gbc.weightx = 1.0; // 设置组件在水平方向上的拉伸权重
-            mainPanel.add(button, gbc);
         }
 
         private void buttonBindAction() {
-            button = new JButton("Generate");
-            button.addActionListener(e -> {
-                // 在这里处理保存按钮的逻辑
-                String text = textField.getText();
-                validInput();
-                Caret currentCaret = editor.getCaretModel().getCurrentCaret();
-                int offset = currentCaret.getOffset();
-                PsiDocumentManager psiDocumentManager = PsiDocumentManager.getInstance(project);
-                PsiFile psiFile = psiDocumentManager.getPsiFile(editor.getDocument());
-                WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
-                    if(psiFile == null){
-                        return;
-                    }
-                    if(!(psiFile instanceof PsiJavaFile)){
-                        return;
-                    }
-                    // 格式化代码
-                    CodeStyleManager codeStyleManager = CodeStyleManager.getInstance(project);
-                    PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
-                    // 创建 PsiElementFactory
-                    PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(project);
-
-                    // 创建新的方法
-                    StringBuilder sb = new StringBuilder();
-                    String returnName = StringUtils.isBlank(returnTextField.getText()) ? "void" : returnTextField.getText().trim();
-                    //TODO: add import list
-                    String methodType = (String) methodTypes.getSelectedItem();
-                    if(StringUtils.isBlank(methodType) || "Other".equals(methodType)){
-                        methodType = "Request";
-                    }
-                    sb.append("@").append(methodType).append("Mapping(\"").append(urlTextField.getText()).append("\")\n");
-
-                    if(!Objects.equals("Get", methodType) && !Objects.equals("Request", methodType)){
-                        sb.append("@ResponseBody").append("\n");
-                    }
-                    sb.append("public ").append(returnName).append(" ").append(text).append("(");
-                    String paramText = paramTextField.getText();
-                    if(StringUtils.isNotBlank(paramText)){
-                        String[] params = paramText.trim().split(",");
-                        List<String> paramList = Arrays.stream(params).map(x -> x.trim() + " " + StringUtil.decapitalize(x.trim())).collect(Collectors.toList());
-                        sb.append(StringUtils.join(paramList, ", "));
-                        //TODO: add import list
-                    }
-                    sb.append(") {\n").append("    // TODO: Implement method");
-                    if(!Objects.equals("void", returnName)){
-                        if(StringUtils.isBlank(serviceTextField.getText())){
-                            sb.append("\nreturn null;");
-                        }else {
-                            PsiField[] fields = psiJavaFile.getClasses()[0].getFields();
-                            String fieldName = "";
-                            for (PsiField field : fields) {
-                                PsiType fieldType = field.getType();
-                                String fieldTypeName = fieldType.getPresentableText();
-                                if(Objects.equals(fieldTypeName, serviceTextField.getText())){
-                                    //找到同一个属性了
-                                    fieldName = field.getName();
-                                    break;
-                                }
-                            }
-                            if(StringUtils.isBlank(fieldName)){
-                                fieldName = StringUtil.decapitalize(serviceTextField.getText());
-                                StringBuilder fieldStr = new StringBuilder("@Resource\nprivate ");
-                                fieldStr.append(serviceTextField.getText()).append(" ").append(fieldName).append(";");
-                                PsiField fieldFromText = elementFactory.createFieldFromText(fieldStr.toString(), psiFile);
-                                psiJavaFile.getClasses()[0].add(codeStyleManager.reformat(fieldFromText));
-                                //TODO: add import list
-                            }
-                            sb.append("\nreturn ").append(fieldName).append(".").append(text).append("();");
-                        }
-                    }
-                    sb.append("\n}");
-                    PsiMethod newMethod = elementFactory.createMethodFromText(sb.toString(), psiFile);
-                    PsiElement reformatMethod = codeStyleManager.reformat(newMethod);
-                    if(psiFile.findElementAt(offset) == null){
-                        psiJavaFile.getClasses()[0].add(reformatMethod);
-                    }else {
-                        psiJavaFile.getClasses()[0].addAfter(reformatMethod, psiFile.findElementAt(offset));
-                    }
-
-                    boolean isExit = false;
-                    PsiImportList importList = psiJavaFile.getImportList();
-                    if (importList == null) {
-                        importList = PsiImportList.ARRAY_FACTORY.create(1)[0];
-                    }else {
-                        PsiImportStatement[] importStatements = importList.getImportStatements();
-                        for (PsiImportStatement importStatement : importStatements) {
-                            if(Objects.equals(importStatement.getQualifiedName(), "org.springframework.web.bind.annotation.*")){
-                                isExit = true;
-                            }
-                        }
-                    }
-                    if(!isExit){
-                        PsiImportStatement importStatement = elementFactory.createImportStatementOnDemand("org.springframework.web.bind.annotation");
-                        importList.add(importStatement);
-                    }
-
-                    codeStyleManager.reformat(psiFile);
-
-                    // 移动光标到生成的方法的起始位置
-                    editor.getCaretModel().moveToOffset(offset + 2); // +2 为插入的两个换行符
-                });
-                popup.cancel();
+            generateButton = new JButton("Generate");
+            cancelButton = new JButton("Cancel");
+            cancelButton.addActionListener(e -> popup.cancel());
+            generateButton.addActionListener(e -> {
+                // 验证输入
+                if(validInput()){
+                    //生成方法
+                    generateMethods();
+                    //弹出关闭
+                    popup.cancel();
+                }
             });
         }
 
-        private void validInput() {
-            textField.setInputVerifier(new InputVerifier() {
-                @Override
-                public boolean verify(JComponent jComponent) {
-                    String text = textField.getText();
-                    if(StringUtils.isBlank(text)){
-                        Messages.showMessageDialog("Method name required", "Error", Messages.getInformationIcon());
-                        return false;
+        private void generateMethods() {
+            PsiJavaFile psiFile = getPsiJavaFile();
+            if(psiFile == null){
+                return;
+            }
+            WriteCommandAction.runWriteCommandAction(editor.getProject(), () -> {
+                Caret currentCaret = editor.getCaretModel().getCurrentCaret();
+                int offset = currentCaret.getOffset();
+                // 创建 PsiElementFactory
+                PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(project);
+                // 创建新的方法
+                PsiMethod requestMethod = createRequestMethod(psiFile, elementFactory, offset);
+                //创建导入语句
+                createImports(psiFile, elementFactory);
+                //接口+实现类 创建方法
+                createSubClassMethods(elementFactory);
+                // 移动光标到生成的方法的起始位置
+                editor.getCaretModel().moveToOffset(requestMethod.getTextOffset());
+            });
+        }
+
+        private void createSubClassMethods(PsiElementFactory elementFactory) {
+            if(serviceComplete.getNeedImportList().size() > 0){
+                PsiClass psiClass = serviceComplete.getNeedImportList().get(0);
+                if(!psiClass.getContainingFile().isWritable() || !needGenerateSub.isSelected()){
+                    return;
+                }
+                if(psiClass.isInterface()){
+                    //是接口
+                    PsiJavaFile containingFile = (PsiJavaFile) psiClass.getContainingFile();
+                    String methodForInteface = methodfirstLine.replaceFirst("public ", "").concat(";");
+                    PsiMethod methodFromText = elementFactory.createMethodFromText(methodForInteface, containingFile);
+                    psiClass.add(methodFromText);
+                    realNeedImportList.forEach(importClass -> {
+                        PsiImportList importList = containingFile.getImportList();
+                        if(importList == null){
+                            PsiImportList.ARRAY_FACTORY.create(1);
+                        }
+                        long count = Arrays.stream(containingFile.getImportList().getImportStatements()).filter(x ->
+                                Objects.equals(x.getQualifiedName(), importClass.getQualifiedName())
+                                        || Objects.equals(psiClass.getQualifiedName(), importClass.getQualifiedName())
+                        ).count();
+                        if(count == 0){
+                            PsiImportStatement importStatement = elementFactory.createImportStatement(importClass);
+                            containingFile.getImportList().add(importStatement);
+                        }
+                    });
+                    //所有的实现类
+                    Collection<PsiClass> psiClasses = ClassInheritorsSearch.search(psiClass, GlobalSearchScope.projectScope(project), true).findAll();
+                    for (PsiClass subPsiClass : psiClasses) {
+                        //逐一生成
+                        generateMethodForSubClass(subPsiClass, elementFactory, true);
                     }
-                    return true;
+                }else {
+                    //直接生成
+                    generateMethodForSubClass(psiClass, elementFactory, false);
+                }
+            }
+        }
+
+        private void generateMethodForSubClass(PsiClass subPsiClass, PsiElementFactory elementFactory, boolean needOverride) {
+            String overrideStr = "";
+            if(needOverride){
+                overrideStr = "@Override\n";
+            }
+            StringBuilder sb = new StringBuilder(overrideStr);
+            sb.append(methodfirstLine).append(" {\n");
+            if(StringUtils.isNotBlank(returnTextField.getText())){
+                sb.append("return null;");
+            }
+            sb.append("\n");
+            sb.append("}");
+            String implementMethod = sb.toString();
+            PsiJavaFile subFile = (PsiJavaFile) subPsiClass.getContainingFile();
+            PsiMethod implement = elementFactory.createMethodFromText(implementMethod, subFile);
+            subPsiClass.add(implement);
+            realNeedImportList.forEach(importClass -> {
+                PsiImportList importList = subFile.getImportList();
+                if(importList == null){
+                    PsiImportList.ARRAY_FACTORY.create(1);
+                }
+                long count = Arrays.stream(subFile.getImportList().getImportStatements()).filter(x ->
+                        Objects.equals(x.getQualifiedName(), importClass.getQualifiedName())
+                                || Objects.equals(subPsiClass.getQualifiedName(), importClass.getQualifiedName())
+                ).count();
+                if(count == 0){
+                    PsiImportStatement importStatement = elementFactory.createImportStatement(importClass);
+                    subFile.getImportList().add(importStatement);
                 }
             });
+        }
+
+        private void createImports(PsiJavaFile psiFile, PsiElementFactory elementFactory) {
+            boolean isExit = false;
+            PsiImportList importList = psiFile.getImportList();
+            if (importList == null) {
+                importList = PsiImportList.ARRAY_FACTORY.create(1)[0];
+            }else {
+                PsiImportStatement[] importStatements = importList.getImportStatements();
+                for (PsiImportStatement importStatement : importStatements) {
+                    if(Objects.equals(importStatement.getQualifiedName(), "org.springframework.web.bind.annotation.*")){
+                        isExit = true;
+                    }
+                }
+            }
+            if(!isExit){
+                PsiImportStatement importStatement = elementFactory.createImportStatementOnDemand("org.springframework.web.bind.annotation");
+                importList.add(importStatement);
+            }
+            PsiImportList finalImportList = importList;
+            //将参数、返回和bean的class导入
+            addImportListForField(importList);
+            realNeedImportList.forEach(psiClass -> {
+                long count = Arrays.stream(finalImportList.getImportStatements()).filter(x -> Objects.equals(x.getQualifiedName(), psiClass.getQualifiedName())).count();
+                if(count == 0){
+                    PsiImportStatement importStatement = elementFactory.createImportStatement(psiClass);
+                    finalImportList.add(importStatement);
+                }
+            });
+        }
+
+        private void addImportListForField(PsiImportList importList) {
+            if(StringUtils.isNotBlank(paramTextField.getText())){
+                List<PsiClass> needImportList = paramComplete.getNeedImportList();
+                String[] params = paramTextField.getText().trim().split(",");
+                for (String param : params) {
+                    for (PsiClass importParam : needImportList) {
+                        if(importParam.getName().contains(param)){
+                            //need import
+                            realNeedImportList.add(importParam);
+                        }
+                    }
+                }
+            }
+            importClass(importList, returnTextField, returnComplete);
+            importClass(importList, serviceTextField, serviceComplete);
+        }
+
+        private void importClass(PsiImportList importList, TextFieldWithCompletion returnTextField, ClassComplete returnComplete) {
+            if(StringUtils.isNotBlank(returnTextField.getText())){
+                List<PsiClass> needImportList = returnComplete.getNeedImportList();
+                String inner = getInner(returnTextField.getText().trim());
+                if(inner == null || "".equals(inner)){
+                    String param = returnTextField.getText().replace("<>", "").trim();
+                    for (PsiClass importParam : needImportList) {
+                        if(importParam.getName().contains(param)){
+                            //need import
+                            realNeedImportList.add(importParam);
+                        }
+                    }
+                }else {
+                    String trim = returnTextField.getText().trim();
+                    String param = trim.substring(0, trim.indexOf("<"));
+                    for (PsiClass importParam : needImportList) {
+                        if(importParam.getName().contains(param) || importParam.getName().contains(inner)){
+                            //need import
+                            realNeedImportList.add(importParam);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        private PsiMethod createRequestMethod(PsiJavaFile psiFile, PsiElementFactory elementFactory, int offset) {
+            StringBuilder sb = new StringBuilder();
+            String returnName = StringUtils.isBlank(returnTextField.getText()) ? "void" : returnTextField.getText().trim();
+            String methodType = (String) methodTypes.getSelectedItem();
+            if(StringUtils.isBlank(methodType) || "Other".equals(methodType)){
+                methodType = "Request";
+            }
+            sb.append("@").append(methodType).append("Mapping(\"").append(urlTextField.getText()).append("\")\n");
+
+            if(!Objects.equals("Get", methodType) && !Objects.equals("Request", methodType)){
+                sb.append("@ResponseBody").append("\n");
+            }
+            String text = nameTextField.getText();
+            StringBuilder methodFistLine = new StringBuilder();
+            methodFistLine.append("public ").append(returnName).append(" ").append(text).append("(");
+            String[] paramStr = getParamStr();
+            methodFistLine.append(paramStr[0]).append(")");
+            methodfirstLine = methodFistLine.toString();
+            sb.append(methodFistLine);
+            sb.append(" {\n");
+            if(StringUtils.isBlank(serviceTextField.getText())){
+                if(!Objects.equals("void", returnName)){
+                    sb.append("\nreturn null;");
+                }
+            }else {
+                PsiField[] fields = psiFile.getClasses()[0].getFields();
+                String fieldName = "";
+                for (PsiField field : fields) {
+                    PsiType fieldType = field.getType();
+                    String fieldTypeName = fieldType.getPresentableText();
+                    if(Objects.equals(fieldTypeName, serviceTextField.getText().trim())){
+                        //找到同一个属性了
+                        fieldName = field.getName();
+                        break;
+                    }
+                }
+                if(StringUtils.isBlank(fieldName)){
+                    fieldName = StringUtil.decapitalize(serviceTextField.getText());
+                    PsiField fieldFromText = elementFactory.createFieldFromText("@Autowired\nprivate " + serviceTextField.getText() + " " + fieldName + ";", psiFile);
+                    psiFile.getClasses()[0].add(fieldFromText);
+                }
+                if(StringUtils.isNotBlank(returnTextField.getText())){
+                    sb.append("return ");
+                }
+                sb.append(fieldName).append(".").append(text.trim()).append("(");
+                sb.append(paramStr[1]);
+                sb.append(");");
+            }
+            sb.append("\n}");
+            //从光标获取上下文方法
+            PsiElement element = PsiUtilBase.getElementAtCaret(editor);
+            PsiMethod prevMethod = PsiTreeUtil.getPrevSiblingOfType(element, PsiMethod.class);
+            PsiMethod newMethod = elementFactory.createMethodFromText(sb.toString(), psiFile);
+            PsiMethod finalMethod = null;
+            if(prevMethod != null && prevMethod.getParent() == psiFile.getClasses()[0]){
+                finalMethod = (PsiMethod)psiFile.getClasses()[0].addAfter(newMethod, prevMethod);
+            }
+            if(finalMethod == null){
+                PsiMethod nextMethod = PsiTreeUtil.getNextSiblingOfType(element, PsiMethod.class);
+                if(nextMethod != null && nextMethod.getParent() == psiFile.getClasses()[0]){
+                    finalMethod = (PsiMethod)psiFile.getClasses()[0].addBefore(newMethod, nextMethod);
+                }
+            }
+            if(finalMethod == null){
+                finalMethod = (PsiMethod)psiFile.getClasses()[0].add(newMethod);
+            }
+            CodeStyleManager.getInstance(project).reformat(psiFile);
+            return finalMethod;
+        }
+
+        private String[] getParamStr() {
+            String[] result = new String[]{"",""};
+            String paramText = paramTextField.getText();
+            if(StringUtils.isNotBlank(paramText)){
+                String[] params = paramText.trim().split(",");
+                Map<String, Integer> paramsMap = new HashMap<>();
+                for (String param : params) {
+                    String trim = param.trim();
+                    if(!paramsMap.containsKey(trim)){
+                        paramsMap.put(trim, 1);
+                    }else {
+                        Integer integer = paramsMap.get(trim);
+                        paramsMap.put(trim, integer+1);
+                    }
+                }
+                List<String> paramList = new LinkedList<>();
+                List<String> paramListTemp = new LinkedList<>();
+                Iterator<Map.Entry<String, Integer>> iterator = paramsMap.entrySet().iterator();
+                while (iterator.hasNext()){
+                    Map.Entry<String, Integer> next = iterator.next();
+                    if(next.getValue() == 1){
+                        String decapitalize = StringUtil.decapitalize(next.getKey());
+                        if(KeywordUtil.javaKeywords.contains(decapitalize)){
+                            decapitalize = decapitalize + "0";
+                        }
+                        paramList.add(next.getKey() + " " + decapitalize);
+                        paramListTemp.add(decapitalize);
+                    }else {
+                        for (int i = 0; i < next.getValue(); i++) {
+                            String className = next.getKey() + (i+1);
+                            String decapitalize = StringUtil.decapitalize(className);
+                            paramList.add(next.getKey() + " " + decapitalize);
+                            paramListTemp.add(decapitalize);
+                        }
+                    }
+                }
+                result[0] = StringUtils.join(paramList, ", ");
+                result[1] = StringUtils.join(paramListTemp, ", ");
+            }
+            return result;
+        }
+
+        private PsiJavaFile getPsiJavaFile() {
+            PsiDocumentManager psiDocumentManager = PsiDocumentManager.getInstance(project);
+            PsiFile psiFile = psiDocumentManager.getPsiFile(editor.getDocument());
+            if(psiFile == null){
+                return null;
+            }
+            if(!(psiFile instanceof PsiJavaFile)){
+                return null;
+            }
+            return (PsiJavaFile)psiFile;
+        }
+
+        private boolean validInput() {
+            PsiJavaFile psiJavaFile = getPsiJavaFile();
+            if(psiJavaFile == null){
+                Messages.showMessageDialog("Please open a Java file!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
+                return false;
+            }
+            if(!psiJavaFile.isWritable()){
+                Messages.showMessageDialog("The current file is read-only!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
+                return false;
+            }
+            String text = nameTextField.getText();
+            if(StringUtils.isBlank(text)){
+                Messages.showMessageDialog("Method name cannot be empty!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                return false;
+            }
+            if(!PATTERN.matcher(text.trim()).matches()){
+                Messages.showMessageDialog("Method naming does not comply with regulations!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                return false;
+            }
+            String url = urlTextField.getText();
+            if(StringUtils.isBlank(url)){
+                Messages.showMessageDialog("Url cannot be empty!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                return false;
+            }
+            //校验输入的class是否符合要求
+            if(StringUtils.isNotBlank(returnTextField.getText())){
+                if(findClassName(returnTextField.getText())){
+                    Messages.showMessageDialog("Return class [" + getRealText(returnTextField.getText()) + "] doesn't exist!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                    return false;
+                }
+            }
+            if(StringUtils.isNotBlank(serviceTextField.getText())){
+                if(findClassName(serviceTextField.getText())){
+                    Messages.showMessageDialog("Bean class [" + getRealText(serviceTextField.getText()) + "] doesn't exist!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                    return false;
+                }
+            }
+            if(StringUtils.isNotBlank(paramTextField.getText())){
+                String[] params = paramTextField.getText().split(",");
+                for (String param : params) {
+                    if(StringUtils.isNotBlank(param)){
+                        if(findClassName(param)){
+                            Messages.showMessageDialog("Parameter class [" + getRealText(param) + "] doesn't exist!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private String getRealText(String param) {
+            return param.replace("<", "&lt;").replace(">", "&gt;").trim();
+        }
+
+        private boolean findClassName(String text) {
+            try {
+                //getClassesByName这个方法必须被这样包裹住，不然会报各种慢操作问题
+                return !AppExecutorUtil.getAppExecutorService().submit(() -> ApplicationManager.getApplication().runReadAction((Computable<Boolean>) () -> {
+                    String trim = text.trim();
+                    String inner = getInner(trim);
+                    if(inner == null || "".equals(inner)){
+                        PsiClass[] psiClass = PsiShortNamesCache.getInstance(project).getClassesByName(trim.replace("<>", ""), GlobalSearchScope.allScope(project));
+                        return psiClass.length > 0;
+                    }else {
+                        PsiClass[] psiClass = PsiShortNamesCache.getInstance(project).getClassesByName(inner, GlobalSearchScope.allScope(project));
+                        if(psiClass.length == 0){
+                            return false;
+                        }
+                        PsiClass[] psiClass1 = PsiShortNamesCache.getInstance(project).getClassesByName(trim.substring(0, trim.indexOf("<")), GlobalSearchScope.allScope(project));
+                        return psiClass1.length > 0;
+                    }
+                })).get();
+            } catch (Exception e) {
+            }
+            return false;
+        }
+        private String getInner(String target){
+            String trim = target.trim();
+            int start = trim.indexOf("<");
+            int end = trim.lastIndexOf(">");
+            if(start != -1 && end != -1){
+                return trim.substring(start+1, end).trim();
+
+            }else {
+                return null;
+            }
         }
 
         public JPanel getMainPanel() {
@@ -352,23 +571,53 @@ public class GenerateMethodAction extends AnAction {
         }
     }
 
+
+
     class ClassComplete extends TextFieldCompletionProvider {
-        Project project;
+        private final Project project;
 
-        boolean many;
+        private final List<PsiClass> needImportList;
 
-        public ClassComplete(Project project, boolean many){
+        private final boolean many;
+
+        private final int type;
+
+        TextFieldWithCompletion textField;
+
+        public List<PsiClass> getNeedImportList(){
+            return needImportList;
+        }
+
+        public void setTextField(TextFieldWithCompletion textField){
+            this.textField = textField;
+        }
+
+        public ClassComplete(Project project, boolean many, int type){
             this.project = project;
             this.many = many;
+            this.needImportList = new LinkedList<>();
+            this.type = type;
+        }
+
+        @Override
+        public CharFilter.@Nullable Result acceptChar(char c) {
+//            if(c == '<'){
+//                this.textField.setText(this.textField.getText() + ">");
+//            }
+            return super.acceptChar(c);
         }
 
         @Override
         public @Nullable String getPrefix(@NotNull String text, int offset) {
+            String substring = text.substring(0, offset);
             if(many){
-                String substring = text.substring(0, offset);
                 String[] split = substring.split(",");
-                return split[split.length-1];
+                return split[split.length-1].trim();
             }else {
+                //dddd
+                if(substring.contains("<")){
+                    return text.substring(text.indexOf("<")+1, offset);
+                }
                 return super.getPrefix(text, offset);
             }
         }
@@ -384,6 +633,10 @@ public class GenerateMethodAction extends AnAction {
             Collection<PsiClass> psiClasses = AllClassesSearch.search(GlobalSearchScope.allScope(project), project, s -> s.contains(finalText)).findAll();
             // 将匹配的类名添加到自动补全结果集
             for (PsiClass psiClass : psiClasses) {
+                if(psiClass.isAnnotationType()){
+                    //不要注解
+                    continue;
+                }
                 PsiFile psiFile = psiClass.getContainingFile();
                 String packageName;
                 if (psiFile instanceof PsiJavaFile) {
@@ -395,9 +648,23 @@ public class GenerateMethodAction extends AnAction {
                 packageName = " " + packageName;
                 LookupElementBuilder lookupElementBuilder = LookupElementBuilder.create(psiClass)
                         .withIcon(psiClass.getIcon(Iconable.ICON_FLAG_READ_STATUS))
-                        .withBoldness(true).withTailText(packageName, true);
+                        .withBoldness(true).withTailText(packageName, true).withInsertHandler((context, item) -> {
+                            PsiClass psiClz = (PsiClass) item.getObject();
+                            if(psiClz.getQualifiedName().startsWith("java.lang.")){
+                                return;
+                            }
+                            //删除之前导入过得  防止重复
+                            needImportList.removeIf(s -> Objects.nonNull(psiClz.getName()) && Objects.equals(s.getName(), psiClz.getName()));
+                            needImportList.add(psiClz);
+                        });
                 result.addElement(lookupElementBuilder);
             }
+        }
+
+        @Override
+        public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull String prefix, @NotNull CompletionResultSet result) {
+            super.fillCompletionVariants(parameters, prefix, result);
+
         }
 
         private String getFinalText(String text, int offset) {
@@ -411,6 +678,11 @@ public class GenerateMethodAction extends AnAction {
                         text = classes[i];
                         break;
                     }
+                }
+            }else {
+                String substring = text.substring(0, offset);
+                if(substring.contains("<")){
+                    return text.substring(text.indexOf("<")+1, offset);
                 }
             }
             return text;
