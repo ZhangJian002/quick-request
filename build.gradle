@@ -31,7 +31,7 @@ patchPluginXml {
 
     <h3>v2023.6.9</h3 >
     <ul>
-       <li>Add automatic spring generation method(right click choose Generate Spring Method or alt \"): 
+       <li>Add automatic spring generation method(right click choose Generate Spring Method or alt \\): 
        
        You only need to fill out a form according to the requirements, which will automatically generate code for the controller layer and service layer for you</li>
     </ul>

@@ -488,28 +488,28 @@ public class GenerateMethodAction extends AnAction {
             }
             String text = nameTextField.getText();
             if(StringUtils.isBlank(text)){
-                Messages.showMessageDialog("Method name cannot be empty!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                Messages.showMessageDialog("Method name cannot be empty!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
                 return false;
             }
             if(!PATTERN.matcher(text.trim()).matches()){
-                Messages.showMessageDialog("Method naming does not comply with regulations!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                Messages.showMessageDialog("Method naming does not comply with regulations!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
                 return false;
             }
             String url = urlTextField.getText();
             if(StringUtils.isBlank(url)){
-                Messages.showMessageDialog("Url cannot be empty!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                Messages.showMessageDialog("Url cannot be empty!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
                 return false;
             }
             //校验输入的class是否符合要求
             if(StringUtils.isNotBlank(returnTextField.getText())){
                 if(findClassName(returnTextField.getText())){
-                    Messages.showMessageDialog("Return class [" + getRealText(returnTextField.getText()) + "] doesn't exist!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                    Messages.showMessageDialog("Return class [" + getRealText(returnTextField.getText()) + "] doesn't exist!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
                     return false;
                 }
             }
             if(StringUtils.isNotBlank(serviceTextField.getText())){
                 if(findClassName(serviceTextField.getText())){
-                    Messages.showMessageDialog("Bean class [" + getRealText(serviceTextField.getText()) + "] doesn't exist!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                    Messages.showMessageDialog("Bean class [" + getRealText(serviceTextField.getText()) + "] doesn't exist!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
                     return false;
                 }
             }
@@ -518,7 +518,7 @@ public class GenerateMethodAction extends AnAction {
                 for (String param : params) {
                     if(StringUtils.isNotBlank(param)){
                         if(findClassName(param)){
-                            Messages.showMessageDialog("Parameter class [" + getRealText(param) + "] doesn't exist!", UIBundle.message("invalid.user.input.dialog.title"), Messages.getErrorIcon());
+                            Messages.showMessageDialog("Parameter class [" + getRealText(param) + "] doesn't exist!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
                             return false;
                         }
                     }
