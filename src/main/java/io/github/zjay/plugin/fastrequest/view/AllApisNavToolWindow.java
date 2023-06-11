@@ -48,6 +48,7 @@ import com.intellij.util.Query;
 import io.github.zjay.plugin.fastrequest.action.CheckBoxFilterAction;
 import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.configurable.FastRequestSearchEverywhereConfiguration;
+import io.github.zjay.plugin.fastrequest.deprecated.TreeSpeedSearch;
 import io.github.zjay.plugin.fastrequest.model.ApiService;
 import io.github.zjay.plugin.fastrequest.model.MethodType;
 import io.github.zjay.plugin.fastrequest.view.component.tree.*;
@@ -105,7 +106,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                 }
             }
         });
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(apiTree, path -> {
+        io.github.zjay.plugin.fastrequest.deprecated.TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(apiTree, path -> {
             BaseNode node = (BaseNode) path.getLastPathComponent();
             Object object = node.getUserObject();
             return object.toString();
@@ -197,12 +198,12 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                 indicator.setIndeterminate(false);
                 ApplicationManager.getApplication().runReadAction(() -> {
                     Query<PsiClass> query = AllClassesSearch.search(ProjectScope.getContentScope(myProject), myProject);
-                    Collection<PsiClass> controller = query.filtering(cls -> cls.getAnnotation("org.springframework.web.bind.annotation.RestController") != null ||
+                    Collection<PsiClass> controller = query.findAll().stream().filter(cls -> cls.getAnnotation("org.springframework.web.bind.annotation.RestController") != null ||
                                     cls.getAnnotation("org.springframework.stereotype.Controller") != null
                                     || cls.getAnnotation("org.springframework.web.bind.annotation.RequestMapping") != null
                                     || cls.getAnnotation("javax.ws.rs.Path") != null
                             )
-                            .filtering(
+                            .filter(
                                     cls -> {
                                         if (moduleNameList == null) {
                                             return true;
@@ -213,9 +214,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                                         }
                                         return moduleNameList.contains(module.getName());
                                     }
-                            )
-                            .allowParallelProcessing()
-                            .findAll();
+                            ).collect(Collectors.toList());
                     allApiList = NodeUtil.getAllApiList(controller);
                     indicator.setText("Rendering");
                     List<String> selectMethodType = methodTypeFilter.getSelectedElementList();

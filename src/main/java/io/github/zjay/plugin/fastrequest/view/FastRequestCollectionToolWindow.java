@@ -67,6 +67,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.StatusText;
 import free.icons.PluginIcons;
+import io.github.zjay.plugin.fastrequest.config.AddAnActionFunction;
 import io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent;
 import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.config.FastRequestHistoryCollectionComponent;
@@ -516,6 +517,9 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         });
         toolbarDecorator.setAddActionName("Add Group").setAddAction(e -> {
             int selectedRow = collectionTable.getSelectedRow();
+            if(selectedRow <= 0){
+                return;
+            }
             CollectionCustomNode root = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(0);
             String id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
             CollectionCustomNode addNode = null;
@@ -579,7 +583,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         });
 
         /**
-        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.addModuleGroup"), AllIcons.Nodes.ModuleGroup) {
+        toolbarDecorator.addExtraActions(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.addModuleGroup"), AllIcons.Nodes.ModuleGroup) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 CollectionCustomNode root = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(0);
@@ -603,46 +607,32 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             }
         });
          */
-        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton("Expand All", AllIcons.Actions.Expandall) {
+        toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Expand All", "", AllIcons.Actions.Expandall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 CollectionCustomNode node = new CollectionCustomNode("0", "Root", 1);
                 SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),true);
             }
 
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        });
+        }));
 
-        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton("Collapse All", AllIcons.Actions.Collapseall) {
+        toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Collapse All", "", AllIcons.Actions.Collapseall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 CollectionCustomNode node = new CollectionCustomNode("0", "Root", 1);
                 SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),false);
             }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        });
-        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton("Refresh", AllIcons.Actions.Refresh) {
+        }));
+        toolbarDecorator.setActionGroup(new MyActionGroup(() -> new AnAction("Refresh", "", AllIcons.Actions.Refresh) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 refresh();
             }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        });
-        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.exportToPostman"), PluginIcons.ICON_POSTMAN) {
-
+        }));
+        MyActionGroup myActionGroup = new MyActionGroup(() -> new AnAction(MyResourceBundleUtil.getKey("button.exportToPostman"), "", PluginIcons.ICON_POSTMAN) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
+
 
                 List<DataMapping> headerParamsKeyValueList;
                 FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
@@ -682,12 +672,9 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 };
                 ExportToFileUtil.chooseFileAndExport(myProject,exporterToTextFile);
             }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
         });
+
+        toolbarDecorator.setActionGroup(myActionGroup);
         toolbarDecorator.setToolbarPosition(ActionToolbarPosition.TOP);
         collectionPanel = toolbarDecorator.createPanel();
     }
@@ -708,18 +695,14 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 refreshTable2();
             }
         });
-        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton("Refresh", AllIcons.Actions.Refresh) {
+        MyActionGroup myActionGroup = new MyActionGroup(() -> new AnAction("Refresh", "", AllIcons.Actions.Refresh) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 refresh2();
             }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
         });
-//        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.exportToPostman"), PluginIcons.ICON_POSTMAN) {
+        toolbarDecorator.setActionGroup(myActionGroup);
+//        toolbarDecorator.addExtraActions(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.exportToPostman"), PluginIcons.ICON_POSTMAN) {
 //
 //            @Override
 //            public void actionPerformed(@NotNull AnActionEvent e) {
@@ -770,6 +753,31 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 //        });
         toolbarDecorator.setToolbarPosition(ActionToolbarPosition.TOP);
         collectionPanel2 = toolbarDecorator.createPanel();
+    }
+
+    /**
+     * 这个类 完全是为了兼容新版本做的，因为新版本addExtraActions 和 addExtraAction方法都已经标记为过期
+     */
+    static class MyActionGroup extends ActionGroup{
+
+        List<AnAction> allActions = new LinkedList<>();
+
+        public MyActionGroup(){
+
+        }
+
+        public MyActionGroup(AddAnActionFunction anActionFunction){
+            add(anActionFunction.initAnAction());
+        }
+
+        public void add(AnAction anAction){
+            allActions.add(anAction);
+        }
+
+        @Override
+        public AnAction @NotNull [] getChildren(@Nullable AnActionEvent e) {
+            return allActions.toArray(new AnAction[allActions.size()]);
+        }
     }
 
     private TreeTableView createCollectionTable() {

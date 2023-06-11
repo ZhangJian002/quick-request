@@ -27,6 +27,7 @@ import com.intellij.lang.Language;
 import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xhtml.XHTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
@@ -57,6 +58,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
@@ -102,19 +104,19 @@ public class MyLanguageTextField extends LanguageTextField {
     @Override
     public void setText(@Nullable String text) {
         Language finalLanguage = getLanguage(text);
-        ReadAction.nonBlocking(() -> {
-        Document document = createDocument(text, finalLanguage, myProject, new SimpleDocumentCreator());
-        setDocument(document);
-        PsiFile psiFile = PsiDocumentManager.getInstance(myProject).getPsiFile(document);
-        if (psiFile != null) {
-            WriteCommandAction.runWriteCommandAction(
-                    myProject,
-                    () -> {
-                        CodeStyleManager.getInstance(getProject()).reformat(psiFile);
-                    }
-            );
-        }
-        }).executeSynchronously();
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            Document document = createDocument(text, finalLanguage, myProject, new SimpleDocumentCreator());
+            setDocument(document);
+            PsiFile psiFile = PsiDocumentManager.getInstance(myProject).getPsiFile(document);
+            if (psiFile != null) {
+                WriteCommandAction.runWriteCommandAction(
+                        myProject,
+                        () -> {
+                            CodeStyleManager.getInstance(getProject()).reformat(psiFile);
+                        }
+                );
+            }
+        });
     }
 
     private Language getLanguage(String text) {

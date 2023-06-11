@@ -1685,7 +1685,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(headerTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.addExtraAction(new ClearAction());
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
         toolbarDecorator.setAddAction(anActionButton -> {
                     if (headerParamsKeyValueList == null) {
                         headerParamsKeyValueList = new ArrayList<>();
@@ -1704,7 +1704,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ).setRemoveAction(anActionButton -> {
             removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
-        toolbarDecorator.addExtraAction(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("header.group.manage"), AllIcons.Actions.ListChanges) {
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new AnAction(MyResourceBundleUtil.getKey("header.group.manage"), "", AllIcons.Actions.ListChanges) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 int idx = -1;
@@ -1726,11 +1726,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 }
             }
 
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        });
+        }));
         headerPanel = toolbarDecorator.createPanel();
     }
 
@@ -1802,7 +1798,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(urlParamsTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.addExtraAction(new ClearAction());
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
 
         toolbarDecorator.setAddAction(anActionButton -> {
                     int selectedRow = urlParamsTable.getSelectedRow();
@@ -1823,17 +1819,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         urlParamsTablePanel = toolbarDecorator.createPanel();
     }
 
-    class ClearAction extends AnActionButton{
+    class ClearAction extends AnAction{
         public ClearAction(){
-            super("Clear", PluginIcons.ICON_CLEAR);
-        }
-
-        @Override
-        public void updateButton(@NotNull AnActionEvent e) {
-
-//            FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(project);
-//            fastRequestToolWindow.get
-//            e.getPresentation().setEnabled();
+            super("Clear", "", PluginIcons.ICON_CLEAR);
         }
 
         @Override
@@ -1984,7 +1972,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(pathParamsTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.addExtraAction(new ClearAction());
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
 
         toolbarDecorator.setAddAction(anActionButton -> {
                     int selectedRow = pathParamsTable.getSelectedRow();
@@ -2033,7 +2021,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(urlEncodedTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.addExtraAction(new ClearAction());
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
 
 
         toolbarDecorator.setAddAction(anActionButton -> {
@@ -2076,7 +2064,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(multipartTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.addExtraAction(new ClearAction());
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
 
 
         toolbarDecorator.setAddAction(anActionButton -> {

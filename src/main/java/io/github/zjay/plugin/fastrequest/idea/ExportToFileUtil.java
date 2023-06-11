@@ -45,6 +45,7 @@ import com.intellij.util.PathUtil;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -122,15 +123,16 @@ public final class ExportToFileUtil {
       myExporter = exporter;
 
       myTfFile = new TextFieldWithBrowseButton();
-      myTfFile.addBrowseFolderListener(new TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor(), myProject) {
-        @NotNull
+
+      myTfFile.addBrowseFolderListener(new TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFolderDescriptor(), myProject) {
         @Override
-        protected String chosenFileToResultingText(@NotNull VirtualFile chosenFile) {
-          String res = super.chosenFileToResultingText(chosenFile);
-          if (chosenFile.isDirectory()) {
-            res += File.separator + PathUtil.getFileName(myExporter.getDefaultFilePath());
+        public void actionPerformed(ActionEvent e) {
+          super.actionPerformed(e);
+          String text = myTfFile.getText();
+
+          if(StringUtils.isBlank(text) || !text.endsWith(".json")){
+            myTfFile.setText(text + File.separator + (PathUtil.getFileName(myExporter.getDefaultFilePath())));
           }
-          return res;
         }
       });
 

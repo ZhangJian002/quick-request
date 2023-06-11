@@ -182,11 +182,11 @@ public class CheckBoxFilterAction<T> extends AnAction {
         }
 
         public List<T> getSelectedElementList() {
-            return ContainerUtil.filter(myElementList, myPersistentConfiguration::isFileTypeVisible);
+            return ContainerUtil.filter(myElementList, this::isSelected);
         }
 
         public boolean isSelected(T element) {
-            return myPersistentConfiguration.isFileTypeVisible(element);
+            return !myPersistentConfiguration.getState().getFilteredOutFileTypeNames().contains(element);
         }
 
         public void setSelected(T element, boolean selected) {
