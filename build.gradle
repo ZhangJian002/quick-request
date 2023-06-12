@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.6.9.2'
+version '2023.6.12'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -29,6 +29,10 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.6.12</h3 >
+    <ul>
+        <li>Other optimizations and bug fixes</li>
+    </ul>
     <h3>v2023.6.9</h3 >
     <ul>
        <li>Add automatic spring generation method(right click choose Generate Spring Method or alt \\): 

@@ -90,14 +90,14 @@
                     description="Generate spring method">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
             </action>
-            <action id="quickRequest.generator" class="io.github.zjay.plugin.fastrequest.action.GenerateUrlAction"
-                    text="Generate URL and Param"
-                    description="Generate URL and Param">
-                <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl BACK_SLASH"/>
-                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl BACK_SLASH"/>
-                <keyboard-shortcut keymap="Default for XWin" first-keystroke="ctrl BACK_SLASH"/>
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl BACK_SLASH"/>
-            </action>
+<!--            <action id="quickRequest.generator" class="io.github.zjay.plugin.fastrequest.action.GenerateUrlAction"-->
+<!--                    text="Generate URL and Param"-->
+<!--                    description="Generate URL and Param">-->
+<!--                <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl BACK_SLASH"/>-->
+<!--                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl BACK_SLASH"/>-->
+<!--                <keyboard-shortcut keymap="Default for XWin" first-keystroke="ctrl BACK_SLASH"/>-->
+<!--                <keyboard-shortcut keymap="$default" first-keystroke="ctrl BACK_SLASH"/>-->
+<!--            </action>-->
 
             <action id="quickRequest.sendAction"
                     class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">

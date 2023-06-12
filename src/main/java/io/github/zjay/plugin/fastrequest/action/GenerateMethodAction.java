@@ -53,6 +53,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.util.KeywordUtil;
+import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,6 +63,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GenerateMethodAction extends AnAction {
 
@@ -72,9 +74,11 @@ public class GenerateMethodAction extends AnAction {
 
     Editor editor;
 
+    Project project;
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-        Project project = anActionEvent.getData(LangDataKeys.PROJECT);
+        project = anActionEvent.getData(LangDataKeys.PROJECT);
         if (project == null) {
             return;
         }
@@ -83,11 +87,24 @@ public class GenerateMethodAction extends AnAction {
         if (editor == null) {
             return;
         }
-        MyCustomForm form = new MyCustomForm(project);
+        PsiJavaFile psiJavaFile = getPsiJavaFile();
+        if(psiJavaFile == null){
+            Messages.showMessageDialog("Please choose a java file!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
+            return;
+        }
+        if(!psiJavaFile.isWritable()){
+            Messages.showMessageDialog("Please select an editable file!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
+            return;
+        }
+        if(psiJavaFile.getClasses()[0].isInterface() || psiJavaFile.getClasses()[0].isAnnotationType()){
+            Messages.showMessageDialog("Please select a java file containing the class!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
+            return;
+        }
 
+        MyCustomForm form = new MyCustomForm(project);
         // 创建一个弹出窗口，并将表单窗口添加到其中
         popup = JBPopupFactory.getInstance().createComponentPopupBuilder(form.getMainPanel(), form.nameTextField)
-                .setTitle("Generate Spring Method")
+                .setTitle(MyResourceBundleUtil.getKey("GenerateSpringMethod"))
                 .setResizable(true)
                 .setMovable(true)
                 .setCancelOnClickOutside(false)
@@ -97,6 +114,18 @@ public class GenerateMethodAction extends AnAction {
                 .createPopup();
         popup.showInBestPositionFor(editor);
 
+    }
+
+    private PsiJavaFile getPsiJavaFile() {
+        PsiDocumentManager psiDocumentManager = PsiDocumentManager.getInstance(project);
+        PsiFile psiFile = psiDocumentManager.getPsiFile(editor.getDocument());
+        if(psiFile == null){
+            return null;
+        }
+        if(!(psiFile instanceof PsiJavaFile)){
+            return null;
+        }
+        return (PsiJavaFile)psiFile;
     }
 
     class MyCustomForm {
@@ -130,9 +159,12 @@ public class GenerateMethodAction extends AnAction {
 
         List<PsiClass> realNeedImportList;
 
+        List<PsiClass> realAutoImportList;
+
         public MyCustomForm(Project project) {
             this.project = project;
             this.realNeedImportList = new LinkedList<>();
+            this.realAutoImportList = new LinkedList<>();
             buttonBindAction();
             buildPanel();
         }
@@ -150,19 +182,19 @@ public class GenerateMethodAction extends AnAction {
             returnComplete.setTextField(returnTextField);
             serviceTextField = new TextFieldWithCompletion(project, (serviceComplete=new ClassComplete(project, false, 3)), "", true, true, true);
             serviceComplete.setTextField(serviceTextField);
-            needGenerateSub = new JBCheckBox("Generate methods in the bean class", true);
+            needGenerateSub = new JBCheckBox(MyResourceBundleUtil.getKey("GenerateSelected"), true);
             JPanel buttonJPanel = new JPanel(new GridBagLayout());
             buttonJPanel.add(generateButton);
             buttonJPanel.add(cancelButton);
             JPanel panel = UI.PanelFactory.grid()
-                    .add(UI.PanelFactory.panel(nameTextField).withLabel("Name:").withComment("Enter your method name"))
-                    .add(UI.PanelFactory.panel(paramTextField).withLabel("Parameters:").withComment("Multiple parameters, separated by commas (auto-complete)"))
-                    .add(UI.PanelFactory.panel(methodTypes).withLabel("Type:").withComment("Select method type"))
-                    .add(UI.PanelFactory.panel(urlTextField).withLabel("Url:").withComment("Enter request url"))
-                    .add(UI.PanelFactory.panel(returnTextField).withLabel("Return class:").withComment("Enter method return class (auto-complete)"))
-                    .add(UI.PanelFactory.panel(serviceTextField).withLabel("Bean class:").withComment("The bean called in the 'return' statement (auto-complete), and generate bean class method"))
-                    .add(UI.PanelFactory.panel(needGenerateSub).withComment("Selected representatives need to be generated"))
-                    .add(UI.PanelFactory.panel(buttonJPanel).withTooltip("Name and url are required, the field for automatic completion needs to be selected and entered, generics only support one type"))
+                    .add(UI.PanelFactory.panel(nameTextField).withLabel(MyResourceBundleUtil.getKey("MethodName")+":").withComment(MyResourceBundleUtil.getKey("MethodNameDes")))
+                    .add(UI.PanelFactory.panel(paramTextField).withLabel(MyResourceBundleUtil.getKey("Parameters")+":").withComment(MyResourceBundleUtil.getKey("ParametersDes")))
+                    .add(UI.PanelFactory.panel(methodTypes).withLabel(MyResourceBundleUtil.getKey("Type")+":").withComment(MyResourceBundleUtil.getKey("TypeDes")))
+                    .add(UI.PanelFactory.panel(urlTextField).withLabel(MyResourceBundleUtil.getKey("Url")+":").withComment(MyResourceBundleUtil.getKey("UrlDes")))
+                    .add(UI.PanelFactory.panel(returnTextField).withLabel(MyResourceBundleUtil.getKey("Return.class")+":").withComment(MyResourceBundleUtil.getKey("Return.classDes")))
+                    .add(UI.PanelFactory.panel(serviceTextField).withLabel(MyResourceBundleUtil.getKey("Bean.class")+":").withComment(MyResourceBundleUtil.getKey("Bean.classDes")))
+                    .add(UI.PanelFactory.panel(needGenerateSub).withComment(MyResourceBundleUtil.getKey("GenerateSelectedDes")))
+                    .add(UI.PanelFactory.panel(buttonJPanel).withTooltip(MyResourceBundleUtil.getKey("GenerateTooTip")))
                     .createPanel();
             mainPanel = new JPanel(new GridBagLayout());
             GridBag gb = new GridBag()
@@ -210,41 +242,49 @@ public class GenerateMethodAction extends AnAction {
         }
 
         private void createSubClassMethods(PsiElementFactory elementFactory) {
-            if(serviceComplete.getNeedImportList().size() > 0){
-                PsiClass psiClass = serviceComplete.getNeedImportList().get(0);
-                if(!psiClass.getContainingFile().isWritable() || !needGenerateSub.isSelected()){
-                    return;
-                }
-                if(psiClass.isInterface()){
-                    //是接口
-                    PsiJavaFile containingFile = (PsiJavaFile) psiClass.getContainingFile();
-                    String methodForInteface = methodfirstLine.replaceFirst("public ", "").concat(";");
-                    PsiMethod methodFromText = elementFactory.createMethodFromText(methodForInteface, containingFile);
-                    psiClass.add(methodFromText);
-                    realNeedImportList.forEach(importClass -> {
-                        PsiImportList importList = containingFile.getImportList();
-                        if(importList == null){
-                            PsiImportList.ARRAY_FACTORY.create(1);
-                        }
-                        long count = Arrays.stream(containingFile.getImportList().getImportStatements()).filter(x ->
-                                Objects.equals(x.getQualifiedName(), importClass.getQualifiedName())
-                                        || Objects.equals(psiClass.getQualifiedName(), importClass.getQualifiedName())
-                        ).count();
-                        if(count == 0){
-                            PsiImportStatement importStatement = elementFactory.createImportStatement(importClass);
-                            containingFile.getImportList().add(importStatement);
-                        }
-                    });
-                    //所有的实现类
-                    Collection<PsiClass> psiClasses = ClassInheritorsSearch.search(psiClass, GlobalSearchScope.projectScope(project), true).findAll();
-                    for (PsiClass subPsiClass : psiClasses) {
-                        //逐一生成
-                        generateMethodForSubClass(subPsiClass, elementFactory, true);
+            if(StringUtils.isBlank(serviceTextField.getText())){
+                return;
+            }
+            List<PsiClass> serviceClasses = new LinkedList<>();
+            serviceClasses.addAll(serviceComplete.getNeedImportList());
+            serviceClasses.addAll(realAutoImportList);
+            List<PsiClass> classes = serviceClasses.stream().filter(x -> x.getQualifiedName().endsWith(serviceTextField.getText().trim())).collect(Collectors.toList());
+            if(classes.isEmpty()){
+                return;
+            }
+            PsiClass psiClass = classes.get(0);
+            if(!psiClass.getContainingFile().isWritable() || !needGenerateSub.isSelected()){
+                return;
+            }
+            if(psiClass.isInterface()){
+                //是接口
+                PsiJavaFile containingFile = (PsiJavaFile) psiClass.getContainingFile();
+                String methodForInteface = methodfirstLine.replaceFirst("public ", "").concat(";");
+                importRealClass(psiClass, elementFactory, methodForInteface, containingFile);
+                realAutoImportList.forEach(importClass -> {
+                    PsiImportList importList = containingFile.getImportList();
+                    if(importList == null){
+                        PsiImportList.ARRAY_FACTORY.create(1);
                     }
-                }else {
-                    //直接生成
-                    generateMethodForSubClass(psiClass, elementFactory, false);
+                    //自动导入的类，由于不好判断导入哪一个，就只能按返回第一个来，但是如果已经存在名字一样的类了，就不导入了
+                    long count = Arrays.stream(containingFile.getImportList().getImportStatements()).filter(x ->
+                            x.getQualifiedName().endsWith(importClass.getName())
+                                    || Objects.equals(psiClass.getQualifiedName(), importClass.getQualifiedName())
+                    ).count();
+                    if(count == 0){
+                        PsiImportStatement importStatement = elementFactory.createImportStatement(importClass);
+                        containingFile.getImportList().add(importStatement);
+                    }
+                });
+                //所有的实现类
+                Collection<PsiClass> psiClasses = ClassInheritorsSearch.search(psiClass, GlobalSearchScope.projectScope(project), true).findAll();
+                for (PsiClass subPsiClass : psiClasses) {
+                    //逐一生成
+                    generateMethodForSubClass(subPsiClass, elementFactory, true);
                 }
+            }else {
+                //直接生成
+                generateMethodForSubClass(psiClass, elementFactory, false);
             }
         }
 
@@ -262,6 +302,24 @@ public class GenerateMethodAction extends AnAction {
             sb.append("}");
             String implementMethod = sb.toString();
             PsiJavaFile subFile = (PsiJavaFile) subPsiClass.getContainingFile();
+            importRealClass(subPsiClass, elementFactory, implementMethod, subFile);
+            realAutoImportList.forEach(importClass -> {
+                PsiImportList importList = subFile.getImportList();
+                if(importList == null){
+                    PsiImportList.ARRAY_FACTORY.create(1);
+                }
+                long count = Arrays.stream(subFile.getImportList().getImportStatements()).filter(x ->
+                        x.getQualifiedName().endsWith(importClass.getQualifiedName())
+                                || Objects.equals(subPsiClass.getQualifiedName(), importClass.getQualifiedName())
+                ).count();
+                if(count == 0){
+                    PsiImportStatement importStatement = elementFactory.createImportStatement(importClass);
+                    subFile.getImportList().add(importStatement);
+                }
+            });
+        }
+
+        private void importRealClass(PsiClass subPsiClass, PsiElementFactory elementFactory, String implementMethod, PsiJavaFile subFile) {
             PsiMethod implement = elementFactory.createMethodFromText(implementMethod, subFile);
             subPsiClass.add(implement);
             realNeedImportList.forEach(importClass -> {
@@ -298,8 +356,6 @@ public class GenerateMethodAction extends AnAction {
                 importList.add(importStatement);
             }
             PsiImportList finalImportList = importList;
-            //将参数、返回和bean的class导入
-            addImportListForField(importList);
             realNeedImportList.forEach(psiClass -> {
                 long count = Arrays.stream(finalImportList.getImportStatements()).filter(x -> Objects.equals(x.getQualifiedName(), psiClass.getQualifiedName())).count();
                 if(count == 0){
@@ -307,9 +363,19 @@ public class GenerateMethodAction extends AnAction {
                     finalImportList.add(importStatement);
                 }
             });
+            realAutoImportList.forEach(psiClass -> {
+                long count = Arrays.stream(finalImportList.getImportStatements()).filter(x -> x.getQualifiedName().endsWith(psiClass.getName())).count();
+                if(count == 0){
+                    PsiImportStatement importStatement = elementFactory.createImportStatement(psiClass);
+                    finalImportList.add(importStatement);
+                }
+            });
         }
 
-        private void addImportListForField(PsiImportList importList) {
+        /**
+         * 将param、return和service的bean class获得放入list
+         */
+        private void addImportListForField() {
             if(StringUtils.isNotBlank(paramTextField.getText())){
                 List<PsiClass> needImportList = paramComplete.getNeedImportList();
                 String[] params = paramTextField.getText().trim().split(",");
@@ -322,11 +388,11 @@ public class GenerateMethodAction extends AnAction {
                     }
                 }
             }
-            importClass(importList, returnTextField, returnComplete);
-            importClass(importList, serviceTextField, serviceComplete);
+            importClass(returnTextField, returnComplete);
+            importClass(serviceTextField, serviceComplete);
         }
 
-        private void importClass(PsiImportList importList, TextFieldWithCompletion returnTextField, ClassComplete returnComplete) {
+        private void importClass(TextFieldWithCompletion returnTextField, ClassComplete returnComplete) {
             if(StringUtils.isNotBlank(returnTextField.getText())){
                 List<PsiClass> needImportList = returnComplete.getNeedImportList();
                 String inner = getInner(returnTextField.getText().trim());
@@ -464,19 +530,10 @@ public class GenerateMethodAction extends AnAction {
             return result;
         }
 
-        private PsiJavaFile getPsiJavaFile() {
-            PsiDocumentManager psiDocumentManager = PsiDocumentManager.getInstance(project);
-            PsiFile psiFile = psiDocumentManager.getPsiFile(editor.getDocument());
-            if(psiFile == null){
-                return null;
-            }
-            if(!(psiFile instanceof PsiJavaFile)){
-                return null;
-            }
-            return (PsiJavaFile)psiFile;
-        }
 
         private boolean validInput() {
+            //将参数、返回和bean的class添加入list
+            addImportListForField();
             PsiJavaFile psiJavaFile = getPsiJavaFile();
             if(psiJavaFile == null){
                 Messages.showMessageDialog("Please open a Java file!", UIBundle.message("error.dialog.title"), Messages.getErrorIcon());
@@ -540,20 +597,45 @@ public class GenerateMethodAction extends AnAction {
                     String inner = getInner(trim);
                     if(inner == null || "".equals(inner)){
                         PsiClass[] psiClass = PsiShortNamesCache.getInstance(project).getClassesByName(trim.replace("<>", ""), GlobalSearchScope.allScope(project));
-                        return psiClass.length > 0;
+                        return handlePsiClass(psiClass);
                     }else {
                         PsiClass[] psiClass = PsiShortNamesCache.getInstance(project).getClassesByName(inner, GlobalSearchScope.allScope(project));
                         if(psiClass.length == 0){
                             return false;
                         }
+                        handlePsiClass(psiClass);
                         PsiClass[] psiClass1 = PsiShortNamesCache.getInstance(project).getClassesByName(trim.substring(0, trim.indexOf("<")), GlobalSearchScope.allScope(project));
-                        return psiClass1.length > 0;
+                        return handlePsiClass(psiClass1);
                     }
                 })).get();
             } catch (Exception e) {
             }
             return false;
         }
+
+        private Boolean handlePsiClass(PsiClass[] psiClass) {
+            if(psiClass.length > 0){
+                //有这个类 取第一个
+                PsiClass targetClass = psiClass[0];
+                //java.lang的不用导入
+                if(!targetClass.getQualifiedName().startsWith("java.lang.")){
+                    boolean existClass = false;
+                    //判断realNeedImportList里面是否有这个名字的类
+                    for (PsiClass item : realNeedImportList) {
+                        if(Objects.equals(item.getName(), targetClass.getName())){
+                            existClass = true;
+                        }
+                    }
+                    if(!existClass){
+                        //没有的话，代表是复制的或者没有选择的，加进来就好
+                        realAutoImportList.add(targetClass);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
         private String getInner(String target){
             String trim = target.trim();
             int start = trim.indexOf("<");
