@@ -201,7 +201,9 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                     Collection<PsiClass> controller = query.findAll().stream().filter(cls -> cls.getAnnotation("org.springframework.web.bind.annotation.RestController") != null ||
                                     cls.getAnnotation("org.springframework.stereotype.Controller") != null
                                     || cls.getAnnotation("org.springframework.web.bind.annotation.RequestMapping") != null
-                                    || cls.getAnnotation("javax.ws.rs.Path") != null
+                                    || cls.getAnnotation(Constant.DubboMethodConfig.ApacheService.getCode()) != null
+                                    || cls.getAnnotation(Constant.DubboMethodConfig.DubboService.getCode()) != null
+                                    || cls.getAnnotation(Constant.DubboMethodConfig.AliService.getCode()) != null
                             )
                             .filter(
                                     cls -> {

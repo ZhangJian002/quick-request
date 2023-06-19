@@ -21,13 +21,18 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.generator.FastUrlGenerator;
+import io.github.zjay.plugin.fastrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
+
 public class GeneratorUrlService {
     SpringMethodUrlGenerator springMethodUrlGenerator = new SpringMethodUrlGenerator();
     JaxRsGenerator jaxRsGenerator = new JaxRsGenerator();
+
+    DubboMethodGenerator dubboMethodGenerator = new DubboMethodGenerator();
 
     public String generate(PsiElement psiElement) {
         FastUrlGenerator fastUrlGenerator;
@@ -40,7 +45,19 @@ public class GeneratorUrlService {
         if (annotation != null) {
             fastUrlGenerator = jaxRsGenerator;
         } else {
-            fastUrlGenerator = springMethodUrlGenerator;
+            Constant.SpringMappingConfig[] values = Constant.SpringMappingConfig.values();
+            boolean isSpring = false;
+            for (Constant.SpringMappingConfig value : values) {
+                if(psiMethod.getAnnotation(value.getCode()) != null){
+                    isSpring = true;
+                    break;
+                }
+            }
+            if(isSpring){
+                fastUrlGenerator = springMethodUrlGenerator;
+            }else {
+                fastUrlGenerator = dubboMethodGenerator;
+            }
         }
         return fastUrlGenerator.generate(psiElement);
     }

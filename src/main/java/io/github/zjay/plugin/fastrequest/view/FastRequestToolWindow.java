@@ -43,8 +43,6 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
@@ -68,7 +66,6 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
 import com.intellij.ui.dualView.TreeTableView;
-import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
 import com.intellij.ui.treeStructure.treetable.TreeColumnInfo;
@@ -84,6 +81,7 @@ import io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAct
 import io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction;
 import io.github.zjay.plugin.fastrequest.config.*;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
+import io.github.zjay.plugin.fastrequest.dubbo.DubboService;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.fastrequest.util.*;
 import io.github.zjay.plugin.fastrequest.view.component.*;
@@ -95,8 +93,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jsoup.Jsoup;
-import org.jsoup.parser.Parser;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -269,8 +265,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private ComboBox getNormalTypeComboBox(String type) {
         ComboBox<String> typeJComboBox = new ComboBox<>();
         typeJComboBox.setRenderer(new IconListRenderer(TYPE_ICONS));
-        typeJComboBox.addItem(TypeUtil.Type.Number.name());
         typeJComboBox.addItem(TypeUtil.Type.String.name());
+        typeJComboBox.addItem(TypeUtil.Type.Number.name());
         typeJComboBox.addItem(TypeUtil.Type.Boolean.name());
         typeJComboBox.setSelectedItem(type);
         return typeJComboBox;
@@ -385,6 +381,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false);
 
         jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, false);
+
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
         prettyJsonEditorPanel.setPreferredSize(new Dimension(-1, 120));
@@ -397,6 +394,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         jsonParamsTextArea.setMinimumSize(new Dimension(-1, 120));
         jsonParamsTextArea.setPreferredSize(new Dimension(-1, 120));
         jsonParamsTextArea.setMaximumSize(new Dimension(-1, 1000));
+
 
         //2020.3before
 //        manageConfigButton = new JButton();
@@ -716,8 +714,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         completeCheckBox.addItemListener(e -> {
             if(e.getStateChange() == ItemEvent.SELECTED){
                 urlCompleteChangeFlag.set(true);
-                if(!UrlUtil.isHttpURL(urlTextField.getText())){
-                    urlTextField.setText(getActiveDomain() + urlTextField.getText());
+                if(Objects.equals(methodTypeComboBox.getSelectedItem(), "DUBBO")){
+                    if(!UrlUtil.isDubboURL(urlTextField.getText())){
+                        urlTextField.setText(getActiveDomain() + urlTextField.getText());
+                    }
+                }else {
+                    if(!UrlUtil.isHttpURL(urlTextField.getText())){
+                        urlTextField.setText(getActiveDomain() + urlTextField.getText());
+                    }
                 }
             }else {
                 urlCompleteChangeFlag.set(false);
@@ -801,18 +805,98 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         sendButtonFlag = false;
         //首先停止正在编辑中的table
         stopCellEditing();
+        String methodType = (String) methodTypeComboBox.getSelectedItem();
+        //请求进程条设置
+        requestProgressBarSetting();
+        if(Objects.equals(methodType, "DUBBO")){
+            dubboRequest(fileMode);
+        }else {
+            //Restful Request
+            restfulRequest(fileMode);
+        }
+    }
+
+    private void dubboRequest(boolean fileMode) {
+        try {
+            FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+            ParamGroup paramGroup = config.getParamGroup();
+            String dubboServiceStr = String.format("%s.%s",paramGroup.getInterfaceName(), paramGroup.getMethod());
+            String address;
+            try {
+                address = getDubboSendUrl().split("/")[0];
+                if(StringUtils.isBlank(address)){
+                    address = "127.0.0.1:20880";
+                }
+            }catch (Exception e){
+                address = "127.0.0.1:20880";
+            }
+            if (!UrlUtil.isDubboURL(address)) {
+                ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required.Dubbo url should start with ip:port.");
+                ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+                tabbedPane.setSelectedIndex(4);
+                responseTabbedPanel.setSelectedIndex(2);
+                sendButtonFlag = true;
+                futureAtomicReference.set(null);
+                requestProgressBar.setVisible(false);
+                return;
+            }
+            String finalAddress = address;
+            futureAtomicReference.set(ThreadUtil.execAsync(() -> {
+                try {
+                    LinkedHashMap<String, Object> bodyParamMapTemp = buildParamForDubbo();
+                    DubboService.Param param = new DubboService.Param(bodyParamMapTemp);
+                    DubboService dubboService = new DubboService(dubboServiceStr, param);
+                    dubboService.setServiceAddress(finalAddress);
+                    long start = System.currentTimeMillis();
+                    DubboService.Response invokeRes = dubboService.invoke();
+                    long end = System.currentTimeMillis();
+                    //如果被外部中断，就不继续了
+                    if(Thread.currentThread().isInterrupted()){
+                        return;
+                    }
+                    //结果处理
+                    dubboResponseHandler(invokeRes, start, end, fileMode, paramGroup);
+                } catch (Exception ee) {
+                    //异常处理
+                    exceptionHandlerForDubbo(ee);
+                }finally {
+                    sendButtonFlag = true;
+                    futureAtomicReference.set(null);
+                }
+            }));
+        }catch (Exception e){
+            requestExceptionHandler(e);
+        }
+    }
+
+    private LinkedHashMap<String, Object> buildParamForDubbo() {
+        LinkedHashMap<String, Object> bodyParamMapTemp = new LinkedHashMap<>();
+        urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> {
+            if(Objects.equals(q.getType(), "Object")){
+                bodyParamMapTemp.put(q.getKey(), JSONObject.parse(q.getValue().toString()));
+            }else if(Objects.equals(q.getType(), "Array")){
+                bodyParamMapTemp.put(q.getKey(), JSONArray.parse(q.getValue().toString()));
+            } else if (Objects.equals(q.getType(), "Number")) {
+                bodyParamMapTemp.put(q.getKey(), Double.valueOf(q.getValue().toString()));
+            } else if (Objects.equals(q.getType(), "Boolean")) {
+                bodyParamMapTemp.put(q.getKey(), Boolean.valueOf(q.getValue().toString()));
+            }else {
+                bodyParamMapTemp.put(q.getKey(), q.getValue().toString());
+            }
+        });
+        return bodyParamMapTemp;
+    }
+
+    private void restfulRequest(boolean fileMode) {
         try {
             //新建、组装请求
             HttpRequest request = buildRequest();
             if(request == null) return;
-            //请求进程条设置
-            requestProgressBarSetting();
             //发起请求并处理返回结果
             sendAndHandleResponse(request, fileMode);
         } catch (Exception exception) {
             requestExceptionHandler(exception);
         }
-
     }
 
     private void requestExceptionHandler(Exception exception) {
@@ -854,9 +938,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             } catch (Exception ee) {
                 //异常处理
                 exceptionHandler(ee, request);
+            }finally {
+                sendButtonFlag = true;
+                futureAtomicReference.set(null);
             }
-            sendButtonFlag = true;
-            futureAtomicReference.set(null);
         }));
     }
 
@@ -871,13 +956,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String sendUrl = getSendUrl();
 
         if (!UrlUtil.isURL(sendUrl)) {
-            ApplicationManager.getApplication().invokeLater(() -> {
-                ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required");
-            });
+            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+            ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required.Http url should start with http(s)://ip:port.");
             tabbedPane.setSelectedIndex(4);
             responseTabbedPanel.setSelectedIndex(2);
             sendButtonFlag = true;
-            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+            requestProgressBar.setVisible(false);
             return null;
         }
         String methodType = (String) methodTypeComboBox.getSelectedItem();
@@ -957,6 +1041,22 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         return sendUrl;
     }
 
+    private String getDubboSendUrl() {
+        NameGroup defaultNameGroup = new NameGroup(StringUtils.EMPTY, new ArrayList<>());
+        HostGroup defaultHostGroup = new HostGroup(StringUtils.EMPTY, StringUtils.EMPTY);
+        String domain = FastRequestComponent.getInstance().getState().getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
+                .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
+        String sendUrl;
+        //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
+        if(UrlUtil.isDubboURL(urlTextField.getText())){
+            sendUrl = urlTextField.getText();
+        }else {
+            //如果不是url 就给加
+            sendUrl = domain + urlTextField.getText();
+        }
+        return sendUrl;
+    }
+
     private void exceptionHandler(Exception ee, HttpRequest request) {
         sendButtonFlag = true;
         futureAtomicReference.set(null);
@@ -982,6 +1082,31 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
     }
 
+    private void exceptionHandlerForDubbo(Exception ee) {
+        sendButtonFlag = true;
+        futureAtomicReference.set(null);
+        requestProgressBar.setVisible(false);
+        tabbedPane.setSelectedIndex(4);
+        responseTabbedPanel.setSelectedIndex(2);
+//                    responseStatusComboBox.setSelectedItem(0);
+        String errorMsg = ee.getMessage();
+        ApplicationManager.getApplication().invokeLater(() -> {
+            ((MyLanguageTextField) responseTextAreaPanel).setText(errorMsg);
+            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+        });
+//                    responseStatusComboBox.setBackground(MyColor.red);
+        responseInfoParamsKeyValueList = Lists.newArrayList(
+                new ParamKeyValue("Url", getDubboSendUrl(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Error", errorMsg)
+        );
+        //refreshTable(responseInfoTable);
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
+        CustomNode root = new CustomNode("Root", "");
+        ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
+    }
+
     private void responseHandler(HttpResponse response, long start, long end, HttpRequest request, boolean fileMode) {
         ApplicationManager.getApplication().invokeLater(() -> {
             tabbedPane.setSelectedIndex(4);
@@ -993,7 +1118,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             //download file
             fileHandler(finalFileMode, status, response);
             //not a file
-            resultHandler(finalFileMode, response);
+            resultHandler(finalFileMode, response.body());
             //response渲染
             responsePageHandler(request, response, status, duration);
             ApplicationManager.getApplication().invokeLater(()->{
@@ -1004,33 +1129,64 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     return;
                 }
                 //saveToHistory
-                saveTableRequest(request);
+                saveTableRequest(1, request.getMethod().name());
             });
 
         }, ModalityState.NON_MODAL);
     }
 
-    private void saveTableRequest(HttpRequest request) {
+    private void dubboResponseHandler(DubboService.Response response, long start, long end, boolean fileMode, ParamGroup paramGroup) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            tabbedPane.setSelectedIndex(4);
+            String duration = String.valueOf(end - start - 10);
+            requestProgressBar.setVisible(false);
+            //not a file
+            resultHandler(false, response.getResultStr());
+            //response渲染
+            responseDubboPageHandler(response.getResponseStr(), duration);
+            ApplicationManager.getApplication().invokeLater(()->{
+                if (getActiveDomain().isBlank()) {
+                    return;
+                }
+                if (urlTextField.getText().isBlank()) {
+                    return;
+                }
+                //saveToHistory
+                saveTableRequest(2, paramGroup.getMethodType());
+            });
+
+        }, ModalityState.NON_MODAL);
+    }
+
+    private void saveTableRequest(int type, String methodName) {
         HistoryTable historyTable = FastRequestHistoryCollectionComponent.getInstance(myProject).getState();
         LocalDateTime now = LocalDateTime.now();
         // 定义日期时间格式
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         // 格式化当前时间
         String formattedDateTime = now.format(formatter);
-        HistoryTableData historyTableData = new HistoryTableData(request.getMethod().name(), getSendUrl(), formattedDateTime);
-        historyTableData.setHeaders(JSONArray.toJSONString(headerParamsKeyValueList));
-        if(CollectionUtils.isNotEmpty(pathParamsKeyValueList)){
-            historyTableData.setPathParams(JSONArray.toJSONString(pathParamsKeyValueList));
-        }
-        if(CollectionUtils.isNotEmpty(urlParamsKeyValueList)){
-            historyTableData.setUrlParams(JSONArray.toJSONString(urlParamsKeyValueList));
-        }
-        if(CollectionUtils.isNotEmpty(urlEncodedKeyValueList)){
-            historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
-        }
-        historyTableData.setJsonParam(((LanguageTextField) jsonParamsTextArea).getText());
-        if(CollectionUtils.isNotEmpty(multipartKeyValueList)){
-            historyTableData.setMultipart(JSONArray.toJSONString(multipartKeyValueList));
+        HistoryTableData historyTableData;
+        if(type == 1){
+            historyTableData = new HistoryTableData(methodName, getSendUrl(), formattedDateTime);
+            historyTableData.setHeaders(JSONArray.toJSONString(headerParamsKeyValueList));
+            if(CollectionUtils.isNotEmpty(pathParamsKeyValueList)){
+                historyTableData.setPathParams(JSONArray.toJSONString(pathParamsKeyValueList));
+            }
+            if(CollectionUtils.isNotEmpty(urlParamsKeyValueList)){
+                historyTableData.setUrlParams(JSONArray.toJSONString(urlParamsKeyValueList));
+            }
+            if(CollectionUtils.isNotEmpty(urlEncodedKeyValueList)){
+                historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
+            }
+            historyTableData.setJsonParam(((LanguageTextField) jsonParamsTextArea).getText());
+            if(CollectionUtils.isNotEmpty(multipartKeyValueList)){
+                historyTableData.setMultipart(JSONArray.toJSONString(multipartKeyValueList));
+            }
+        }else {
+            historyTableData = new HistoryTableData(methodName, getDubboSendUrl(), formattedDateTime);
+            if(CollectionUtils.isNotEmpty(urlEncodedKeyValueList)){
+                historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
+            }
         }
         historyTable.getList().add(0, historyTableData);
     }
@@ -1052,9 +1208,20 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //                        responseStatusComboBox.setBackground((status >= 200 && status < 300) ? MyColor.green : MyColor.red);
     }
 
-    private void resultHandler(boolean finalFileMode, HttpResponse response) {
+    private void responseDubboPageHandler(String message, String duration) {
+        responseInfoParamsKeyValueList = Lists.newArrayList(
+                new ParamKeyValue("Url", getDubboSendUrl(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Message",message, 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Date", new Date())
+        );
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
+    }
+
+    private void resultHandler(boolean finalFileMode, String body) {
         if (!finalFileMode) {
-            String body = response.body();
             int bodyLength = StrUtil.byteLength(body, StandardCharsets.UTF_8);
             if (bodyLength > MAX_DATA_LENGTH) {
                 ((MyLanguageTextField) responseTextAreaPanel).setText(body);
@@ -1450,7 +1617,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             ((LanguageTextField) jsonParamsTextArea).setText("");
         } else {
             //body param
-            if (!bodyKeyValueListJson.isBlank()) {
+            if (StringUtils.isNotBlank(bodyKeyValueListJson)) {
                 //json
                 ((LanguageTextField) jsonParamsTextArea).setText(bodyKeyValueListJson);
                 tabbedPane.setSelectedIndex(3);
@@ -1551,6 +1718,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         //method
         methodTypeComboBox.setSelectedItem(methodType);
+//        if(Objects.equals(methodType, "Dubbo")){
+//            return;
+//        }
 
         //request param
         String requestParamStr = conventDataToString(conventMapToList(requestParamMap));
@@ -1658,6 +1828,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }else {
             urlTextField.setText(url);
             paramGroup.setUrl(url);
+        }
+        if(StringUtils.isNotBlank(paramGroup.getMethodType())){
+            methodTypeComboBox.setSelectedItem(paramGroup.getMethodType());
         }
 //        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
     }
@@ -2354,7 +2527,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private String bodyParamMapToJson() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         convertToMap(bodyParamMap, map, false);
-        return JSON.toJSONString(map.get(map.keySet().stream().findFirst().orElse("")), true);
+        if(Objects.equals("DUBBO", methodTypeComboBox.getSelectedItem())){
+            return JSON.toJSONString(map, true);
+        }else {
+            return JSON.toJSONString(map.get(map.keySet().stream().findFirst().orElse("")), true);
+        }
     }
 
 
@@ -3082,12 +3259,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         urlEncodedParamChangeFlag.set(true);
                     }
                 } else if (column == 3) {
-                    String value = aValue.toString();
                     ParamKeyValue paramKeyValue = urlEncodedKeyValueList.get(row);
-                    if (!paramKeyValue.getValue().equals(value)) {
+                    if (!paramKeyValue.getValue().equals(aValue)) {
                         urlEncodedParamChangeFlag.set(true);
                     }
-                    paramKeyValue.setValue(value);
+                    paramKeyValue.setValue(aValue);
                 }
                 changeUrlEncodedParamsText();
             }
@@ -3637,12 +3813,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         collectionDetail.setEnableEnv(getActiveEnv());
         collectionDetail.setEnableProject(getActiveProject());
         collectionDetail.setDomain(getActiveDomain());
-        collectionDetail.setName(StringUtils.isBlank(paramGroup.getMethodDescription()) ? "New Request" : paramGroup.getMethodDescription());
+        collectionDetail.setName(StringUtils.isBlank(paramGroup.getMethodDescription()) ? paramGroup.getMethod() + "_request" : paramGroup.getMethodDescription());
         collectionDetail.setType(2);
         paramGroupCollection.setOriginUrl(paramGroup.getOriginUrl());
         paramGroupCollection.setUrl(urlTextField.getText());
         paramGroupCollection.setMethodType((String) methodTypeComboBox.getSelectedItem());
-        paramGroupCollection.setMethodDescription(StringUtils.isBlank(paramGroup.getMethodDescription()) ? "New Request" : paramGroup.getMethodDescription());
+        paramGroupCollection.setMethodDescription(StringUtils.isBlank(paramGroup.getMethodDescription()) ? paramGroup.getMethod() + "_request" : paramGroup.getMethodDescription());
         paramGroupCollection.setClassName(paramGroup.getClassName());
         paramGroupCollection.setMethod(paramGroup.getMethod());
         paramGroupCollection.setPathParamsKeyValueListJson(JSON.toJSONString(pathParamsKeyValueList));

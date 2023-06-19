@@ -45,6 +45,8 @@
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator"/>
         <applicationService
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
+        <applicationService
+                serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.DubboMethodGenerator"/>
         <applicationConfigurable id="p" displayName="Quick Request"
                                  instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
             <configurable parentId="p"
@@ -58,6 +60,9 @@
 
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.FastRequestLineMarkerProvider"/>
+
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.DubboLineMarkerProvider"/>
 
         <!--兼容性处理code-->
         <notificationGroup id="toolWindowNotificationGroup" displayType="TOOL_WINDOW"/>

@@ -32,6 +32,8 @@ public class FrIconUtil {
                 return PluginIcons.ICON_DELETE;
             case "PATCH":
                 return PluginIcons.ICON_PATCH;
+            case "DUBBO":
+                return PluginIcons.ICON_DUBBO;
             default:
                 return PluginIcons.ICON_GET;
         }
@@ -64,6 +66,13 @@ public class FrIconUtil {
                 return PluginIcons.ICON_DEL_INTEFACE;
             }else {
                 return PluginIcons.ICON_DEL_CLASS;
+            }
+        }
+        if("DUBBO".equals(methodType)){
+            if(isInterface){
+                return PluginIcons.ICON_DUB_INTEFACE;
+            }else {
+                return PluginIcons.ICON_DUB_CLASS;
             }
         }
         if(isInterface){

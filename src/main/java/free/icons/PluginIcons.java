@@ -67,11 +67,14 @@ public interface PluginIcons {
     Icon ICON_POST_INTEFACE = IconLoader.getIcon("/free.icon/post-interface.svg", PluginIcons.class);
     Icon ICON_PUT_INTEFACE = IconLoader.getIcon("/free.icon/put-interface.svg", PluginIcons.class);
     Icon ICON_DEL_INTEFACE = IconLoader.getIcon("/free.icon/del-interface.svg", PluginIcons.class);
+    Icon ICON_DUB_INTEFACE = IconLoader.getIcon("/free.icon/dubbo-interface.svg", PluginIcons.class);
 
     Icon ICON_GET_CLASS = IconLoader.getIcon("/free.icon/get-class.svg", PluginIcons.class);
     Icon ICON_POST_CLASS = IconLoader.getIcon("/free.icon/post-class.svg", PluginIcons.class);
     Icon ICON_PUT_CLASS = IconLoader.getIcon("/free.icon/put-class.svg", PluginIcons.class);
     Icon ICON_DEL_CLASS = IconLoader.getIcon("/free.icon/del-class.svg", PluginIcons.class);
+    Icon ICON_DUB_CLASS = IconLoader.getIcon("/free.icon/dubbo-class.svg", PluginIcons.class);
+
 
 
 
@@ -87,5 +90,5 @@ public interface PluginIcons {
 
     Icon ICON_SYNC = IconLoader.getIcon("/free.icon/sync.svg", PluginIcons.class);
 
-    Icon ICON_HISTORY = IconLoader.getIcon("/free.icon/history.svg", PluginIcons.class);
+    Icon ICON_DUBBO = IconLoader.getIcon("/free.icon/dubbo.svg", PluginIcons.class);
 }

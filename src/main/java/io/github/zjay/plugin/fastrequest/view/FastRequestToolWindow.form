@@ -64,6 +64,7 @@
                     <item value="DELETE"/>
                     <item value="PUT"/>
                     <item value="PATCH"/>
+                    <item value="DUBBO"/>
                   </model>
                 </properties>
               </component>

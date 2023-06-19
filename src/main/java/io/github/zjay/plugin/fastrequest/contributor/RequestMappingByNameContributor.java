@@ -20,26 +20,29 @@ import com.intellij.navigation.ChooseByNameContributor;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtilCore;
 import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.generator.FastUrlGenerator;
+import io.github.zjay.plugin.fastrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator;
 import io.github.zjay.plugin.fastrequest.util.FrPsiUtil;
+import io.github.zjay.plugin.fastrequest.view.linemarker.DubboLineMarkerProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
 public abstract class RequestMappingByNameContributor implements ChooseByNameContributor {
     SpringMethodUrlGenerator springMethodUrlGenerator = ApplicationManager.getApplication().getService(SpringMethodUrlGenerator.class);
     JaxRsGenerator jaxRsGenerator = ApplicationManager.getApplication().getService(JaxRsGenerator.class);
+
+    DubboMethodGenerator dubboMethodGenerator = ApplicationManager.getApplication().getService(DubboMethodGenerator.class);
 
     abstract List<PsiAnnotation> getAnnotationSearchers(String annotationName, Project project);
     private List<RequestMappingItem> navigationItems = new ArrayList<>();
@@ -62,10 +65,42 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
 
     private List<RequestMappingItem> findRequestMappingItems(Project project, String annotationName) {
         List<PsiAnnotation> annotationSearchers = getAnnotationSearchers(annotationName, project);
-        List<RequestMappingItem> collect = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) instanceof PsiMethod)
+        annotationSearchers = annotationSearchers.stream().filter(x->{
+            PsiJavaCodeReferenceElement nameReferenceElement = x.getNameReferenceElement();
+            if(nameReferenceElement != null){
+                if(Objects.equals(nameReferenceElement.getText(), "Service")){
+                    if(!Objects.equals(x.getQualifiedName(), Constant.DubboMethodConfig.AliService.getCode()) &&
+                    !Objects.equals(x.getQualifiedName(), Constant.DubboMethodConfig.ApacheService.getCode())){
+                        //Service的注解 必须要是dubbo的
+                        return false;
+                    }else {
+                        return true;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }).collect(Collectors.toList());
+        //restful request
+        List<RequestMappingItem> restfulRequestList = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) instanceof PsiMethod)
                 .map(annotation -> mapItems(annotation))
                 .collect(Collectors.toList());
-        return collect;
+
+        List<RequestMappingItem> dubboRequestList = new LinkedList<>();
+        //dubbo
+        annotationSearchers.stream().filter(x-> Constant.DubboMethodConfig.exist(x.getQualifiedName()) && x.getParent().getParent() instanceof PsiClass
+            ).forEach(psiAnnotation -> {
+            PsiClass parent = (PsiClass) psiAnnotation.getParent().getParent();
+            PsiMethod[] methods = parent.getMethods();
+            for (PsiMethod method : methods) {
+                if(!DubboLineMarkerProvider.judgeMethod(method)){
+                    continue;
+                }
+                dubboRequestList.add(new RequestMappingItem(method,dubboMethodGenerator.getMethodRequestMappingUrl(method),"DUBBO"));
+            }
+        });
+        dubboRequestList.addAll(restfulRequestList);
+        return dubboRequestList;
 
     }
 
@@ -77,8 +112,11 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
         FastUrlGenerator generator;
         if (frameworkType.equals(Constant.FrameworkType.SPRING)) {
             generator = springMethodUrlGenerator;
-        } else {
+        } else if(frameworkType.equals(Constant.FrameworkType.JAX_RS)){
             generator = jaxRsGenerator;
+        }else {
+            generator = dubboMethodGenerator;
+            return new RequestMappingItem(method,generator.getMethodRequestMappingUrl(method),"DUBBO");
         }
         String methodUrl = generator.getMethodRequestMappingUrl(method);
         String classUrl = generator.getClassRequestMappingUrl(method);

@@ -89,6 +89,7 @@ import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.RowSorterEvent;
+import javax.swing.plaf.LabelUI;
 import javax.swing.table.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
@@ -387,8 +388,9 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             // 根据匹配条件设置高亮样式
             String searchKeyword = ((SearchTextField) searchPanel2).getText(); // 替换成你的匹配关键字
             String cellValue = String.valueOf(value);
+            JLabel jLabel = (JLabel) component;
             if(cellValue.toLowerCase().contains(searchKeyword.toLowerCase())){
-                ((JLabel)component).setText("<html>" + cellValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>")  + "</html>");
+                jLabel.setText("<html>" + cellValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>")  + "</html>");
             }
             return component;
         }

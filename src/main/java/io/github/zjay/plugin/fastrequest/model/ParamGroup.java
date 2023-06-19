@@ -16,6 +16,8 @@
 
 package io.github.zjay.plugin.fastrequest.model;
 
+import com.intellij.psi.PsiParameterList;
+
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 
@@ -29,8 +31,18 @@ public class ParamGroup implements Serializable {
     private LinkedHashMap<String, Object> bodyParamMap = new LinkedHashMap<>();
     private String methodDescription;
     private String className;
+
+    private String interfaceName;
     private String method;
     private String module;
+
+    public String getInterfaceName() {
+        return interfaceName;
+    }
+
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
+    }
 
     public String getOriginUrl() {
         return originUrl;

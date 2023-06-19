@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.6.12'
+version '2023.6.16'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -29,6 +29,16 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.6.16</h3 >
+    <ul>
+        <li>支持Dubbo2.X版本的请求生成及简单测试(点send按钮)
+        注：1、暂时只支持官方提供的@Service、@DubboService注解，xml文件的支持会在后续版本中提供(但是不一定)；
+            2、测试方式为telnet方式，返回结果可能会存在问题(可以多请求几次)；
+            3、3.X版本想要使用的需要在项目中引入TelnetHandler的实现；
+            4、存在BUG请发邮件给我
+        </li>
+        <li>其他优化及BUG修复</li>
+    </ul>
     <h3>v2023.6.12</h3 >
     <ul>
         <li>Other optimizations and bug fixes</li>

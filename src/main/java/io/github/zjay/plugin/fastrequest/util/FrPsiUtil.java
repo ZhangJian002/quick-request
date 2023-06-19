@@ -27,7 +27,13 @@ public class FrPsiUtil {
         if (jaxRsAnno != null) {
             return Constant.FrameworkType.JAX_RS;
         } else {
-            return Constant.FrameworkType.SPRING;
+            for (Constant.SpringMappingConfig value : Constant.SpringMappingConfig.values()) {
+                PsiAnnotation springAnno = psiMethod.getAnnotation(value.getCode());
+                if(springAnno != null){
+                    return Constant.FrameworkType.SPRING;
+                }
+            }
+            return Constant.FrameworkType.DUBBO;
         }
     }
 }

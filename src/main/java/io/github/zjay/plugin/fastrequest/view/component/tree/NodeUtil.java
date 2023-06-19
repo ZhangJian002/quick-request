@@ -22,10 +22,12 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import io.github.zjay.plugin.fastrequest.config.Constant;
+import io.github.zjay.plugin.fastrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator;
 import io.github.zjay.plugin.fastrequest.model.ApiService;
 import io.github.zjay.plugin.fastrequest.util.FrPsiUtil;
+import io.github.zjay.plugin.fastrequest.view.linemarker.DubboLineMarkerProvider;
 import org.apache.commons.collections.IteratorUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,6 +42,7 @@ public class NodeUtil {
     public static List<ApiService> getAllApiList(Collection<PsiClass> controller) {
         SpringMethodUrlGenerator springMethodUrlGenerator = ApplicationManager.getApplication().getService(SpringMethodUrlGenerator.class);
         JaxRsGenerator jaxRsGenerator = ApplicationManager.getApplication().getService(JaxRsGenerator.class);
+        DubboMethodGenerator dubboMethodGenerator = ApplicationManager.getApplication().getService(DubboMethodGenerator.class);
 
         List<ApiService> apiServiceList = new ArrayList<>();
         for (PsiClass psiClass : controller) {
@@ -68,7 +71,7 @@ public class NodeUtil {
                             break;
                         }
                     }
-                } else {
+                } else if(frameworkType.equals(Constant.FrameworkType.JAX_RS)){
                     for (Constant.JaxRsMappingConfig value : Constant.JaxRsMappingConfig.values()) {
                         if (method.getAnnotation(value.getCode()) != null) {
                             String methodDescription = jaxRsGenerator.getMethodDescription(method);
@@ -83,6 +86,15 @@ public class NodeUtil {
                             break;
                         }
                     }
+                }else if(frameworkType.equals(Constant.FrameworkType.DUBBO)){
+                    if(!DubboLineMarkerProvider.judgeMethod(method)){
+                        continue;
+                    }
+                    String methodDescription = dubboMethodGenerator.getMethodDescription(method);
+                    String name = method.getName();
+//                    String methodUrl = dubboMethodGenerator.getMethodRequestMappingUrl(method);
+                    ApiService.ApiMethod apiMethod = new ApiService.ApiMethod(method, name, methodDescription, name, "DUBBO");
+                    apiMethodList.add(apiMethod);
                 }
             }
 

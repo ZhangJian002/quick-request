@@ -18,16 +18,20 @@ package io.github.zjay.plugin.fastrequest.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.intellij.lang.jvm.types.JvmPrimitiveTypeKind;
+import com.intellij.psi.PsiPrimitiveType;
 import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.model.MethodType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Constant {
     public static final String I18N_PATH = "io/github/zjay/fastrequest/18n/fr";
 
     public enum FrameworkType {
+        DUBBO,
         SPRING,
         JAX_RS;
     }
@@ -48,6 +52,36 @@ public class Constant {
         JaxRsMappingConfig(String code, String methodType) {
             this.code = code;
             this.methodType = methodType;
+        }
+    }
+
+    public enum DubboMethodConfig {
+        DubboService("org.apache.dubbo.config.annotation.DubboService"),
+        AliService("com.alibaba.dubbo.config.annotation.Service"),
+        ApacheService("org.apache.dubbo.config.annotation.Service"),
+        ;
+        private final String code;
+//        private final String methodType;
+
+        public String getCode() {
+            return code;
+        }
+
+//        public String getMethodType() {
+//            return methodType;
+//        }
+        public static boolean exist(String target){
+            for (DubboMethodConfig value : values()) {
+                if(Objects.equals(value.code, target)){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        DubboMethodConfig(String code) {
+            this.code = code;
+//            this.methodType = methodType;
         }
     }
 
@@ -246,7 +280,8 @@ public class Constant {
 
     public static List<String> SUPPORTED_ANNOTATIONS = Lists.newArrayList(
             "GetMapping", "PostMapping", "RequestMapping", "DeleteMapping", "PutMapping", "PatchMapping",
-            "GET", "POST", "DELETE", "PUT"
+            "GET", "POST", "DELETE", "PUT",
+            "Service","DubboService"
     );
 
     public static List<MethodType> METHOD_TYPE_LIST = Lists.newArrayList(
@@ -254,7 +289,8 @@ public class Constant {
             new MethodType("POST", PluginIcons.ICON_POST),
             new MethodType("PUT", PluginIcons.ICON_PUT),
             new MethodType("DELETE", PluginIcons.ICON_DELETE),
-            new MethodType("PATCH", PluginIcons.ICON_PATCH)
+            new MethodType("PATCH", PluginIcons.ICON_PATCH),
+            new MethodType("DUBBO", PluginIcons.ICON_DUBBO)
     );
 
     public static final String CN_DOC_DOMAIN = "https://plugins.sheng90.wang/fast-request";

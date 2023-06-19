@@ -51,4 +51,12 @@ public class UrlUtil {
             return false;
         }
     }
+
+    public static boolean isDubboURL(String url) {
+        try {
+            return !url.startsWith("http") && url.split(":").length > 1;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
