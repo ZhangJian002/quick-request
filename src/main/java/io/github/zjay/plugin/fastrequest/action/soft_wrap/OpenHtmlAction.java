@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.impl.HTMLEditorProvider;
 import com.intellij.openapi.project.Project;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class OpenHtmlAction extends AnAction {
@@ -30,7 +31,9 @@ public class OpenHtmlAction extends AnAction {
             return;
         }
         String str = editor.getDocument().getText();
-        HTMLEditorProvider.openEditor(project, "Html Preview", str);
+        if(StringUtils.isNotBlank(str)){
+            HTMLEditorProvider.openEditor(project, "Html Preview", str);
+        }
     }
 
     @Override

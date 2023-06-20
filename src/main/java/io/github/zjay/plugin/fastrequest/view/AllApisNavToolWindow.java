@@ -20,6 +20,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.CommonActionsManager;
 import com.intellij.ide.actions.searcheverywhere.PersistentSearchEverywhereContributorFilter;
+import com.intellij.ide.plugins.newui.ListPluginComponent;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
@@ -42,20 +43,26 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.search.searches.AllClassesSearch;
 import com.intellij.ui.*;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.speedSearch.SpeedSearchUtil;
+import com.intellij.util.BooleanFunction;
 import com.intellij.util.PsiNavigateUtil;
 import com.intellij.util.Query;
+import com.intellij.util.ui.StatusText;
 import io.github.zjay.plugin.fastrequest.action.CheckBoxFilterAction;
 import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.configurable.FastRequestSearchEverywhereConfiguration;
-import io.github.zjay.plugin.fastrequest.deprecated.TreeSpeedSearch;
 import io.github.zjay.plugin.fastrequest.model.ApiService;
 import io.github.zjay.plugin.fastrequest.model.MethodType;
 import io.github.zjay.plugin.fastrequest.view.component.tree.*;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -69,9 +76,13 @@ import java.util.stream.Collectors;
 public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Disposable {
     private final Project myProject;
     private JPanel panel;
+
+    private SearchTextField searchPanel;
+
     private ApiTree apiTree;
     private ToolWindow toolWindow;
     private List<ApiService> allApiList;
+
     private List<String> mySelectModule;
     //    PersistentSearchEverywhereContributorFilter<String> methodTypeFilter = createMethodTypeFilter();
     private CheckBoxFilterAction.Filter<String> moduleFilter;
@@ -106,15 +117,83 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                 }
             }
         });
-        io.github.zjay.plugin.fastrequest.deprecated.TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(apiTree, path -> {
-            BaseNode node = (BaseNode) path.getLastPathComponent();
-            Object object = node.getUserObject();
-            return object.toString();
-        }, true);
-        JScrollPane scrollPane = ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent());
+        searchPanel = new SearchTextField(true);
+        searchPanel.setFocusable(false);
+        JBTextField searchTextField2 = searchPanel.getTextEditor();
+        searchTextField2.putClientProperty("StatusVisibleFunction", (BooleanFunction<JBTextField>) field -> field.getText().isEmpty());
+        StatusText emptyText2 = searchTextField2.getEmptyText();
+        emptyText2.appendText("Search by url or method name", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, ListPluginComponent.GRAY_COLOR));
+//        searchTextField2.putClientProperty("search.extension", ExtendableTextComponent.Extension
+//                .create(AllIcons.Actions.More, AllIcons.Actions.More, "Search options",
+//                        () -> showRightBottomPopup(searchTextField2, "By", myInstalledSearchGroup2)));
+        searchTextField2.putClientProperty("JTextField.variant", null);
+        searchTextField2.putClientProperty("JTextField.variant", "search");
+        searchTextField2.getDocument().addDocumentListener(new DelayedDocumentListener());
+        panel.add(searchPanel, BorderLayout.NORTH);
+        JScrollPane scrollPane = ScrollPaneFactory.createScrollPane(apiTree);
         panel.add(scrollPane);
-//        renderData(myProject);
         Disposer.register(myProject, this);
+    }
+
+    public class DelayedDocumentListener implements DocumentListener {
+
+        private final Timer timer;
+
+        public DelayedDocumentListener() {
+            timer = new Timer(2, e -> filterRequest());
+            timer.setRepeats(false);
+        }
+
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            timer.restart();
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            timer.restart();
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            timer.restart();
+        }
+
+
+    }
+
+    private void filterRequest() {
+        if (allApiList == null) {
+            return;
+        }
+        List<String> selectMethodType = methodTypeFilter.getSelectedElementList();
+        List<ApiService> filterList = allApiList.stream().filter(q -> moduleFilter.getSelectedElementList().contains(q.getModuleName())).collect(Collectors.toList());
+        List<ApiService> allApiFilterList = new LinkedList<>();
+        filterList.stream().forEach(apiService -> {
+            List<ApiService.ApiMethod> methods = apiService.getApiMethodList().stream().filter(x ->
+                    (x.getName().toLowerCase().contains(searchPanel.getText().toLowerCase())
+                            || x.getUrl().toLowerCase().contains(searchPanel.getText().toLowerCase()))
+                            && selectMethodType.contains(x.getMethodType())
+            ).collect(Collectors.toList());
+            if(methods.isEmpty()){
+                return;
+            }
+            ApiService item = new ApiService();
+            item.setClassName(apiService.getClassName());
+            item.setModuleName(apiService.getModuleName());
+            item.setPackageName(apiService.getPackageName());
+            item.setApiMethodList(methods);
+            allApiFilterList.add(item);
+        });
+        List<ApiService.ApiMethod> filterMethodList = new LinkedList<>();
+        allApiFilterList.stream().map(ApiService::getApiMethodList).filter(CollectionUtil::isNotEmpty).forEach(filterMethodList::addAll);
+        long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
+        RootNode root = new RootNode(count + " apis") {
+        };
+
+        NodeUtil.convertToRoot(root, NodeUtil.convertToMap(allApiFilterList), selectMethodType);
+        apiTree.setModel(new DefaultTreeModel(root));
+        apiTree.expandAll();
     }
 
     private void navigateToMethod() {
@@ -140,16 +219,20 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                         if (allApiList == null) {
                             return;
                         }
-                        List<ApiService> filterList = allApiList.stream().filter(q -> selectModule.contains(q.getModuleName())).collect(Collectors.toList());
-                        indicator.setText("Rendering");
-                        List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
-                        filterList.stream().map(ApiService::getApiMethodList).filter(CollectionUtil::isNotEmpty).forEach(filterMethodList::addAll);
-                        long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
-                        RootNode root = new RootNode(count + " apis") {
-                        };
+                        if(StringUtils.isNotBlank(searchPanel.getText())){
+                            filterRequest();
+                        }else {
+                            List<ApiService> filterList = allApiList.stream().filter(q -> selectModule.contains(q.getModuleName())).collect(Collectors.toList());
+                            indicator.setText("Rendering");
+                            List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
+                            filterList.stream().map(ApiService::getApiMethodList).filter(CollectionUtil::isNotEmpty).forEach(filterMethodList::addAll);
+                            long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
+                            RootNode root = new RootNode(count + " apis") {
+                            };
 
-                        NodeUtil.convertToRoot(root, NodeUtil.convertToMap(filterList), selectMethodType);
-                        apiTree.setModel(new DefaultTreeModel(root));
+                            NodeUtil.convertToRoot(root, NodeUtil.convertToMap(filterList), selectMethodType);
+                            apiTree.setModel(new DefaultTreeModel(root));
+                        }
                     });
                 }
             };
@@ -219,15 +302,19 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                             ).collect(Collectors.toList());
                     allApiList = NodeUtil.getAllApiList(controller);
                     indicator.setText("Rendering");
-                    List<String> selectMethodType = methodTypeFilter.getSelectedElementList();
-                    List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
-                    allApiList.stream().map(ApiService::getApiMethodList).forEach(filterMethodList::addAll);
-                    long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
-                    RootNode root = new RootNode(count + " apis");
-                    NodeUtil.convertToRoot(root, NodeUtil.convertToMap(
-                            allApiList.stream().filter(q->CollectionUtil.isNotEmpty(q.getApiMethodList())).collect(Collectors.toList())
-                    ), methodTypeFilter.getSelectedElementList());
-                    apiTree.setModel(new DefaultTreeModel(root));
+                    if(StringUtils.isNotBlank(searchPanel.getText())){
+                        filterRequest();
+                    }else {
+                        List<String> selectMethodType = methodTypeFilter.getSelectedElementList();
+                        List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
+                        allApiList.stream().map(ApiService::getApiMethodList).forEach(filterMethodList::addAll);
+                        long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
+                        RootNode root = new RootNode(count + " apis");
+                        NodeUtil.convertToRoot(root, NodeUtil.convertToMap(
+                                allApiList.stream().filter(q->CollectionUtil.isNotEmpty(q.getApiMethodList())).collect(Collectors.toList())
+                        ), methodTypeFilter.getSelectedElementList());
+                        apiTree.setModel(new DefaultTreeModel(root));
+                    }
                     NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
                             .notify(myProject);
                 });

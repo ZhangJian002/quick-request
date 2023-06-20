@@ -19,6 +19,7 @@ package io.github.zjay.plugin.fastrequest.view.inner;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.util.ui.UI;
+import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +41,7 @@ public class GlobalHeaderAddView extends DialogWrapper {
     protected @Nullable JComponent createCenterPanel() {
         keyTextField = new JTextField();
         valueTextField = new JTextField();
-        return UI.PanelFactory.grid().splitColumns()
+        return new MyPanelGridBuilder().splitColumns()
                 .add(UI.PanelFactory.panel(keyTextField).withLabel("Key"))
                 .add(UI.PanelFactory.panel(valueTextField).withLabel("Value"))
                 .createPanel();

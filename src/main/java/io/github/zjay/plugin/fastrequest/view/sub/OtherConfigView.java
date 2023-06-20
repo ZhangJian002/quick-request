@@ -27,6 +27,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.*;
+import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
@@ -128,7 +129,7 @@ public class OtherConfigView extends AbstractConfigurableView {
                 }
             }
         });
-        JPanel connectionConfigPanel = UI.PanelFactory.grid()
+        JPanel connectionConfigPanel = new MyPanelGridBuilder()
                 .add(UI.PanelFactory.panel(connectionTimeoutText).withLabel("ConnectionTimeout"))
                 .add(UI.PanelFactory.panel(readTimeoutText).withLabel("ReadTimeout"))
                 .createPanel();
@@ -142,7 +143,7 @@ public class OtherConfigView extends AbstractConfigurableView {
         completeCheckBox.addItemListener(e -> {
             this.clickAndSend = e.getStateChange() == ItemEvent.SELECTED;
         });
-        JPanel clickAndSendConfigPanel = UI.PanelFactory.grid()
+        JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
                 .add(UI.PanelFactory.panel(completeCheckBox)).createPanel();
         clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("ClickIconConfig")));
         return clickAndSendConfigPanel;

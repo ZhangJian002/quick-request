@@ -3908,49 +3908,49 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private static final class DocAction extends AnAction {
-        public DocAction() {
-            super(MyResourceBundleUtil.getKey("StarDocument"), MyResourceBundleUtil.getKey("StarDocument"), PluginIcons.ICON_DOC);
-        }
+//    private static final class DocAction extends AnAction {
+//        public DocAction() {
+//            super(MyResourceBundleUtil.getKey("StarDocument"), MyResourceBundleUtil.getKey("StarDocument"), PluginIcons.ICON_DOC);
+//        }
+//
+//        @Override
+//        public void actionPerformed(@NotNull AnActionEvent event) {
+//            try {
+//                Desktop dp = Desktop.getDesktop();
+//                if (dp.isSupported(Desktop.Action.BROWSE)) {
+//                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
+//                        dp.browse(URI.create(Constant.CN_DOC_DOMAIN));
+//                    } else {
+//                        dp.browse(URI.create(Constant.EN_DOC_DOMAIN));
+//                    }
+//                }
+//            } catch (Exception e) {
+//                LOGGER.error("open url fail:%s", e, Constant.EN_DOC_DOMAIN);
+//            }
+//        }
+//    }
 
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent event) {
-            try {
-                Desktop dp = Desktop.getDesktop();
-                if (dp.isSupported(Desktop.Action.BROWSE)) {
-                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-                        dp.browse(URI.create(Constant.CN_DOC_DOMAIN));
-                    } else {
-                        dp.browse(URI.create(Constant.EN_DOC_DOMAIN));
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.error("open url fail:%s", e, Constant.EN_DOC_DOMAIN);
-            }
-        }
-    }
-
-    private static final class WhatsNewAction extends AnAction {
-        public WhatsNewAction() {
-            super(MyResourceBundleUtil.getKey("whatsnew"), MyResourceBundleUtil.getKey("whatsnew"), PluginIcons.NOTIFICATIONS_NEW);
-        }
-
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent event) {
-            try {
-                Desktop dp = Desktop.getDesktop();
-                if (dp.isSupported(Desktop.Action.BROWSE)) {
-                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-                        dp.browse(URI.create(String.format("%s%s", Constant.CN_DOC_DOMAIN, "/guide/whatsnew")));
-                    } else {
-                        dp.browse(URI.create(String.format("%s%s", Constant.EN_DOC_DOMAIN, "guide/whatsnew")));
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.error("open url fail:%s", e, String.format("%s%s", Constant.EN_DOC_DOMAIN, "guide/whatsnew"));
-            }
-        }
-    }
+//    private static final class WhatsNewAction extends AnAction {
+//        public WhatsNewAction() {
+//            super(MyResourceBundleUtil.getKey("whatsnew"), MyResourceBundleUtil.getKey("whatsnew"), PluginIcons.NOTIFICATIONS_NEW);
+//        }
+//
+//        @Override
+//        public void actionPerformed(@NotNull AnActionEvent event) {
+//            try {
+//                Desktop dp = Desktop.getDesktop();
+//                if (dp.isSupported(Desktop.Action.BROWSE)) {
+//                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
+//                        dp.browse(URI.create(String.format("%s%s", Constant.CN_DOC_DOMAIN, "/guide/whatsnew")));
+//                    } else {
+//                        dp.browse(URI.create(String.format("%s%s", Constant.EN_DOC_DOMAIN, "guide/whatsnew")));
+//                    }
+//                }
+//            } catch (Exception e) {
+//                LOGGER.error("open url fail:%s", e, String.format("%s%s", Constant.EN_DOC_DOMAIN, "guide/whatsnew"));
+//            }
+//        }
+//    }
 
 
 //    public class ToolbarSendRequestAction extends DumbAwareAction {
@@ -4067,23 +4067,23 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             String methodName = paramGroup.getMethod();
             if (StringUtils.isBlank(className)) {
                 NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("You should generate first", MessageType.ERROR)
-                        .addAction(new NotificationAction("Document") {
-                            @Override
-                            public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
-                                Desktop dp = Desktop.getDesktop();
-                                if (dp.isSupported(Desktop.Action.BROWSE)) {
-                                    try {
-                                        if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-                                            dp.browse(URI.create(Constant.CN_DOC_DOMAIN + "/guide/feature/#%E9%87%8D%E6%96%B0%E7%94%9F%E5%AD%98%E8%AF%B7%E6%B1%82"));
-                                        } else {
-                                            dp.browse(URI.create(String.format("%s/guide/getstarted/#regenetate", Constant.EN_DOC_DOMAIN)));
-                                        }
-                                    } catch (IOException ex) {
-                                        LOGGER.error("open url fail:%s/guide/getstarted/#regenetate", ex, Constant.EN_DOC_DOMAIN);
-                                    }
-                                }
-                            }
-                        })
+//                        .addAction(new NotificationAction("Document") {
+//                            @Override
+//                            public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
+//                                Desktop dp = Desktop.getDesktop();
+//                                if (dp.isSupported(Desktop.Action.BROWSE)) {
+//                                    try {
+//                                        if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
+//                                            dp.browse(URI.create(Constant.CN_DOC_DOMAIN + "/guide/feature/#%E9%87%8D%E6%96%B0%E7%94%9F%E5%AD%98%E8%AF%B7%E6%B1%82"));
+//                                        } else {
+//                                            dp.browse(URI.create(String.format("%s/guide/getstarted/#regenetate", Constant.EN_DOC_DOMAIN)));
+//                                        }
+//                                    } catch (IOException ex) {
+//                                        LOGGER.error("open url fail:%s/guide/getstarted/#regenetate", ex, Constant.EN_DOC_DOMAIN);
+//                                    }
+//                                }
+//                            }
+//                        })
                         .notify(myProject);
                 return;
             }

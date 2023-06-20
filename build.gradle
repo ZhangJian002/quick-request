@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.6.19'
+version '2023.6.20'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -29,6 +29,11 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.6.20</h3 >
+    <ul>
+        <li>兼容性修改</li>
+        <li>Navigate页面新增搜索框(可根据url或者方法名搜索)</li>
+    </ul>
     <h3>v2023.6.19</h3 >
     <ul>
         <li>编辑器增加Soft-wrap支持，并且支持美化、html预览</li>

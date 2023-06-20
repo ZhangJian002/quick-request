@@ -296,6 +296,6 @@ public class Constant {
             new MethodType("DUBBO", PluginIcons.ICON_DUBBO)
     );
 
-    public static final String CN_DOC_DOMAIN = "https://plugins.sheng90.wang/fast-request";
-    public static final String EN_DOC_DOMAIN = "https://dromara.github.io/fast-request/en";
+//    public static final String CN_DOC_DOMAIN = "https://plugins.sheng90.wang/fast-request";
+//    public static final String EN_DOC_DOMAIN = "https://dromara.github.io/fast-request/en";
 }

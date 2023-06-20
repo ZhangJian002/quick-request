@@ -31,6 +31,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.*;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import io.github.zjay.plugin.fastrequest.config.Constant;
+import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
@@ -166,7 +167,7 @@ public class DataMappingConfigViewNew extends AbstractConfigurableView {
 
 
     private JPanel createStringGeneratorConfigPanel(){
-        JPanel stringGeneratorConfigPanel = UI.PanelFactory.grid().splitColumns()
+        JPanel stringGeneratorConfigPanel = new MyPanelGridBuilder().splitColumns()
                 .add(UI.PanelFactory.panel(randomStringStrategyComboBox).withLabel(MyResourceBundleUtil.getKey("Strategy")))
                 .add(UI.PanelFactory.panel(randomStringTextField).withLabel(MyResourceBundleUtil.getKey("Length")))
                 .add(UI.PanelFactory.panel(randomStringDelimiterTextField).withLabel(MyResourceBundleUtil.getKey("Delimiter"))).createPanel();
@@ -211,20 +212,22 @@ public class DataMappingConfigViewNew extends AbstractConfigurableView {
             viewCustomDataMappingList = new ArrayList<>();
         }
         JBTable table = createCustomTable();
-        table.getEmptyText().appendLine("Example-> java type: com.baomidou.mybatisplus.extension.plugins.pagination.Page").appendLine("Default value: {\"size\":10,\"current\":1}").appendLine("Help", SimpleTextAttributes.LINK_PLAIN_ATTRIBUTES,e -> {
-            try {
-                Desktop dp = Desktop.getDesktop();
-                if (dp.isSupported(Desktop.Action.BROWSE)) {
-                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-                        dp.browse(URI.create(Constant.CN_DOC_DOMAIN + "/guide/getstarted/#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%B1%BB%E5%9E%8B%E6%98%A0%E5%B0%84"));
-                    } else {
-                        dp.browse(URI.create(Constant.EN_DOC_DOMAIN + "/guide/getstarted/#custom-type-mapping"));
-                    }
-                }
-            } catch (Exception exception) {
-                LOGGER.error("open url fail:" + Constant.EN_DOC_DOMAIN + "/guide/getstarted/#custom-type-mapping", exception);
-            }
-        });
+        table.getEmptyText().appendLine("Example-> java type: com.baomidou.mybatisplus.extension.plugins.pagination.Page").appendLine("Default value: {\"size\":10,\"current\":1}")
+//                .appendLine("Help", SimpleTextAttributes.LINK_PLAIN_ATTRIBUTES,e -> {
+//            try {
+//                Desktop dp = Desktop.getDesktop();
+//                if (dp.isSupported(Desktop.Action.BROWSE)) {
+//                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
+//                        dp.browse(URI.create(Constant.CN_DOC_DOMAIN + "/guide/getstarted/#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%B1%BB%E5%9E%8B%E6%98%A0%E5%B0%84"));
+//                    } else {
+//                        dp.browse(URI.create(Constant.EN_DOC_DOMAIN + "/guide/getstarted/#custom-type-mapping"));
+//                    }
+//                }
+//            } catch (Exception exception) {
+//                LOGGER.error("open url fail:" + Constant.EN_DOC_DOMAIN + "/guide/getstarted/#custom-type-mapping", exception);
+//            }
+//        })
+        ;
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(table);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);

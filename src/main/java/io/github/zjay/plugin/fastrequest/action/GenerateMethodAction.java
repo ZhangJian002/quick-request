@@ -52,6 +52,7 @@ import com.intellij.util.ui.GridBag;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import free.icons.PluginIcons;
+import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.util.KeywordUtil;
 import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -186,7 +187,7 @@ public class GenerateMethodAction extends AnAction {
             JPanel buttonJPanel = new JPanel(new GridBagLayout());
             buttonJPanel.add(generateButton);
             buttonJPanel.add(cancelButton);
-            JPanel panel = UI.PanelFactory.grid()
+            JPanel panel = new MyPanelGridBuilder()
                     .add(UI.PanelFactory.panel(nameTextField).withLabel(MyResourceBundleUtil.getKey("MethodName")+":").withComment(MyResourceBundleUtil.getKey("MethodNameDes")))
                     .add(UI.PanelFactory.panel(paramTextField).withLabel(MyResourceBundleUtil.getKey("Parameters")+":").withComment(MyResourceBundleUtil.getKey("ParametersDes")))
                     .add(UI.PanelFactory.panel(methodTypes).withLabel(MyResourceBundleUtil.getKey("Type")+":").withComment(MyResourceBundleUtil.getKey("TypeDes")))
