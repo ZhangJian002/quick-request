@@ -1132,7 +1132,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 saveTableRequest(1, request.getMethod().name());
             });
 
-        }, ModalityState.NON_MODAL);
+        });
     }
 
     private void dubboResponseHandler(DubboService.Response response, long start, long end, boolean fileMode, ParamGroup paramGroup) {
@@ -1155,7 +1155,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 saveTableRequest(2, paramGroup.getMethodType());
             });
 
-        }, ModalityState.NON_MODAL);
+        });
     }
 
     private void saveTableRequest(int type, String methodName) {

@@ -19,6 +19,7 @@ package io.github.zjay.plugin.fastrequest.config;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.intellij.lang.jvm.types.JvmPrimitiveTypeKind;
+import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiPrimitiveType;
 import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.model.MethodType;
@@ -271,6 +272,8 @@ public class Constant {
                 .put(505, "HTTP Version Not Supported")
                 .build();
     }
+
+    public static Key<Integer> KEY_QUICKREQUEST = Key.create("QuickRequest");
 
     public static List<String> IGNORE_PARAM_PARSE_LIST = Lists.newArrayList(
             "javax.servlet.http.HttpServletRequest",

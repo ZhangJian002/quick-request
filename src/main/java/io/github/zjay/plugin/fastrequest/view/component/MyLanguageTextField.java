@@ -37,6 +37,7 @@ import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.ex.SoftWrapChangeListener;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.impl.EditorTabbedContainer;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
@@ -60,6 +61,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import free.icons.PluginIcons;
+import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 import org.cef.browser.CefBrowser;
@@ -97,6 +99,7 @@ public class MyLanguageTextField extends LanguageTextField {
     protected @NotNull EditorEx createEditor() {
         EditorEx editor = super.createEditor();
         setUpEditor(editor);
+        editor.putUserData(Constant.KEY_QUICKREQUEST, 1);
         editor.setViewer(isViewer);
         return editor;
     }
@@ -162,6 +165,7 @@ public class MyLanguageTextField extends LanguageTextField {
         settings.setLineNumbersShown(true);
         settings.setIndentGuidesShown(true);
         settings.setUseSoftWraps(true);
+        settings.setAdditionalLinesCount(3);
         settings.setAutoCodeFoldingEnabled(true);
         settings.setFoldingOutlineShown(true);
         settings.setAllowSingleLogicalLineFolding(true);
