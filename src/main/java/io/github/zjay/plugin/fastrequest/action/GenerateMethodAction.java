@@ -52,6 +52,7 @@ import com.intellij.util.ui.GridBag;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UI;
 import free.icons.PluginIcons;
+import io.github.zjay.plugin.fastrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.util.KeywordUtil;
 import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
@@ -188,14 +189,14 @@ public class GenerateMethodAction extends AnAction {
             buttonJPanel.add(generateButton);
             buttonJPanel.add(cancelButton);
             JPanel panel = new MyPanelGridBuilder()
-                    .add(UI.PanelFactory.panel(nameTextField).withLabel(MyResourceBundleUtil.getKey("MethodName")+":").withComment(MyResourceBundleUtil.getKey("MethodNameDes")))
-                    .add(UI.PanelFactory.panel(paramTextField).withLabel(MyResourceBundleUtil.getKey("Parameters")+":").withComment(MyResourceBundleUtil.getKey("ParametersDes")))
-                    .add(UI.PanelFactory.panel(methodTypes).withLabel(MyResourceBundleUtil.getKey("Type")+":").withComment(MyResourceBundleUtil.getKey("TypeDes")))
-                    .add(UI.PanelFactory.panel(urlTextField).withLabel(MyResourceBundleUtil.getKey("Url")+":").withComment(MyResourceBundleUtil.getKey("UrlDes")))
-                    .add(UI.PanelFactory.panel(returnTextField).withLabel(MyResourceBundleUtil.getKey("Return.class")+":").withComment(MyResourceBundleUtil.getKey("Return.classDes")))
-                    .add(UI.PanelFactory.panel(serviceTextField).withLabel(MyResourceBundleUtil.getKey("Bean.class")+":").withComment(MyResourceBundleUtil.getKey("Bean.classDes")))
-                    .add(UI.PanelFactory.panel(needGenerateSub).withComment(MyResourceBundleUtil.getKey("GenerateSelectedDes")))
-                    .add(UI.PanelFactory.panel(buttonJPanel).withTooltip(MyResourceBundleUtil.getKey("GenerateTooTip")))
+                    .add(new MyComponentPanelBuilder(nameTextField).withLabel(MyResourceBundleUtil.getKey("MethodName")+":").withComment(MyResourceBundleUtil.getKey("MethodNameDes")))
+                    .add(new MyComponentPanelBuilder(paramTextField).withLabel(MyResourceBundleUtil.getKey("Parameters")+":").withComment(MyResourceBundleUtil.getKey("ParametersDes")))
+                    .add(new MyComponentPanelBuilder(methodTypes).withLabel(MyResourceBundleUtil.getKey("Type")+":").withComment(MyResourceBundleUtil.getKey("TypeDes")))
+                    .add(new MyComponentPanelBuilder(urlTextField).withLabel(MyResourceBundleUtil.getKey("Url")+":").withComment(MyResourceBundleUtil.getKey("UrlDes")))
+                    .add(new MyComponentPanelBuilder(returnTextField).withLabel(MyResourceBundleUtil.getKey("Return.class")+":").withComment(MyResourceBundleUtil.getKey("Return.classDes")))
+                    .add(new MyComponentPanelBuilder(serviceTextField).withLabel(MyResourceBundleUtil.getKey("Bean.class")+":").withComment(MyResourceBundleUtil.getKey("Bean.classDes")))
+                    .add(new MyComponentPanelBuilder(needGenerateSub).withComment(MyResourceBundleUtil.getKey("GenerateSelectedDes")))
+                    .add(new MyComponentPanelBuilder(buttonJPanel).withTooltip(MyResourceBundleUtil.getKey("GenerateTooTip")))
                     .createPanel();
             mainPanel = new JPanel(new GridBagLayout());
             GridBag gb = new GridBag()

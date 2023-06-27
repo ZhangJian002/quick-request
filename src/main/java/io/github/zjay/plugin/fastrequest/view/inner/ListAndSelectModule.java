@@ -72,7 +72,7 @@
 //            comment = "<p>Help move the API to the module for the controller.<a href =\"" + Constant.EN_DOC_DOMAIN + "/guide/feature#api-group-automatic-association\">see knowledge</a></p>";
 //        }
 //
-//        return UI.PanelFactory.panel(scrollPane)
+//        return new MyComponentPanelBuilder(scrollPane)
 //                withComment(comment)
 //                .createPanel();
 //    }

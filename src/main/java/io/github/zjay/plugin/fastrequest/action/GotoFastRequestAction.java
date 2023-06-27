@@ -50,8 +50,8 @@ public class GotoFastRequestAction extends SearchEverywhereBaseAction {
         }
     }
 
-    @Override
-    protected void setShortcutSet(@NotNull ShortcutSet shortcutSet) {
-        super.setShortcutSet(shortcutSet);
-    }
+//    @Override
+//    protected void setShortcutSet(@NotNull ShortcutSet shortcutSet) {
+//        super.setShortcutSet(shortcutSet);
+//    }
 }

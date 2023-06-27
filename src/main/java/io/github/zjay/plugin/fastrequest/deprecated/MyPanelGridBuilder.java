@@ -1,6 +1,5 @@
 package io.github.zjay.plugin.fastrequest.deprecated;
 
-import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.openapi.ui.panel.GridBagPanelBuilder;
 import com.intellij.openapi.ui.panel.PanelBuilder;
 import com.intellij.util.ui.JBUI;
@@ -31,7 +30,7 @@ public class MyPanelGridBuilder implements PanelBuilder {
      * anchored to the top of the panel and don't resize vertically. All free space is filled with a
      * blank area.
      * This setting is useful when one or more rows are resizable also. To turn on row vertical
-     * resizing use {@link ComponentPanelBuilder#resizeX(boolean)}.
+     * resizing use {@link MyComponentPanelBuilder#resizeX(boolean)}.
      *
      * @return <code>this</code>
      */

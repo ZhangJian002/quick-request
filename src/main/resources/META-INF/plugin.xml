@@ -14,19 +14,14 @@
             <li>3、Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
             <li>4、Support for save requests and history queries</li>
         </ul>
+        <h2>Links</h2>
+        <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a>
 ]]>
     </description>
 
-    <!--    2019.2-->
+    <!--    2021.1-->
     <idea-version since-build="211.6693.111" />
-<!--    <idea-version since-build="203.5981.155"/>-->
-    <!--    <idea-version since-build="192"/>-->
-
-    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
-         on how to target different products -->
-<!--    <depends>com.intellij.java</depends>-->
     <depends>com.intellij.modules.java</depends>
-<!--    <depends>org.intellij.plugins.markdown</depends>-->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -68,18 +63,6 @@
 
         <postStartupActivity implementation="io.github.zjay.plugin.fastrequest.update.WhatsNewActivity"/>
 
-
-
-
-        <!--        <iw.actionProvider implementation="action.io.github.zjay.plugin.fastrequest.FormatActionProvider"/>-->
-
-        <!--        <editorFloatingToolbarProvider-->
-        <!--                order="after DefaultFloatingToolbarProvider"-->
-        <!--                implementation="io.github.zjay.plugin.fastrequest.editor.FastRequestFloatingToolbarProvider"-->
-        <!--                id="fastRequestEditorFloatingToolbarProvider"/>-->
-
-<!--        <errorHandler-->
-<!--                implementation="io.github.zjay.plugin.fastrequest.diagnostic.FastRequestErrorReportSubmitter"/>-->
     </extensions>
 
     <actions>
@@ -94,15 +77,6 @@
                     description="Generate spring method">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
             </action>
-<!--            <action id="quickRequest.generator" class="io.github.zjay.plugin.fastrequest.action.GenerateUrlAction"-->
-<!--                    text="Generate URL and Param"-->
-<!--                    description="Generate URL and Param">-->
-<!--                <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl BACK_SLASH"/>-->
-<!--                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl BACK_SLASH"/>-->
-<!--                <keyboard-shortcut keymap="Default for XWin" first-keystroke="ctrl BACK_SLASH"/>-->
-<!--                <keyboard-shortcut keymap="$default" first-keystroke="ctrl BACK_SLASH"/>-->
-<!--            </action>-->
-
             <action id="quickRequest.sendAction"
                     class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>
@@ -114,27 +88,15 @@
             </action>
         </group>
 
-<!--        <group id="fastRequest.editor.floatGroup">-->
-<!--            <action id="fastRequest.format" class="action.io.github.zjay.plugin.fastrequest.FormatAction">-->
-<!--                <add-to-group group-id="EditorContextBarMenu" anchor="last"/>-->
-<!--            </action>-->
-
-<!--        </group>-->
-
         <action id="quickRequest.gotoFastRequest"
                 class="io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction">
             <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
         </action>
 
         <group id="quickRequest.editor.floatGroup">
-            <action id="fastRequest.format" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.FormatAction" />
-<!--            <action id="fastRequest.replaceJsonPartlyWithAiAction" class="io.github.kings1990.plugin.fastrequest.cofig.lIIIllI1IIIlIlll" />-->
-<!--            <action id="fastRequest.replaceJsonWithAiAction" class="io.github.kings1990.plugin.fastrequest.cofig.l1II1III1Il1Il11llIl" />-->
-            <action id="fastRequest.softWrap" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.SoftWrapAction" />
-            <action id="fastRequest.openAsHtml" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.OpenHtmlAction" />
-<!--            <action id="fastRequest.openRfrToolWindowFromStoreAction" class="io.github.kings1990.plugin.fastrequest.cofig.lII11111llIIl11l">-->
-<!--                <add-to-group group-id="EditorContextBarMenu" anchor="last" />-->
-<!--            </action>-->
+            <action id="quickRequest.format" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.FormatAction" />
+            <action id="quickRequest.softWrap" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.SoftWrapAction" />
+            <action id="quickRequest.openAsHtml" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.OpenHtmlAction" />
         </group>
 
     </actions>

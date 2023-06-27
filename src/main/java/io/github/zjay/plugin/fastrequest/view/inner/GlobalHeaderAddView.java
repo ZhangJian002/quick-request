@@ -19,6 +19,7 @@ package io.github.zjay.plugin.fastrequest.view.inner;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.util.ui.UI;
+import io.github.zjay.plugin.fastrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import org.apache.commons.lang3.StringUtils;
@@ -42,8 +43,8 @@ public class GlobalHeaderAddView extends DialogWrapper {
         keyTextField = new JTextField();
         valueTextField = new JTextField();
         return new MyPanelGridBuilder().splitColumns()
-                .add(UI.PanelFactory.panel(keyTextField).withLabel("Key"))
-                .add(UI.PanelFactory.panel(valueTextField).withLabel("Value"))
+                .add(new MyComponentPanelBuilder(keyTextField).withLabel("Key"))
+                .add(new MyComponentPanelBuilder(valueTextField).withLabel("Value"))
                 .createPanel();
     }
 

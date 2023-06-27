@@ -27,6 +27,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBRadioButton;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.*;
+import io.github.zjay.plugin.fastrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
@@ -130,8 +131,8 @@ public class OtherConfigView extends AbstractConfigurableView {
             }
         });
         JPanel connectionConfigPanel = new MyPanelGridBuilder()
-                .add(UI.PanelFactory.panel(connectionTimeoutText).withLabel("ConnectionTimeout"))
-                .add(UI.PanelFactory.panel(readTimeoutText).withLabel("ReadTimeout"))
+                .add(new MyComponentPanelBuilder(connectionTimeoutText).withLabel("ConnectionTimeout"))
+                .add(new MyComponentPanelBuilder(readTimeoutText).withLabel("ReadTimeout"))
                 .createPanel();
         return connectionConfigPanel;
     }
@@ -144,7 +145,7 @@ public class OtherConfigView extends AbstractConfigurableView {
             this.clickAndSend = e.getStateChange() == ItemEvent.SELECTED;
         });
         JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
-                .add(UI.PanelFactory.panel(completeCheckBox)).createPanel();
+                .add(new MyComponentPanelBuilder(completeCheckBox)).createPanel();
         clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("ClickIconConfig")));
         return clickAndSendConfigPanel;
 
@@ -179,7 +180,7 @@ public class OtherConfigView extends AbstractConfigurableView {
             setUrlReplaceTable(table);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
         JPanel tablePanel = toolbarDecorator.createPanel();
-        return JBUI.Panels.simplePanel(UI.PanelFactory.panel(tablePanel)
+        return JBUI.Panels.simplePanel(new MyComponentPanelBuilder(tablePanel)
                 .withLabel(MyResourceBundleUtil.getKey("UrlReplaceConfig")).moveLabelOnTop()
                 .withComment(MyResourceBundleUtil.getKey("OtherConfigTitle1") + " " + MyResourceBundleUtil.getKey("OtherConfigTitle2"), false).resizeY(true).createPanel());
     }

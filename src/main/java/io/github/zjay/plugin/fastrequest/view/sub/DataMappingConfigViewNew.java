@@ -22,6 +22,7 @@ import com.intellij.openapi.actionSystem.ActionToolbarPosition;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.panel.ComponentPanelBuilder;
 import com.intellij.ui.CollectionListModel;
 import com.intellij.ui.IdeBorderFactory;
 import com.intellij.ui.SimpleTextAttributes;
@@ -31,6 +32,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.*;
 import com.intellij.util.ui.components.BorderLayoutPanel;
 import io.github.zjay.plugin.fastrequest.config.Constant;
+import io.github.zjay.plugin.fastrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
@@ -154,9 +156,9 @@ public class DataMappingConfigViewNew extends AbstractConfigurableView {
         }).setToolbarPosition(ActionToolbarPosition.TOP);
 
 
-        BorderLayoutPanel inlineCustomerDataMapping = JBUI.Panels.simplePanel().addToTop(UI.PanelFactory.panel(customDataMappingPanel).withLabel(MyResourceBundleUtil.getKey("CustomerDataMapping")).moveLabelOnTop().createPanel());
-        BorderLayoutPanel inlineDefaultDataMappingPanel = JBUI.Panels.simplePanel().addToTop(UI.PanelFactory.panel(defaultDataMappingPanel).withLabel(MyResourceBundleUtil.getKey("DefaultDataMapping")).moveLabelOnTop().createPanel());
-        BorderLayoutPanel inlineIgnoreDataMappingPanel = JBUI.Panels.simplePanel().addToTop(UI.PanelFactory.panel(ignoreDataMappingDecorator.createPanel()).withComment(MyResourceBundleUtil.getKey("IgnoreDataMappingDesc")).withLabel(MyResourceBundleUtil.getKey("IgnoreDataMapping")).moveLabelOnTop().createPanel());
+        BorderLayoutPanel inlineCustomerDataMapping = JBUI.Panels.simplePanel().addToTop(new MyComponentPanelBuilder(customDataMappingPanel).withLabel(MyResourceBundleUtil.getKey("CustomerDataMapping")).moveLabelOnTop().createPanel());
+        BorderLayoutPanel inlineDefaultDataMappingPanel = JBUI.Panels.simplePanel().addToTop(new MyComponentPanelBuilder(defaultDataMappingPanel).withLabel(MyResourceBundleUtil.getKey("DefaultDataMapping")).moveLabelOnTop().createPanel());
+        BorderLayoutPanel inlineIgnoreDataMappingPanel = JBUI.Panels.simplePanel().addToTop(new MyComponentPanelBuilder(ignoreDataMappingDecorator.createPanel()).withComment(MyResourceBundleUtil.getKey("IgnoreDataMappingDesc")).withLabel(MyResourceBundleUtil.getKey("IgnoreDataMapping")).moveLabelOnTop().createPanel());
 
         panel.add(stringGeneratorConfigPanel, gb.nextLine().next().fillCell());
         panel.add(inlineCustomerDataMapping, gb.nextLine().next().weighty(0.3).pady(10).fillCell());
@@ -168,9 +170,9 @@ public class DataMappingConfigViewNew extends AbstractConfigurableView {
 
     private JPanel createStringGeneratorConfigPanel(){
         JPanel stringGeneratorConfigPanel = new MyPanelGridBuilder().splitColumns()
-                .add(UI.PanelFactory.panel(randomStringStrategyComboBox).withLabel(MyResourceBundleUtil.getKey("Strategy")))
-                .add(UI.PanelFactory.panel(randomStringTextField).withLabel(MyResourceBundleUtil.getKey("Length")))
-                .add(UI.PanelFactory.panel(randomStringDelimiterTextField).withLabel(MyResourceBundleUtil.getKey("Delimiter"))).createPanel();
+                .add(new MyComponentPanelBuilder(randomStringStrategyComboBox).withLabel(MyResourceBundleUtil.getKey("Strategy")))
+                .add(new MyComponentPanelBuilder(randomStringTextField).withLabel(MyResourceBundleUtil.getKey("Length")))
+                .add(new MyComponentPanelBuilder(randomStringDelimiterTextField).withLabel(MyResourceBundleUtil.getKey("Delimiter"))).createPanel();
         stringGeneratorConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("StringGeneratorConfig")));
         return stringGeneratorConfigPanel;
     }

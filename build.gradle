@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.6.20'
+version '2023.6.27'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -17,6 +17,7 @@ repositories {
 dependencies {
     compile 'com.alibaba:fastjson:1.2.83'
     compile 'cn.hutool:hutool-all:5.7.9'
+
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -29,6 +30,11 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.6.27</h3 >
+    <ul>
+        <li>兼容性修改</li>
+        <li>局部优化</li>
+    </ul>
     <h3>v2023.6.20</h3 >
     <ul>
         <li>兼容性修改</li>
@@ -48,11 +54,11 @@ patchPluginXml {
         </li>
         <li>其他优化及BUG修复</li>
     </ul>
-    <h3>v2023.6.12</h3 >
+    <h3>v2023.6.12</h3>
     <ul>
         <li>Other optimizations and bug fixes</li>
     </ul>
-    <h3>v2023.6.9</h3 >
+    <h3>v2023.6.9</h3>
     <ul>
        <li>Add automatic spring generation method(right click choose Generate Spring Method or alt \\): 
        
@@ -60,12 +66,12 @@ patchPluginXml {
         <li>Other optimizations and bug fixes</li>
     </ul>
 
-    <h3>v2023.5.21</h3 >
+    <h3>v2023.5.21</h3>
     <ul>
             <li>Version compatibility is relaxed, and restrictions can support more versions</li>
         </ul>
 
-    <h3>v2023.5.20</h3 >
+    <h3>v2023.5.20</h3>
     <ul>
             <li>1、Add history query and request in APIs tab</li>
             <li>2、Add a request timeout setting in the configuration</li>
