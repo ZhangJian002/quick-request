@@ -20,10 +20,7 @@ public class OpenHtmlAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent paramAnActionEvent) {
         if (paramAnActionEvent == null) return;
         Editor editor = (Editor)paramAnActionEvent.getData(CommonDataKeys.EDITOR);
-        if (editor == null) {
-            return;
-        }
-        if(!editor.isViewer()){
+        if (editor == null || !editor.isViewer()) {
             return;
         }
         Project project = paramAnActionEvent.getProject();

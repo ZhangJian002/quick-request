@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.InspectionWidgetActionProvider;
+import io.github.zjay.plugin.fastrequest.view.component.MyLanguageTextField;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,5 +14,6 @@ public class QuickRequestToggleAction implements InspectionWidgetActionProvider 
     @Override
     public AnAction createAction(@NotNull Editor paramEditor) {
         return ActionManager.getInstance().getAction("quickRequest.editor.floatGroup");
+
     }
 }

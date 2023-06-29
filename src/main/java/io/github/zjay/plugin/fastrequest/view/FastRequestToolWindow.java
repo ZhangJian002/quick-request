@@ -36,12 +36,9 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.json.JsonFileType;
 import com.intellij.json.JsonLanguage;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
@@ -75,10 +72,7 @@ import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import free.icons.PluginIcons;
-import io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction;
-import io.github.zjay.plugin.fastrequest.action.OpenConfigAction;
-import io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction;
-import io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction;
+import io.github.zjay.plugin.fastrequest.action.*;
 import io.github.zjay.plugin.fastrequest.config.*;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.dubbo.DubboService;
@@ -101,8 +95,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -157,7 +150,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JTabbedPane responseTabbedPanel;
     private JScrollPane responseBodyScrollPanel;
     private JScrollPane responseInfoScrollPanel;
-//    private JComboBox<Integer> responseStatusComboBox;
+    //    private JComboBox<Integer> responseStatusComboBox;
     private JPanel responseInfoPanel;
     private JTabbedPane multipartTabbedPane;
     private JPanel multipartTablePanel;
@@ -215,20 +208,20 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     public boolean sendButtonFlag = true;
 
 
-    public void stopCellEditing(){
-        if(this.headerTable.isEditing()){
+    public void stopCellEditing() {
+        if (this.headerTable.isEditing()) {
             this.headerTable.getCellEditor().stopCellEditing();
         }
-        if(this.pathParamsTable.isEditing()){
+        if (this.pathParamsTable.isEditing()) {
             this.pathParamsTable.getCellEditor().stopCellEditing();
         }
-        if(this.urlParamsTable.isEditing()){
+        if (this.urlParamsTable.isEditing()) {
             this.urlParamsTable.getCellEditor().stopCellEditing();
         }
-        if(this.urlEncodedTable.isEditing()){
+        if (this.urlEncodedTable.isEditing()) {
             this.urlEncodedTable.getCellEditor().stopCellEditing();
         }
-        if(this.multipartTable.isEditing()){
+        if (this.multipartTable.isEditing()) {
             this.multipartTable.getCellEditor().stopCellEditing();
         }
     }
@@ -272,12 +265,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         return typeJComboBox;
     }
 
-    private void setTableButtons(){
+    private void setTableButtons() {
         tablePopupMenu = new JBPopupMenu();
         JBMenuItem delMenItem = new JBMenuItem(" Delete Rows ");
         delMenItem.setIcon(AllIcons.General.Remove);
         delMenItem.addActionListener(evt -> {
-            switch (tabbedPane.getSelectedIndex()){
+            switch (tabbedPane.getSelectedIndex()) {
                 case 0:
                     removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
                     break;
@@ -288,9 +281,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     removeUrlParamsTableLines(urlParamsTable, urlParamsKeyValueList, urlParamsTextArea, urlParamsChangeFlag, null);
                     break;
                 case 3:
-                    if(bodyTabbedPane.getSelectedIndex() == 1){
+                    if (bodyTabbedPane.getSelectedIndex() == 1) {
                         removeUrlParamsTableLines(urlEncodedTable, urlEncodedKeyValueList, urlEncodedTextArea, urlEncodedParamChangeFlag, null);
-                    }else if(bodyTabbedPane.getSelectedIndex() == 2){
+                    } else if (bodyTabbedPane.getSelectedIndex() == 2) {
                         removeUrlParamsTableLines(multipartTable, multipartKeyValueList, null, null, null);
                     }
                     break;
@@ -300,7 +293,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         JBMenuItem clearMenItem = new JBMenuItem(" Clear Rows ");
         clearMenItem.setIcon(PluginIcons.ICON_CLEAR);
         clearMenItem.addActionListener(evt -> {
-            switch (tabbedPane.getSelectedIndex()){
+            switch (tabbedPane.getSelectedIndex()) {
                 case 0:
                     clearTableLines(headerTable, null, null, null, headerParamsKeyValueList);
                     break;
@@ -311,9 +304,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     clearTableLines(urlParamsTable, urlParamsKeyValueList, urlParamsTextArea, urlParamsChangeFlag, null);
                     break;
                 case 3:
-                    if(bodyTabbedPane.getSelectedIndex() == 1){
+                    if (bodyTabbedPane.getSelectedIndex() == 1) {
                         clearTableLines(urlEncodedTable, urlEncodedKeyValueList, urlEncodedTextArea, urlEncodedParamChangeFlag, null);
-                    }else if(bodyTabbedPane.getSelectedIndex() == 2){
+                    } else if (bodyTabbedPane.getSelectedIndex() == 2) {
                         clearTableLines(multipartTable, multipartKeyValueList, null, null, null);
                     }
                     break;
@@ -369,9 +362,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         bindTableOperations(pathParamsTable);
 
 
-
-
-
         ActionLink managerConfigLink = new ActionLink("config", e -> {
             ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
         });
@@ -419,6 +409,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.addSeparator("  |  ");
         ToolbarSendRequestAction toolbarSendRequestAction = (ToolbarSendRequestAction) ActionManager.getInstance().getAction("quickRequest.sendAction");
         ToolbarSendAndDownloadRequestAction sendAndDownloadRequestAction = (ToolbarSendAndDownloadRequestAction) ActionManager.getInstance().getAction("quickRequest.sendDownloadAction");
+        ToolbarPressureRequestAction toolbarPressureRequestAction = (ToolbarPressureRequestAction) ActionManager.getInstance().getAction("quickRequest.pressureAction");
 
 // todo idea暂时有bug
 //        DefaultActionGroup sendGroup = DefaultActionGroup.createPopupGroupWithEmptyText();
@@ -435,6 +426,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         DefaultActionGroup sendGroup = new DefaultActionGroup();
         sendGroup.add(toolbarSendRequestAction);
         sendGroup.add(sendAndDownloadRequestAction);
+        sendGroup.add(toolbarPressureRequestAction);
         SplitButtonAction splitButtonAction = new SplitButtonAction(sendGroup);
         group.add(splitButtonAction);
 
@@ -712,18 +704,18 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         requestProgressBar.setIndeterminate(true);
         requestProgressBar.setVisible(false);
         completeCheckBox.addItemListener(e -> {
-            if(e.getStateChange() == ItemEvent.SELECTED){
+            if (e.getStateChange() == ItemEvent.SELECTED) {
                 urlCompleteChangeFlag.set(true);
-                if(Objects.equals(methodTypeComboBox.getSelectedItem(), "DUBBO")){
-                    if(!UrlUtil.isDubboURL(urlTextField.getText())){
+                if (Objects.equals(methodTypeComboBox.getSelectedItem(), "DUBBO")) {
+                    if (!UrlUtil.isDubboURL(urlTextField.getText())) {
                         urlTextField.setText(getActiveDomain() + urlTextField.getText());
                     }
-                }else {
-                    if(!UrlUtil.isHttpURL(urlTextField.getText())){
+                } else {
+                    if (!UrlUtil.isHttpURL(urlTextField.getText())) {
                         urlTextField.setText(getActiveDomain() + urlTextField.getText());
                     }
                 }
-            }else {
+            } else {
                 urlCompleteChangeFlag.set(false);
                 urlTextField.setText(urlTextField.getText().replace(getActiveDomain(), ""));
             }
@@ -798,7 +790,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         return sendButtonFlag;
     }
 
-    public void sendRequestEvent(boolean fileMode) {
+    public void sendRequestEvent(boolean... conditions) {
         if (!sendButtonFlag || futureAtomicReference.get() != null) {
             return;
         }
@@ -808,26 +800,27 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String methodType = (String) methodTypeComboBox.getSelectedItem();
         //请求进程条设置
         requestProgressBarSetting();
-        if(Objects.equals(methodType, "DUBBO")){
-            dubboRequest(fileMode);
-        }else {
+        if (Objects.equals(methodType, "DUBBO")) {
+            dubboRequest(conditions);
+        } else {
             //Restful Request
-            restfulRequest(fileMode);
+            restfulRequest(conditions);
         }
     }
 
-    private void dubboRequest(boolean fileMode) {
+    private void dubboRequest(boolean... conditions) {
+        boolean fileMode = conditions[0];
         try {
             FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
             ParamGroup paramGroup = config.getParamGroup();
-            String dubboServiceStr = String.format("%s.%s",paramGroup.getInterfaceName(), paramGroup.getMethod());
+            String dubboServiceStr = String.format("%s.%s", paramGroup.getInterfaceName(), paramGroup.getMethod());
             String address;
             try {
                 address = getDubboSendUrl().split("/")[0];
-                if(StringUtils.isBlank(address)){
+                if (StringUtils.isBlank(address)) {
                     address = "127.0.0.1:20880";
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 address = "127.0.0.1:20880";
             }
             if (!UrlUtil.isDubboURL(address)) {
@@ -851,7 +844,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     DubboService.Response invokeRes = dubboService.invoke();
                     long end = System.currentTimeMillis();
                     //如果被外部中断，就不继续了
-                    if(Thread.currentThread().isInterrupted()){
+                    if (Thread.currentThread().isInterrupted()) {
                         return;
                     }
                     //结果处理
@@ -859,12 +852,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 } catch (Exception ee) {
                     //异常处理
                     exceptionHandlerForDubbo(ee);
-                }finally {
+                } finally {
                     sendButtonFlag = true;
                     futureAtomicReference.set(null);
                 }
             }));
-        }catch (Exception e){
+        } catch (Exception e) {
             requestExceptionHandler(e);
         }
     }
@@ -872,28 +865,25 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private LinkedHashMap<String, Object> buildParamForDubbo() {
         LinkedHashMap<String, Object> bodyParamMapTemp = new LinkedHashMap<>();
         urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> {
-            if(Objects.equals(q.getType(), "Object")){
+            if (Objects.equals(q.getType(), "Object")) {
                 bodyParamMapTemp.put(q.getKey(), JSONObject.parse(q.getValue().toString()));
-            }else if(Objects.equals(q.getType(), "Array")){
+            } else if (Objects.equals(q.getType(), "Array")) {
                 bodyParamMapTemp.put(q.getKey(), JSONArray.parse(q.getValue().toString()));
             } else if (Objects.equals(q.getType(), "Number")) {
                 bodyParamMapTemp.put(q.getKey(), Double.valueOf(q.getValue().toString()));
             } else if (Objects.equals(q.getType(), "Boolean")) {
                 bodyParamMapTemp.put(q.getKey(), Boolean.valueOf(q.getValue().toString()));
-            }else {
+            } else {
                 bodyParamMapTemp.put(q.getKey(), q.getValue().toString());
             }
         });
         return bodyParamMapTemp;
     }
 
-    private void restfulRequest(boolean fileMode) {
+    private void restfulRequest(boolean... conditions) {
         try {
-            //新建、组装请求
-            HttpRequest request = buildRequest();
-            if(request == null) return;
             //发起请求并处理返回结果
-            sendAndHandleResponse(request, fileMode);
+            sendAndHandleResponse(conditions);
         } catch (Exception exception) {
             requestExceptionHandler(exception);
         }
@@ -923,22 +913,35 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         responseTabbedPanel.setSelectedIndex(2);
     }
 
-    private void sendAndHandleResponse(HttpRequest request, boolean fileMode) {
+    private void sendAndHandleResponse(boolean... conditions) {
+        boolean fileMode = conditions[0];
         futureAtomicReference.set(ThreadUtil.execAsync(() -> {
             try {
-                long start = System.currentTimeMillis();
-                HttpResponse response = request.execute();
-                long end = System.currentTimeMillis();
-                //如果被外部中断，就不继续了
-                if(Thread.currentThread().isInterrupted()){
-                    return;
+                if (conditions.length > 1 && conditions[1]) {
+                    PressureEntity pressureEntity = PressureUtils.beginPressure(1000, this::buildRequest);
+                    //如果被外部中断，就不继续了
+                    if (Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    pressureResponseHandler(pressureEntity);
+                } else {
+                    //新建、组装请求
+                    HttpRequest request = buildRequest();
+                    if (request == null) return;
+                    long start = System.currentTimeMillis();
+                    HttpResponse response = request.execute();
+                    long end = System.currentTimeMillis();
+                    //如果被外部中断，就不继续了
+                    if (Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                    //结果处理
+                    responseHandler(response, start, end, request, fileMode);
                 }
-                //结果处理
-                responseHandler(response, start, end, request, fileMode);
             } catch (Exception ee) {
                 //异常处理
-                exceptionHandler(ee, request);
-            }finally {
+                exceptionHandler(ee);
+            } finally {
                 sendButtonFlag = true;
                 futureAtomicReference.set(null);
             }
@@ -969,10 +972,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         request.setMaxRedirectCount(10);
         Integer connectionTimeout = config.getConnectionTimeout();
         Integer readTimeout = config.getReadTimeout();
-        if(connectionTimeout != null && connectionTimeout != 0){
+        if (connectionTimeout != null && connectionTimeout != 0) {
             request.setConnectionTimeout(connectionTimeout * 1000);
         }
-        if(readTimeout != null && readTimeout != 0){
+        if (readTimeout != null && readTimeout != 0) {
             request.setReadTimeout(readTimeout * 1000);
         }
         headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
@@ -1032,9 +1035,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
         String sendUrl;
         //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
-        if(UrlUtil.isHttpURL(urlTextField.getText())){
+        if (UrlUtil.isHttpURL(urlTextField.getText())) {
             sendUrl = urlTextField.getText();
-        }else {
+        } else {
             //如果不是url 就给加
             sendUrl = domain + urlTextField.getText();
         }
@@ -1048,16 +1051,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
         String sendUrl;
         //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
-        if(UrlUtil.isDubboURL(urlTextField.getText())){
+        if (UrlUtil.isDubboURL(urlTextField.getText())) {
             sendUrl = urlTextField.getText();
-        }else {
+        } else {
             //如果不是url 就给加
             sendUrl = domain + urlTextField.getText();
         }
         return sendUrl;
     }
 
-    private void exceptionHandler(Exception ee, HttpRequest request) {
+    private void exceptionHandler(Exception ee) {
         sendButtonFlag = true;
         futureAtomicReference.set(null);
         requestProgressBar.setVisible(false);
@@ -1071,7 +1074,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
 //                    responseStatusComboBox.setBackground(MyColor.red);
         responseInfoParamsKeyValueList = Lists.newArrayList(
-                new ParamKeyValue("Url", request.getUrl(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Url", getSendUrl(), 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue("Error", errorMsg)
         );
         //refreshTable(responseInfoTable);
@@ -1121,7 +1124,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             resultHandler(finalFileMode, response.body());
             //response渲染
             responsePageHandler(request, response, status, duration);
-            ApplicationManager.getApplication().invokeLater(()->{
+            ApplicationManager.getApplication().invokeLater(() -> {
                 if (getActiveDomain().isBlank()) {
                     return;
                 }
@@ -1144,7 +1147,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             resultHandler(false, response.getResultStr());
             //response渲染
             responseDubboPageHandler(response.getResponseStr(), duration);
-            ApplicationManager.getApplication().invokeLater(()->{
+            ApplicationManager.getApplication().invokeLater(() -> {
                 if (getActiveDomain().isBlank()) {
                     return;
                 }
@@ -1158,6 +1161,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
     }
 
+    private void pressureResponseHandler(PressureEntity pressureEntity) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            tabbedPane.setSelectedIndex(4);
+            requestProgressBar.setVisible(false);
+            //response渲染
+            pressureResponsePageHandler(pressureEntity);
+            responseTabbedPanel.setSelectedIndex(3);
+        });
+    }
+
     private void saveTableRequest(int type, String methodName) {
         HistoryTable historyTable = FastRequestHistoryCollectionComponent.getInstance(myProject).getState();
         LocalDateTime now = LocalDateTime.now();
@@ -1166,25 +1179,25 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         // 格式化当前时间
         String formattedDateTime = now.format(formatter);
         HistoryTableData historyTableData;
-        if(type == 1){
+        if (type == 1) {
             historyTableData = new HistoryTableData(methodName, getSendUrl(), formattedDateTime);
             historyTableData.setHeaders(JSONArray.toJSONString(headerParamsKeyValueList));
-            if(CollectionUtils.isNotEmpty(pathParamsKeyValueList)){
+            if (CollectionUtils.isNotEmpty(pathParamsKeyValueList)) {
                 historyTableData.setPathParams(JSONArray.toJSONString(pathParamsKeyValueList));
             }
-            if(CollectionUtils.isNotEmpty(urlParamsKeyValueList)){
+            if (CollectionUtils.isNotEmpty(urlParamsKeyValueList)) {
                 historyTableData.setUrlParams(JSONArray.toJSONString(urlParamsKeyValueList));
             }
-            if(CollectionUtils.isNotEmpty(urlEncodedKeyValueList)){
+            if (CollectionUtils.isNotEmpty(urlEncodedKeyValueList)) {
                 historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
             }
             historyTableData.setJsonParam(((LanguageTextField) jsonParamsTextArea).getText());
-            if(CollectionUtils.isNotEmpty(multipartKeyValueList)){
+            if (CollectionUtils.isNotEmpty(multipartKeyValueList)) {
                 historyTableData.setMultipart(JSONArray.toJSONString(multipartKeyValueList));
             }
-        }else {
+        } else {
             historyTableData = new HistoryTableData(methodName, getDubboSendUrl(), formattedDateTime);
-            if(CollectionUtils.isNotEmpty(urlEncodedKeyValueList)){
+            if (CollectionUtils.isNotEmpty(urlEncodedKeyValueList)) {
                 historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
             }
         }
@@ -1211,13 +1224,34 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private void responseDubboPageHandler(String message, String duration) {
         responseInfoParamsKeyValueList = Lists.newArrayList(
                 new ParamKeyValue("Url", getDubboSendUrl(), 2, TypeUtil.Type.String.name()),
-                new ParamKeyValue("Message",message, 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Message", message, 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue("Date", new Date())
         );
         responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
         responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
         responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
+    }
+
+    private void pressureResponsePageHandler(PressureEntity pressureEntity) {
+        BigDecimal bigDecimal_100 = new BigDecimal(100);
+        responseInfoParamsKeyValueList = Lists.newArrayList(
+                new ParamKeyValue("Qps", pressureEntity.getQps(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Avg Time", pressureEntity.getAvgTime() + "ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Max Time", pressureEntity.getMaxTime() + "ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Min Time", pressureEntity.getMinTime() + "ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("All Time", pressureEntity.getAllTime() + "ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Errors", pressureEntity.getErrors(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Error Rate", pressureEntity.getErrorRate().multiply(bigDecimal_100).setScale(1) + "%", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Corrects", pressureEntity.getCorrects(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Correct Rate", pressureEntity.getCorrectRate().multiply(bigDecimal_100).setScale(1) + "%", 2, TypeUtil.Type.String.name())
+        );
+        //refreshTable(responseInfoTable);
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
+//                        responseStatusComboBox.setSelectedItem(status);
+//                        responseStatusComboBox.setBackground((status >= 200 && status < 300) ? MyColor.green : MyColor.red);
     }
 
     private void resultHandler(boolean finalFileMode, String body) {
@@ -1420,9 +1454,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     /**
-     *
      * @param detail
-     * @param flag 当前的url是否是当前的项目的
+     * @param flag   当前的url是否是当前的项目的
      */
     public void refreshByCollection(CollectionConfiguration.CollectionDetail detail, boolean flag) {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
@@ -1526,13 +1559,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         setCheckBoxHeader(multipartTable, multipartCheckBoxHeader);
         //默认不刷第一个url 这里与complete冲突
 //        urlTextField.setText(url);
-        if(flag){
+        if (flag) {
             changeUrl();
-        }else {
+        } else {
             String url = paramGroup.getUrl();
-            if(!UrlUtil.isHttpURL(url)){
-                urlTextField.setText(detail.getDomain()+ url);
-            }else {
+            if (!UrlUtil.isHttpURL(url)) {
+                urlTextField.setText(detail.getDomain() + url);
+            } else {
                 urlTextField.setText(url);
             }
         }
@@ -1540,7 +1573,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     /**
-     *
      * @param data
      * @param flag 当前的url是否是当前的项目的
      */
@@ -1560,34 +1592,34 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //        String urlEncodedKeyValueListText = data.getUrlEncoded();
         String multipartKeyValueListJson = data.getMultipart();
         String headers = data.getHeaders();
-        if(StringUtils.isNotBlank(headers)){
+        if (StringUtils.isNotBlank(headers)) {
             headerParamsKeyValueList = JSON.parseObject(headers, new TypeReference<List<DataMapping>>() {
             });
-        }else {
+        } else {
             headerParamsKeyValueList = new ArrayList<>();
         }
-        if(StringUtils.isNotBlank(pathParamsKeyValueListJson)){
+        if (StringUtils.isNotBlank(pathParamsKeyValueListJson)) {
             pathParamsKeyValueList = JSON.parseObject(pathParamsKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
             });
-        }else {
+        } else {
             pathParamsKeyValueList = new ArrayList<>();
         }
-        if(StringUtils.isNotBlank(urlParamsKeyValueListJson)){
+        if (StringUtils.isNotBlank(urlParamsKeyValueListJson)) {
             urlParamsKeyValueList = JSON.parseObject(urlParamsKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
             });
-        }else {
+        } else {
             urlParamsKeyValueList = new ArrayList<>();
         }
-        if(StringUtils.isNotBlank(urlEncodedKeyValueListJson)){
+        if (StringUtils.isNotBlank(urlEncodedKeyValueListJson)) {
             urlEncodedKeyValueList = JSON.parseObject(urlEncodedKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
             });
-        }else {
+        } else {
             urlEncodedKeyValueList = new ArrayList<>();
         }
-        if(StringUtils.isNotBlank(multipartKeyValueListJson)){
+        if (StringUtils.isNotBlank(multipartKeyValueListJson)) {
             multipartKeyValueList = JSON.parseObject(multipartKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
             });
-        }else {
+        } else {
             multipartKeyValueList = new ArrayList<>();
         }
 
@@ -1668,9 +1700,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         setCheckBoxHeader(multipartTable, multipartCheckBoxHeader);
         //默认不刷第一个url 这里与complete冲突
 //        urlTextField.setText(url);
-        if(flag){
+        if (flag) {
             changeUrl();
-        }else {
+        } else {
             String url = data.getUrl();
             urlTextField.setText(url);
         }
@@ -1816,20 +1848,20 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         assert config != null;
         ParamGroup paramGroup = config.getParamGroup();
         String originUrl = paramGroup.getOriginUrl();
-        if(StringUtils.isBlank(originUrl)){
+        if (StringUtils.isBlank(originUrl)) {
             return;
         }
 
         String url = buildPathParamUrl(originUrl);
         url = ((url.startsWith("/") || "".equals(url)) ? "" : "/") + url;
-        if(!UrlUtil.isHttpURL(url) && urlCompleteChangeFlag.get()){
-            urlTextField.setText(getActiveDomain()+ url);
-            paramGroup.setUrl(getActiveDomain()+ url);
-        }else {
+        if (!UrlUtil.isHttpURL(url) && urlCompleteChangeFlag.get()) {
+            urlTextField.setText(getActiveDomain() + url);
+            paramGroup.setUrl(getActiveDomain() + url);
+        } else {
             urlTextField.setText(url);
             paramGroup.setUrl(url);
         }
-        if(StringUtils.isNotBlank(paramGroup.getMethodType())){
+        if (StringUtils.isNotBlank(paramGroup.getMethodType())) {
             methodTypeComboBox.setSelectedItem(paramGroup.getMethodType());
         }
 //        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
@@ -1858,7 +1890,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(headerTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new ClearAction()));
         toolbarDecorator.setAddAction(anActionButton -> {
                     if (headerParamsKeyValueList == null) {
                         headerParamsKeyValueList = new ArrayList<>();
@@ -1877,7 +1909,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ).setRemoveAction(anActionButton -> {
             removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new AnAction(MyResourceBundleUtil.getKey("header.group.manage"), "", AllIcons.Actions.ListChanges) {
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new AnAction(MyResourceBundleUtil.getKey("header.group.manage"), "", AllIcons.Actions.ListChanges) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 int idx = -1;
@@ -1971,7 +2003,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(urlParamsTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new ClearAction()));
 
         toolbarDecorator.setAddAction(anActionButton -> {
                     int selectedRow = urlParamsTable.getSelectedRow();
@@ -1992,15 +2024,15 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         urlParamsTablePanel = toolbarDecorator.createPanel();
     }
 
-    class ClearAction extends AnAction{
-        public ClearAction(){
+    class ClearAction extends AnAction {
+        public ClearAction() {
             super("Clear", "", PluginIcons.ICON_CLEAR);
         }
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
             int selectedIndex = tabbedPane.getSelectedIndex();
-            switch (selectedIndex){
+            switch (selectedIndex) {
                 case 0:
                     headerParamsKeyValueList.forEach(dataMapping -> {
                         dataMapping.setType("");
@@ -2029,7 +2061,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     changeUrlParamsText();
                     break;
                 case 3:
-                    if(bodyTabbedPane.getSelectedIndex() == 1){
+                    if (bodyTabbedPane.getSelectedIndex() == 1) {
                         urlEncodedKeyValueList.forEach(paramKeyValue -> {
                             paramKeyValue.setKey("");
                             paramKeyValue.setValue("");
@@ -2037,7 +2069,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         refreshTable(urlEncodedTable);
                         resizeTable(urlEncodedTable);
                         changeUrlEncodedParamsText();
-                    }else if(bodyTabbedPane.getSelectedIndex() == 2){
+                    } else if (bodyTabbedPane.getSelectedIndex() == 2) {
                         multipartKeyValueList.forEach(paramKeyValue -> {
                             paramKeyValue.setKey("");
                             paramKeyValue.setValue("");
@@ -2052,18 +2084,17 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
 
-
     private void removeUrlParamsTableLines(JBTable targetTable, List<ParamKeyValue> paramsKeyValueList,
                                            JTextArea targetArea, AtomicBoolean flag, List<DataMapping> headerParamsList) {
         int[] selectedIndices = targetTable.getSelectionModel().getSelectedIndices();
         List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(paramsKeyValueList)){
+        if (CollectionUtils.isNotEmpty(paramsKeyValueList)) {
             indexes.removeIf(q -> q > paramsKeyValueList.size() - 1);
             indexes.stream().mapToInt(i -> i).forEach(paramsKeyValueList::remove);
             refreshTable(targetTable);
             resizeTable(targetTable);
         }
-        if(CollectionUtils.isNotEmpty(headerParamsList)){
+        if (CollectionUtils.isNotEmpty(headerParamsList)) {
             indexes.removeIf(q -> q > headerParamsList.size() - 1);
             indexes.stream().mapToInt(i -> i).forEach(headerParamsList::remove);
             headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
@@ -2072,17 +2103,17 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             switchHeaderParam();
         }
         targetTable.getSelectionModel().clearSelection();
-        if(selectedIndices[0] > 0){
-            int row = selectedIndices[0]-1;
+        if (selectedIndices[0] > 0) {
+            int row = selectedIndices[0] - 1;
             targetTable.getSelectionModel().setSelectionInterval(row, row);
             targetTable.setRowSelectionInterval(row, row);
-        }else {
-            if(targetTable.getRowCount() > 0){
+        } else {
+            if (targetTable.getRowCount() > 0) {
                 targetTable.getSelectionModel().setSelectionInterval(0, 0);
                 targetTable.setRowSelectionInterval(0, 0);
             }
         }
-        if(targetArea != null){
+        if (targetArea != null) {
             String paramStr = conventDataToString(paramsKeyValueList);
             targetArea.setText(paramStr);
             flag.set(false);
@@ -2090,10 +2121,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     private void clearTableLines(JBTable targetTable, List<ParamKeyValue> paramsKeyValueList,
-                                           JTextArea targetArea, AtomicBoolean flag, List<DataMapping> headerParamsList) {
+                                 JTextArea targetArea, AtomicBoolean flag, List<DataMapping> headerParamsList) {
         int[] selectedIndices = targetTable.getSelectionModel().getSelectedIndices();
         List<Integer> indexes = Arrays.stream(selectedIndices).boxed().collect(Collectors.toList());
-        if(CollectionUtils.isNotEmpty(paramsKeyValueList)){
+        if (CollectionUtils.isNotEmpty(paramsKeyValueList)) {
             indexes.removeIf(q -> q > paramsKeyValueList.size() - 1);
             indexes.stream().mapToInt(i -> i).forEach(index -> {
                 paramsKeyValueList.get(index).setKey("");
@@ -2102,7 +2133,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             refreshTable(targetTable);
             resizeTable(targetTable);
         }
-        if(CollectionUtils.isNotEmpty(headerParamsList)){
+        if (CollectionUtils.isNotEmpty(headerParamsList)) {
             indexes.removeIf(q -> q > headerParamsList.size() - 1);
             indexes.stream().mapToInt(i -> i).forEach(index -> {
                 headerParamsList.get(index).setType("");
@@ -2113,7 +2144,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             saveAndChangeHeader();
             switchHeaderParam();
         }
-        if(targetArea != null){
+        if (targetArea != null) {
             String paramStr = conventDataToString(paramsKeyValueList);
             targetArea.setText(paramStr);
             flag.set(false);
@@ -2145,7 +2176,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(pathParamsTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new ClearAction()));
 
         toolbarDecorator.setAddAction(anActionButton -> {
                     int selectedRow = pathParamsTable.getSelectedRow();
@@ -2194,7 +2225,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(urlEncodedTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new ClearAction()));
 
 
         toolbarDecorator.setAddAction(anActionButton -> {
@@ -2237,7 +2268,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(multipartTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(()->new ClearAction()));
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new ClearAction()));
 
 
         toolbarDecorator.setAddAction(anActionButton -> {
@@ -2527,9 +2558,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private String bodyParamMapToJson() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         convertToMap(bodyParamMap, map, false);
-        if(Objects.equals("DUBBO", methodTypeComboBox.getSelectedItem())){
+        if (Objects.equals("DUBBO", methodTypeComboBox.getSelectedItem())) {
             return JSON.toJSONString(map, true);
-        }else {
+        } else {
             return JSON.toJSONString(map.get(map.keySet().stream().findFirst().orElse("")), true);
         }
     }
@@ -3662,7 +3693,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     if (focusedRowIndex == -1) {
                         return;
                     }
-                    if(table.getSelectedRows().length <= 1){
+                    if (table.getSelectedRows().length <= 1) {
                         //将表格所选项设为当前右键点击的行
                         table.setRowSelectionInterval(focusedRowIndex, focusedRowIndex);
                     }
@@ -3723,11 +3754,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
-            if(futureAtomicReference.get() != null){
+            if (futureAtomicReference.get() != null) {
                 futureAtomicReference.get().cancel(true);
-                if(futureAtomicReference.get().isCancelled()){
+                if (futureAtomicReference.get().isCancelled()) {
                     FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
-                    if(fastRequestToolWindow != null){
+                    if (fastRequestToolWindow != null) {
                         fastRequestToolWindow.sendButtonFlag = true;
                         fastRequestToolWindow.requestProgressBar.setVisible(false);
                         futureAtomicReference.set(null);
@@ -3839,14 +3870,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             CollectionConfiguration.CollectionDetail root = collectionConfiguration.getDetail();
             List<CollectionConfiguration.CollectionDetail> rootChildren = root.getChildList();
             CollectionConfiguration.CollectionDetail defaultGroup;
-            if(CollectionUtils.isEmpty(rootChildren)){
+            if (CollectionUtils.isEmpty(rootChildren)) {
                 defaultGroup = new CollectionConfiguration.CollectionDetail();
                 defaultGroup.setType(1);
                 defaultGroup.setId("1");
                 defaultGroup.setGroupId("1");
                 defaultGroup.setGroupId("1");
                 defaultGroup.setName("Default Group");
-            }else {
+            } else {
                 defaultGroup = rootChildren.get(0);
             }
             CollectionConfiguration.CollectionDetail group;
@@ -3854,7 +3885,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 group = defaultGroup;
             } else {
                 group = rootChildren.stream().filter(q -> module.equals(q.getName())).findFirst().orElse(null);
-                if(group == null){
+                if (group == null) {
                     group = new CollectionConfiguration.CollectionDetail();
                     group.setId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
                     group.setName(module);
@@ -3865,7 +3896,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
 
             //classGroup
-            if(classNameGroup == null){
+            if (classNameGroup == null) {
                 CollectionConfiguration.CollectionDetail groupDetail = new CollectionConfiguration.CollectionDetail();
                 groupDetail.setId(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
                 groupDetail.setName(apiClassName);
@@ -4045,7 +4076,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //            }
 
             SyncView syncView = new SyncView();
-            if(syncView.showAndGet()){
+            if (syncView.showAndGet()) {
                 System.out.println(syncView.changeAndGet());
 //                GitRepositoryManager.getInstance();
 //                ProjectManager.getInstance().

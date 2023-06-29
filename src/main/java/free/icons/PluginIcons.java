@@ -33,6 +33,7 @@ public interface PluginIcons {
     Icon ICON_STRING = IconLoader.getIcon("/free.icon/string.svg", PluginIcons.class);
     Icon ICON_FILE = IconLoader.getIcon("/free.icon/file.svg", PluginIcons.class);
 
+    Icon ICON_PRESSURE_SEND = IconLoader.getIcon("/free.icon/pressure-send.svg", PluginIcons.class);
     Icon ICON_SEND = IconLoader.getIcon("/free.icon/send.svg", PluginIcons.class);
     Icon ICON_SEND_MINI = IconLoader.getIcon("/free.icon/send-mini.svg", PluginIcons.class);
     Icon ICON_SEND_DOWNLOAD = IconLoader.getIcon("/free.icon/send_download.svg", PluginIcons.class);

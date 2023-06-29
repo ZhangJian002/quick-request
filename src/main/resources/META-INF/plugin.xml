@@ -81,6 +81,10 @@
                     class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>
             </action>
+            <action id="quickRequest.pressureAction"
+                    class="io.github.zjay.plugin.fastrequest.action.ToolbarPressureRequestAction">
+<!--                <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>-->
+            </action>
 
             <action id="quickRequest.sendDownloadAction"
                     class="io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction">
