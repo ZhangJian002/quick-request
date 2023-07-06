@@ -28,9 +28,7 @@ public class FormatActionProvider implements InspectionWidgetActionProvider {
     @Nullable
     @Override
     public AnAction createAction(@NotNull Editor editor) {
-        FormatAction action = (FormatAction) ActionManager.getInstance().getAction("fastRequest.format");
         // 右上角按钮实现方式
-//        action.setEditor(editor);
-        return action;
+        return ActionManager.getInstance().getAction("fastRequest.format");
     }
 }

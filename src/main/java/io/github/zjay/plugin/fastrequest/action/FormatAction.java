@@ -46,6 +46,9 @@ public class FormatAction extends AnAction {
         if (editor == null) {
             return;
         }
+        if(!editor.getDocument().isWritable()){
+            return;
+        }
         PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
         if (psiFile != null && !editor.getDocument().getText().isBlank()) {
             WriteCommandAction.runWriteCommandAction(

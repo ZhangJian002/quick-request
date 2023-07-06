@@ -28,7 +28,7 @@ public class FormatAction extends AnAction {
             return;
         }
         Editor editor = (Editor)paramAnActionEvent.getData(CommonDataKeys.EDITOR);
-        if (editor == null || editor.isViewer()) {
+        if (editor == null || !editor.getDocument().isWritable()) {
             return;
         }
         PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
@@ -36,4 +36,5 @@ public class FormatAction extends AnAction {
             WriteCommandAction.runWriteCommandAction(project, (Computable<PsiElement>) () -> CodeStyleManager.getInstance(project).reformat(psiFile));
         }
     }
+
 }

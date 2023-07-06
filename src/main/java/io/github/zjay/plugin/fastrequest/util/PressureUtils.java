@@ -12,6 +12,14 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+//import io.gatling.javaapi.core.*;
+//import io.gatling.javaapi.http.*;
+//import scala.collection.immutable.Seq;
+//
+//import static io.gatling.javaapi.core.CoreDsl.*;
+//import static io.gatling.javaapi.http.HttpDsl.*;
+
+
 public class PressureUtils {
 
     private static ThreadPoolExecutor createThreadPool(int count) {
@@ -19,6 +27,7 @@ public class PressureUtils {
     }
 
     public static PressureEntity beginPressure(int count, PressureFunction pressureFunction) {
+
         //初始线程池
         ThreadPoolExecutor threadPool = createThreadPool(count);
         try {
@@ -30,6 +39,27 @@ public class PressureUtils {
         }
         return null;
     }
+
+//    private static class BasicSimulationJava extends Simulation { // 3
+//
+//        HttpProtocolBuilder httpProtocol = http // 4
+//                .baseUrl("https://www.baidu.com") // 5
+//                .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8") // 6
+//                .doNotTrackHeader("1")
+////                .acceptLanguageHeader("en-US,en;q=0.5")
+//                .acceptEncodingHeader("gzip, deflate")
+//                .userAgentHeader("Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0");
+//
+//        ScenarioBuilder scn = scenario("BasicSimulation") // 7
+//                .exec(http("request_1") // 8
+//                        .get("/")) // 9
+//                .pause(5); // 10
+//
+//        public BasicSimulationJava(){
+//            scn.injectOpen(atOnceUsers(1)).protocols(httpProtocol);
+//        }
+//
+//    }
 
     private static PressureEntity doPressure(ThreadPoolExecutor threadPool, int count, PressureFunction pressureFunction) throws Exception {
         //定义同步器

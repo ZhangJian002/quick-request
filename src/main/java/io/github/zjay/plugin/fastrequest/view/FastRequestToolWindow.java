@@ -918,7 +918,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         futureAtomicReference.set(ThreadUtil.execAsync(() -> {
             try {
                 if (conditions.length > 1 && conditions[1]) {
-                    PressureEntity pressureEntity = PressureUtils.beginPressure(1000, this::buildRequest);
+                    PressureEntity pressureEntity = PressureUtils.beginPressure(Runtime.getRuntime().availableProcessors() * 2, this::buildRequest);
                     //如果被外部中断，就不继续了
                     if (Thread.currentThread().isInterrupted()) {
                         return;
