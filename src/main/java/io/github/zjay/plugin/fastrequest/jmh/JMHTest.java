@@ -75,6 +75,11 @@ public class JMHTest {
 
     public static Collection<RunResult> jmhTest() {
         exceptions.clear();
+        if(OkHttp3Util.clientInstance != null){
+            OkHttp3Util.clientInstance.connectionPool().evictAll();
+            OkHttp3Util.clientInstance = null;
+        }
+        OkHttp3Util.getClientInstance();
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
         final Options opts = new

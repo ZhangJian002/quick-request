@@ -18,7 +18,7 @@ public class OkHttp3Util {
     //MEDIA_TYPE_TEXT post请求不是application/x-www-form-urlencoded的，全部直接返回，不作处理，即不会解析表单数据来放到request parameter map中。所以通过request.getParameter(name)是获取不到的。只能使用最原始的方式，读取输入流来获取。
     private static final MediaType MEDIA_TYPE_TEXT = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
 
-    private static volatile OkHttpClient clientInstance;
+    public static volatile OkHttpClient clientInstance;
 
     public static OkHttpClient getClientInstance() {
         if (clientInstance == null) {
@@ -31,7 +31,7 @@ public class OkHttp3Util {
                             .writeTimeout(config.getJmhWriteTimeout() == null ? 60 : config.getJmhWriteTimeout(), TimeUnit.SECONDS)
                             .readTimeout(config.getJmhReadTimeout() == null ? 60 : config.getJmhReadTimeout(), TimeUnit.SECONDS)
                             .connectionPool(new ConnectionPool(1,10, TimeUnit.MILLISECONDS))
-                            .retryOnConnectionFailure(false)
+                            .retryOnConnectionFailure(true)
                             .build();
                 }
             }
