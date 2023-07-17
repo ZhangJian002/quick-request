@@ -4,17 +4,22 @@ import com.intellij.ui.JBColor;
 import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.jfree.MyStandardChartTheme;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
+import io.github.zjay.plugin.fastrequest.model.HeaderGroup;
 import io.github.zjay.plugin.fastrequest.model.JmhResultEntity;
 import io.github.zjay.plugin.fastrequest.util.OkHttp3Util;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
+import io.github.zjay.plugin.fastrequest.view.inner.HeaderGroupView;
+import io.github.zjay.plugin.fastrequest.view.inner.JmhTestErrorView;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jfree.chart.*;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.*;
+import org.jfree.chart.entity.LegendItemEntity;
 import org.jfree.chart.labels.*;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -102,7 +107,7 @@ public class JMHTest {
         dataset.addSeries("Throughput", jmhResultEntity.getData());
         // 创建图表
         JFreeChart chart = ChartFactory.createXYLineChart(
-                "",  // 图表标题
+                "Throughput",  // 图表标题
                 "",           // x 轴标签
                 "opts/s",           // y 轴标签
                 dataset,       // 数据集
@@ -151,6 +156,26 @@ public class JMHTest {
         NumberAxis numberAxis = (NumberAxis) xyPlot.getDomainAxis();
         numberAxis.setTickUnit(new NumberTickUnit(1)); // 设置刻度单位
 
+        LegendItemCollection legendItems = new LegendItemCollection();
+
+        legendItems.add(new LegendItem(exceptions.size() + " error(s)",JBColor.RED));
+        xyPlot.setFixedLegendItems(legendItems);
+        chartPanel.addChartMouseListener(new ChartMouseListener() {
+            @Override
+            public void chartMouseClicked(ChartMouseEvent event) {
+                if (event.getEntity() instanceof LegendItemEntity) {
+                    if(exceptions.size() > 0){
+                        JmhTestErrorView dialog = new JmhTestErrorView(exceptions);
+                        dialog.show();
+                    }
+                }
+            }
+
+            @Override
+            public void chartMouseMoved(ChartMouseEvent event) {
+                // 处理鼠标移动事件
+            }
+        });
 
         return chartPanel;
     }

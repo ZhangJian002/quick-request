@@ -940,15 +940,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     ChartPanel chartPanel1 = JMHTest.pain(jmhResultEntity);
                     chartPanel1.setPreferredSize(new Dimension(chartPanel.getWidth(), 400));
                     chartPanel.add(chartPanel1, BorderLayout.CENTER);
-                    Thread.sleep(1000);
-                    requestProgressBar.setVisible(false);
-                    tabbedPane.setSelectedIndex(4);
-                    responseTabbedPanel.setSelectedIndex(4);
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        requestProgressBar.setVisible(false);
+                        tabbedPane.setSelectedIndex(4);
+                        responseTabbedPanel.setSelectedIndex(4);
+                    });
                 } else {
                     //新建、组装请求
-                    Request request1 = buildOkHttpRequest();
-                    Response response1 = OkHttp3Util.getClientInstance().newCall(request1).execute();
-                    System.out.println(response1.body().string());
+//                    Request request1 = buildOkHttpRequest();
+//                    Response response1 = OkHttp3Util.getClientInstance().newCall(request1).execute();
+//                    System.out.println(response1.body().string());
                     HttpRequest request = buildRequest();
                     if (request == null) return;
                     long start = System.currentTimeMillis();
@@ -1067,7 +1068,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
         String methodType = (String) methodTypeComboBox.getSelectedItem();
         assert methodType != null;
-        Request.Builder request = new Request.Builder().method(methodType, RequestBody.create("".getBytes()))
+        RequestBody initBody = null;
+        if(!Objects.equals(methodType.toLowerCase(), "get")){
+            initBody = RequestBody.create("".getBytes());
+        }
+        Request.Builder request = new Request.Builder().method(methodType, initBody)
                 .url(sendUrl);
         headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
         List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
@@ -2474,6 +2479,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
         return columnArray;
     }
+
 
     /**
      * table列信息

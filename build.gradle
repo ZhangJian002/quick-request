@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.7.4'
+version '2023.7.17'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -48,6 +48,10 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.7.17</h3 >
+    <ul>
+        <li>JMH压测功能正式发布，可自由设置并发线程数、执行次数等，并含有丰富的图表展示(暂时支持Restful请求，且不支持物理中断)</li>
+    </ul>
     <h3>v2023.7.4</h3 >
     <ul>
         <li>新增压测功能，只是个体验版，启用线程数为cpu核数(如果有超线程，则为超线程数)乘2</li>
