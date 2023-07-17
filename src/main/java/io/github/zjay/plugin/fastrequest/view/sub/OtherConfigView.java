@@ -58,8 +58,19 @@ public class OtherConfigView extends AbstractConfigurableView {
     private FastRequestConfiguration configOld;
 
     private JTextField connectionTimeoutText;
-
     private JTextField readTimeoutText;
+
+
+    private Integer jmhConnectionTimeout = null;
+    private Integer jmhReadTimeout = null;
+    private Integer jmhWriteTimeout = null;
+    private Integer threads = null;
+    private Integer testCount = null;
+    private JTextField jmhConnectionTimeoutText;
+    private JTextField jmhReadTimeoutText;
+    private JTextField jmhWriteTimeoutText;
+    private JTextField jmhThreadsText;
+    private JTextField jmhTestCountText;
 
 
     public OtherConfigView(FastRequestConfiguration config) {
@@ -82,6 +93,7 @@ public class OtherConfigView extends AbstractConfigurableView {
         panel.add(createConnectionPanel(), gb.nextLine().fillCell().weighty(1.0));
         panel.add(createMyTablePanel(), gb.nextLine().fillCell().weighty(1.0));
         panel.add(createBasePanel(), gb.nextLine().fillCell().weighty(1.0));
+        panel.add(createJmhPanel(), gb.nextLine().fillCell().weighty(1.0));
         return panel;
     }
 
@@ -149,6 +161,134 @@ public class OtherConfigView extends AbstractConfigurableView {
         clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("ClickIconConfig")));
         return clickAndSendConfigPanel;
 
+    }
+
+    private JPanel createJmhPanel() {
+        jmhConnectionTimeout = config.getJmhConnectionTimeout();
+        jmhReadTimeout = config.getJmhReadTimeout();
+        jmhWriteTimeout = config.getJmhWriteTimeout();
+        threads = config.getThreads();
+        testCount = config.getTestCount();
+
+        jmhConnectionTimeoutText = new JTextField("60");
+        jmhReadTimeoutText = new JTextField("60");
+        jmhWriteTimeoutText = new JTextField("60");
+        jmhThreadsText = new JTextField("50");
+        jmhTestCountText = new JTextField("5");
+        if(jmhConnectionTimeout != null){
+            jmhConnectionTimeoutText.setText(jmhConnectionTimeout + "");
+        }
+        if(jmhReadTimeout != null){
+            jmhReadTimeoutText.setText(jmhReadTimeout + "");
+        }
+        if(jmhWriteTimeout != null){
+            jmhWriteTimeoutText.setText(jmhWriteTimeout + "");
+        }
+        if(threads != null){
+            jmhThreadsText.setText(threads + "");
+        }
+        if(testCount != null){
+            jmhTestCountText.setText(testCount + "");
+        }
+        addInputVerifiers();
+        JPanel jmhConfigPanel = new MyPanelGridBuilder()
+                .add(new MyComponentPanelBuilder(jmhConnectionTimeoutText).withLabel("ConnectionTimeout").withTooltip(MyResourceBundleUtil.getKey("OkConnectionTimeout")))
+                .add(new MyComponentPanelBuilder(jmhReadTimeoutText).withLabel("ReadTimeout").withTooltip(MyResourceBundleUtil.getKey("OkReadTimeout")))
+                .add(new MyComponentPanelBuilder(jmhWriteTimeoutText).withLabel("WriteTimeout").withTooltip(MyResourceBundleUtil.getKey("OkWriteTimeout")))
+                .add(new MyComponentPanelBuilder(jmhThreadsText).withLabel("Threads").withTooltip(MyResourceBundleUtil.getKey("JmhThreads")))
+                .add(new MyComponentPanelBuilder(jmhTestCountText).withLabel("Test times").withTooltip(MyResourceBundleUtil.getKey("JmhTestTimes")))
+                .createPanel();
+        jmhConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("PressureTestConfiguration")));
+        return jmhConfigPanel;
+
+    }
+
+    private void addInputVerifiers() {
+        jmhConnectionTimeoutText.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                String text = jmhConnectionTimeoutText.getText();
+                try {
+                    jmhConnectionTimeout = Integer.parseInt(text);
+                    if(jmhConnectionTimeout <= 0){
+                        throw new Exception("Positive integer required");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                    jmhConnectionTimeoutText.setText("60");
+                    return false;
+                }
+            }
+        });
+        jmhReadTimeoutText.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                String text = jmhReadTimeoutText.getText();
+                try {
+                    jmhReadTimeout = Integer.parseInt(text);
+                    if(jmhReadTimeout <= 0){
+                        throw new Exception("Positive integer required");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                    jmhReadTimeoutText.setText("60");
+                    return false;
+                }
+            }
+        });
+        jmhWriteTimeoutText.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                String text = jmhWriteTimeoutText.getText();
+                try {
+                    jmhWriteTimeout = Integer.parseInt(text);
+                    if(jmhWriteTimeout <= 0){
+                        throw new Exception("Positive integer required");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                    jmhWriteTimeoutText.setText("60");
+                    return false;
+                }
+            }
+        });
+        jmhThreadsText.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                String text = jmhThreadsText.getText();
+                try {
+                    threads = Integer.parseInt(text);
+                    if(threads <= 0){
+                        throw new Exception("Positive integer required");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                    jmhThreadsText.setText("50");
+                    return false;
+                }
+            }
+        });
+        jmhTestCountText.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                String text = jmhTestCountText.getText();
+                try {
+                    testCount = Integer.parseInt(text);
+                    if(testCount <= 0){
+                        throw new Exception("Positive integer required");
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                    jmhTestCountText.setText("5");
+                    return false;
+                }
+            }
+        });
     }
 
     private JPanel createMyTablePanel() {
@@ -278,5 +418,85 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     public void setReadTimeoutText(JTextField readTimeoutText) {
         this.readTimeoutText = readTimeoutText;
+    }
+
+    public JTextField getJmhConnectionTimeoutText() {
+        return jmhConnectionTimeoutText;
+    }
+
+    public void setJmhConnectionTimeoutText(JTextField jmhConnectionTimeoutText) {
+        this.jmhConnectionTimeoutText = jmhConnectionTimeoutText;
+    }
+
+    public JTextField getJmhReadTimeoutText() {
+        return jmhReadTimeoutText;
+    }
+
+    public void setJmhReadTimeoutText(JTextField jmhReadTimeoutText) {
+        this.jmhReadTimeoutText = jmhReadTimeoutText;
+    }
+
+    public JTextField getJmhWriteTimeoutText() {
+        return jmhWriteTimeoutText;
+    }
+
+    public void setJmhWriteTimeoutText(JTextField jmhWriteTimeoutText) {
+        this.jmhWriteTimeoutText = jmhWriteTimeoutText;
+    }
+
+    public JTextField getJmhThreadsText() {
+        return jmhThreadsText;
+    }
+
+    public void setJmhThreadsText(JTextField jmhThreadsText) {
+        this.jmhThreadsText = jmhThreadsText;
+    }
+
+    public JTextField getJmhTestCountText() {
+        return jmhTestCountText;
+    }
+
+    public void setJmhTestCountText(JTextField jmhTestCountText) {
+        this.jmhTestCountText = jmhTestCountText;
+    }
+
+    public Integer getJmhConnectionTimeout() {
+        return jmhConnectionTimeout;
+    }
+
+    public void setJmhConnectionTimeout(Integer jmhConnectionTimeout) {
+        this.jmhConnectionTimeout = jmhConnectionTimeout;
+    }
+
+    public Integer getJmhReadTimeout() {
+        return jmhReadTimeout;
+    }
+
+    public void setJmhReadTimeout(Integer jmhReadTimeout) {
+        this.jmhReadTimeout = jmhReadTimeout;
+    }
+
+    public Integer getJmhWriteTimeout() {
+        return jmhWriteTimeout;
+    }
+
+    public void setJmhWriteTimeout(Integer jmhWriteTimeout) {
+        this.jmhWriteTimeout = jmhWriteTimeout;
+    }
+
+    public Integer getThreads() {
+        return threads;
+    }
+
+    public void setThreads(Integer threads) {
+        this.threads = threads;
+    }
+
+    public Integer getTestCount() {
+        return testCount;
+    }
+
+    public void setTestCount(Integer testCount) {
+        this.testCount = testCount;
     }
 }

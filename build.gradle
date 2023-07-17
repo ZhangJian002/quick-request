@@ -1,5 +1,5 @@
 plugins {
-    id 'groovy'
+//    id 'groovy'
     id 'java'
     id 'org.jetbrains.intellij' version '0.7.3'
 }
@@ -17,8 +17,22 @@ repositories {
 dependencies {
     compile 'com.alibaba:fastjson:1.2.83'
     compile 'cn.hutool:hutool-all:5.7.9'
-    // https://mvnrepository.com/artifact/io.gatling/gatling-http-java
-//    implementation group: 'io.gatling', name: 'gatling-http-java', version: '3.9.5'
+
+//    implementation 'org.openjdk.jmh:jmh-core:1.36'
+    // https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core
+    implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.36'
+
+    annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+    // https://mvnrepository.com/artifact/org.jfree/jfreechart
+    implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.4'
+
+    // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
+
+
+
+
+
 
 
 

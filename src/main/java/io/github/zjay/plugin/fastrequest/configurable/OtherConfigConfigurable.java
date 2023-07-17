@@ -70,6 +70,21 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         if(!Objects.equals(view.getReadTimeoutText().getText(), config.getReadTimeout() + "")){
             return true;
         }
+        if(!Objects.equals(view.getJmhConnectionTimeoutText().getText(), config.getJmhConnectionTimeout() + "")){
+            return true;
+        }
+        if(!Objects.equals(view.getJmhReadTimeoutText().getText(), config.getJmhReadTimeout() + "")){
+            return true;
+        }
+        if(!Objects.equals(view.getJmhWriteTimeoutText().getText(), config.getJmhWriteTimeout() + "")){
+            return true;
+        }
+        if(!Objects.equals(view.getJmhThreadsText().getText(), config.getThreads() + "")){
+            return true;
+        }
+        if(!Objects.equals(view.getJmhTestCountText().getText(), config.getTestCount() + "")){
+            return true;
+        }
 
         return !judgeEqual(currentUrlReplaceMappingList, urlReplaceMappingList);
     }
@@ -82,6 +97,11 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         config.setClickAndSend(view.getClickAndSend());
         config.setConnectionTimeout(view.getConnectionTimeout());
         config.setReadTimeout(view.getReadTimeout());
+        config.setJmhConnectionTimeout(view.getJmhConnectionTimeout());
+        config.setJmhReadTimeout(view.getJmhReadTimeout());
+        config.setJmhWriteTimeout(view.getJmhWriteTimeout());
+        config.setThreads(view.getThreads());
+        config.setTestCount(view.getTestCount());
     }
 
     @Override
@@ -96,6 +116,11 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         view.setReadTimeout(30);
         view.setConnectionTimeout(30);
         view.setClickAndSend(false);
+        view.setJmhConnectionTimeout(60);
+        view.setJmhReadTimeout(60);
+        view.setJmhWriteTimeout(60);
+        view.setThreads(50);
+        view.setTestCount(5);
     }
 
     public boolean judgeEqual(List<DataMapping> list1, List<DataMapping> list2) {

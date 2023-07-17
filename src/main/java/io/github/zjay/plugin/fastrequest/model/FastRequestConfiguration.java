@@ -62,6 +62,15 @@ public class FastRequestConfiguration implements Serializable {
     private Integer readTimeout = null;
 
     /**
+     * 压测相关参数
+     */
+    private Integer jmhConnectionTimeout = null;
+    private Integer jmhReadTimeout = null;
+    private Integer jmhWriteTimeout = null;
+    private Integer threads = null;
+    private Integer testCount = null;
+
+    /**
      * 默认的数据映射
      */
     private List<DataMapping> defaultDataMappingList = Lists.newArrayList(
@@ -277,5 +286,45 @@ public class FastRequestConfiguration implements Serializable {
 
     public void setReadTimeout(Integer readTimeout) {
         this.readTimeout = readTimeout;
+    }
+
+    public Integer getJmhConnectionTimeout() {
+        return jmhConnectionTimeout;
+    }
+
+    public void setJmhConnectionTimeout(Integer jmhConnectionTimeout) {
+        this.jmhConnectionTimeout = jmhConnectionTimeout;
+    }
+
+    public Integer getJmhReadTimeout() {
+        return jmhReadTimeout;
+    }
+
+    public void setJmhReadTimeout(Integer jmhReadTimeout) {
+        this.jmhReadTimeout = jmhReadTimeout;
+    }
+
+    public Integer getJmhWriteTimeout() {
+        return jmhWriteTimeout;
+    }
+
+    public void setJmhWriteTimeout(Integer jmhWriteTimeout) {
+        this.jmhWriteTimeout = jmhWriteTimeout;
+    }
+
+    public Integer getThreads() {
+        return threads;
+    }
+
+    public void setThreads(Integer threads) {
+        this.threads = threads;
+    }
+
+    public Integer getTestCount() {
+        return testCount;
+    }
+
+    public void setTestCount(Integer testCount) {
+        this.testCount = testCount;
     }
 }
