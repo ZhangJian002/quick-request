@@ -29,6 +29,7 @@ import io.github.zjay.plugin.fastrequest.util.TypeUtil;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class BodyParamParse extends AbstractParamParse {
@@ -106,7 +107,7 @@ public class BodyParamParse extends AbstractParamParse {
                     ParamKeyValue p = new ParamKeyValue("", Lists.newArrayList(paramKeyValue), 2, "Array");
                     nameValueMap.put(name, p);
                 } else {
-                    nameValueMap.put(name, new ParamKeyValue(name, StringUtils.randomString(name, randomStringDelimiter, randomStringLength, randomStringStrategy), 2, targetType));
+                    nameValueMap.put(name, new ParamKeyValue(name, ThreadLocalRandom.current().nextInt(1, 10), 2, targetType));
                 }
                 continue;
             }

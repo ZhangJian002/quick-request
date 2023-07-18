@@ -16,7 +16,6 @@
 
 package io.github.zjay.plugin.fastrequest.parse;
 
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.util.PsiTypesUtil;
@@ -26,9 +25,11 @@ import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.model.ParamKeyValue;
 import io.github.zjay.plugin.fastrequest.model.ParamNameType;
+import io.github.zjay.plugin.fastrequest.util.JsonUtil;
 import io.github.zjay.plugin.fastrequest.util.KV;
 import io.github.zjay.plugin.fastrequest.util.StringUtils;
 import io.github.zjay.plugin.fastrequest.util.TypeUtil;
+import net.minidev.json.JSONUtil;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -78,7 +79,7 @@ public class RequestParamParse extends AbstractParamParse {
             DataMapping dataMapping = customDataMappingList.stream().filter(q -> finalType.contains(q.getType())).findFirst().orElse(null);
             if (dataMapping != null) {
                 Object value = dataMapping.getValue();
-                if (JSONUtil.isJson(value.toString())) {
+                if (JsonUtil.isJson(value.toString())) {
                     Map<String, Object> parse = JSON.parseObject(value.toString(), Map.class);
                     for (Map.Entry<String, Object> entry : parse.entrySet()) {
                         String k = entry.getKey();

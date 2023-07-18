@@ -1,13 +1,13 @@
 package io.github.zjay.plugin.fastrequest.util;
 
 
-import cn.hutool.core.util.StrUtil;
+import org.apache.commons.lang3.StringUtils;
 
 public class RequestUtils {
 
     public static String get(String body) {
         String contentType = null;
-        if (StrUtil.isNotBlank(body)) {
+        if (StringUtils.isNotBlank(body)) {
             char firstChar = body.charAt(0);
             switch (firstChar) {
                 case '{':

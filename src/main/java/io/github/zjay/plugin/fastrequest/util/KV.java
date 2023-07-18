@@ -16,7 +16,6 @@
 
 package io.github.zjay.plugin.fastrequest.util;
 
-import cn.hutool.core.lang.tree.Tree;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -30,6 +29,7 @@ import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.model.ParamKeyValue;
+import io.github.zjay.plugin.fastrequest.util.tree.Tree;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;

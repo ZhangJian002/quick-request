@@ -16,19 +16,12 @@
 
 package io.github.zjay.plugin.fastrequest.parse;
 
-import cn.hutool.json.JSONString;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
-import com.siyeh.ig.psiutils.CollectionUtils;
 import io.github.zjay.plugin.fastrequest.dubbo.SupportType;
-import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.model.ParamKeyValue;
-import io.github.zjay.plugin.fastrequest.model.ParamNameType;
-import io.github.zjay.plugin.fastrequest.util.KV;
-import io.github.zjay.plugin.fastrequest.util.StringUtils;
 import io.github.zjay.plugin.fastrequest.util.TypeUtil;
 
 import java.util.*;

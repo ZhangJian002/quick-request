@@ -20,6 +20,8 @@ public class OkHttp3Util {
 
     public static volatile OkHttpClient clientInstance;
 
+    public static volatile OkHttpClient singleClientInstance;
+
     public static OkHttpClient getClientInstance() {
         if (clientInstance == null) {
             synchronized (OkHttp3Util.class){
@@ -37,6 +39,24 @@ public class OkHttp3Util {
             }
         }
         return clientInstance;
+    }
+
+    public static OkHttpClient getSingleClientInstance() {
+        if (singleClientInstance == null) {
+            synchronized (OkHttp3Util.class){
+                if (singleClientInstance == null){
+                    FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+                    assert config != null;
+                    singleClientInstance = new OkHttpClient.Builder()
+                            .connectTimeout(config.getConnectionTimeout() == null ? 60 : config.getConnectionTimeout(), TimeUnit.SECONDS)
+                            .readTimeout(config.getReadTimeout() == null ? 60 : config.getReadTimeout(), TimeUnit.SECONDS)
+                            .connectionPool(new ConnectionPool(1,10, TimeUnit.MILLISECONDS))
+                            .retryOnConnectionFailure(true)
+                            .build();
+                }
+            }
+        }
+        return singleClientInstance;
     }
 
     /**

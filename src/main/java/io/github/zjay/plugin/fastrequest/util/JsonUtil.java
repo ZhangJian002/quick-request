@@ -16,23 +16,33 @@
 
 package io.github.zjay.plugin.fastrequest.util;
 
-import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 
 public class JsonUtil {
-    public static boolean isJSON2(String str) {
-        try {
-            JSON.parse(str);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public static boolean isJson(String str) {
+        return isJsonObj(str) || isJsonArray(str);
     }
 
-    public static void main(String[] args) {
-        Object a = "true";
-        boolean json = JSONUtil.isJson("2");
-        System.out.println(json);
-        System.out.println(a.getClass());
+    public static boolean isJsonObj(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+        return isWrap(StringUtils.trim(str), '{', '}');
     }
+
+    public static boolean isJsonArray(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+        return isWrap(StringUtils.trim(str), '[', ']');
+    }
+
+    public static boolean isWrap(CharSequence str, char prefixChar, char suffixChar) {
+        if (null == str) {
+            return false;
+        }
+
+        return str.charAt(0) == prefixChar && str.charAt(str.length() - 1) == suffixChar;
+    }
+
 }

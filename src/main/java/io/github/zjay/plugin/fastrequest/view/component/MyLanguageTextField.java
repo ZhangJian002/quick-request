@@ -16,9 +16,7 @@
 
 package io.github.zjay.plugin.fastrequest.view.component;
 
-import cn.hutool.json.JSONSupport;
 import com.alibaba.fastjson.JSONObject;
-import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.json.JsonFileType;

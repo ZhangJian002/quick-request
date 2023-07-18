@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.7.17'
+version '2023.7.18'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     compile 'com.alibaba:fastjson:1.2.83'
-    compile 'cn.hutool:hutool-all:5.7.9'
+//    compile 'cn.hutool:hutool-all:5.7.9'
 
 //    implementation 'org.openjdk.jmh:jmh-core:1.36'
     // https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core
@@ -48,6 +48,14 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.7.18</h3 >
+    <ul>
+        <li>压测部分优化</li>
+        <li>优化请求响应的tab快速切换，提升流畅性</li>
+        <li>请求方式全部修改为Okhttp3的方式</li>
+        <li>修复全局请求头不生效的问题</li>
+        <li>修复@RequestBody修饰的基础数据类型解析成字符串的问题</li>
+    </ul>
     <h3>v2023.7.17</h3 >
     <ul>
         <li>JMH压测功能正式发布，可自由设置并发线程数、执行次数等，并含有丰富的图表展示(暂时支持Restful请求，且不支持物理中断)，压测受到本地环境影响，如IDEA、操作系统等</li>

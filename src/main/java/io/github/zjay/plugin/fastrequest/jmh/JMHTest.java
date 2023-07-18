@@ -75,10 +75,7 @@ public class JMHTest {
 
     public static Collection<RunResult> jmhTest() {
         exceptions.clear();
-        if(OkHttp3Util.clientInstance != null){
-            OkHttp3Util.clientInstance.connectionPool().evictAll();
-            OkHttp3Util.clientInstance = null;
-        }
+        //初始话客户端
         OkHttp3Util.getClientInstance();
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
@@ -97,7 +94,13 @@ public class JMHTest {
                 .warmupIterations(0)
                 .build();
         try {
-            return new Runner(opts).run();
+            Collection<RunResult> result = new Runner(opts).run();
+            //释放
+            if(OkHttp3Util.clientInstance != null){
+                OkHttp3Util.clientInstance.connectionPool().evictAll();
+                OkHttp3Util.clientInstance = null;
+            }
+            return result;
         } catch (RunnerException e) {
 
 
