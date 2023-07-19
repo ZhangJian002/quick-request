@@ -1103,6 +1103,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             urlEncodedParam.append(q.getKey()).append("=").append(q.getValue()).append("&");
         });
 
+        if (!urlParam.isEmpty()) {
+            String queryParam = UrlQuery.of(urlParam).toString();
+            request.url(sendUrl + "?" + URLEncoder.DEFAULT.encode(queryParam, StandardCharsets.UTF_8));
+        }
+        if(Objects.equals(methodType.toLowerCase(), "get")){
+            return request.build();
+        }
+
         boolean formFlag = true;
         //json优先
         if (StringUtils.isNotEmpty(urlEncodedParam)) {
@@ -1118,10 +1126,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             formFlag = false;
         }
 
-        if (!urlParam.isEmpty()) {
-            String queryParam = UrlQuery.of(urlParam).toString();
-            request.url(sendUrl + "?" + URLEncoder.DEFAULT.encode(queryParam, StandardCharsets.UTF_8));
-        }
         if (!multipartFormParam.isEmpty() && formFlag) {
             MultipartBody.Builder multipartBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM);

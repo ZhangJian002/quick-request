@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.7.18'
+version '2023.7.19'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -16,17 +16,9 @@ repositories {
 
 dependencies {
     compile 'com.alibaba:fastjson:1.2.83'
-//    compile 'cn.hutool:hutool-all:5.7.9'
-
-//    implementation 'org.openjdk.jmh:jmh-core:1.36'
-    // https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core
     implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.36'
-
     annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
-    // https://mvnrepository.com/artifact/org.jfree/jfreechart
     implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.4'
-
-    // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
 
 
@@ -48,6 +40,10 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.7.19</h3 >
+    <ul>
+        <li>修复get请求时，body也有数据导致请求报错的问题</li>
+    </ul>
     <h3>v2023.7.18</h3 >
     <ul>
         <li>压测部分优化</li>
