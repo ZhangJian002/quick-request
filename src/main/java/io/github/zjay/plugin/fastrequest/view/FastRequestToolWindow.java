@@ -1871,12 +1871,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         assert collectionConfiguration != null;
 
         ParamGroup paramGroup = config.getParamGroup();
-        String mid = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
-        CollectionConfiguration.CollectionDetail detail = filterById(mid, collectionConfiguration.getDetail());
-        if (detail != null && !regenerate) {
-            refreshByCollection(detail, true);
-            return;
-        }
+//        String mid = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
+//        CollectionConfiguration.CollectionDetail detail = filterById(mid, collectionConfiguration.getDetail());
+//        if (detail != null && !regenerate) {
+//            refreshByCollection(detail, true);
+//            return;
+//        }
 
         //reset value
         multipartKeyValueList = new ArrayList<>();

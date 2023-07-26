@@ -16,35 +16,22 @@
 
 package io.github.zjay.plugin.fastrequest.generator.impl;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.source.PsiClassReferenceType;
 import com.intellij.psi.impl.source.PsiMethodImpl;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.javadoc.PsiDocToken;
-import com.intellij.psi.util.PsiUtil;
-import com.siyeh.ig.psiutils.CollectionUtils;
-import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.generator.FastUrlGenerator;
-import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.model.ParamGroup;
 import io.github.zjay.plugin.fastrequest.model.ParamNameType;
-import io.github.zjay.plugin.fastrequest.parse.BodyParamParse;
 import io.github.zjay.plugin.fastrequest.parse.DubboParamParse;
-import io.github.zjay.plugin.fastrequest.parse.PathValueParamParse;
-import io.github.zjay.plugin.fastrequest.parse.RequestParamParse;
-import io.github.zjay.plugin.fastrequest.util.UrlUtil;
-import io.github.zjay.plugin.fastrequest.view.CommonConfigView;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DubboMethodGenerator extends FastUrlGenerator {
     private FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
