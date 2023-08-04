@@ -436,7 +436,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         DefaultActionGroup sendGroup = new DefaultActionGroup();
         sendGroup.add(toolbarSendRequestAction);
         sendGroup.add(sendAndDownloadRequestAction);
-        sendGroup.add(toolbarPressureRequestAction);
+        if(ClassUtils.existMath3Class()){
+            sendGroup.add(toolbarPressureRequestAction);
+        }
         SplitButtonAction splitButtonAction = new SplitButtonAction(sendGroup);
         group.add(splitButtonAction);
 
@@ -1105,7 +1107,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         if (!urlParam.isEmpty()) {
             String queryParam = UrlQuery.of(urlParam).toString();
-            request.url(sendUrl + "?" + URLEncoder.DEFAULT.encode(queryParam, StandardCharsets.UTF_8));
+            request.url(sendUrl + "?" + queryParam);
         }
         if(Objects.equals(methodType.toLowerCase(), "get")){
             return request.build();

@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.7.26'
+version '2023.8.4'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -16,10 +16,17 @@ repositories {
 
 dependencies {
     compile 'com.alibaba:fastjson:1.2.83'
-    implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.36'
     annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
     implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.4'
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
+    implementation ('com.squareup.okhttp3:okhttp:4.11.0') {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-common'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    }
+    implementation ('org.openjdk.jmh:jmh-core:1.36') {
+//        exclude group: 'org.apache.commons', module: 'commons-math3'
+    }
 
 
 
@@ -40,6 +47,18 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.8.4</h3 >
+    <ul>
+        <li>修复历史请求列表url列显示换行问题</li>
+    </ul>
+    <h3>v2023.8.2</h3 >
+    <ul>
+        <li>修复get请求下，请求参数encode问题</li>
+    </ul>
+    <h3>v2023.7.28</h3 >
+    <ul>
+        <li>优化okhttp3的体积，实现更轻量化运用</li>
+    </ul>
     <h3>v2023.7.26</h3 >
     <ul>
         <li>修复已保存的请求，如果修改url后导致url不能实时更新的问题</li>

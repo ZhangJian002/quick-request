@@ -225,7 +225,8 @@ public class UrlQuery {
 				sb.append(URLEncoder.ALL.encode(key.toString(), charset));
 				value = entry.getValue();
 				if (null != value) {
-					sb.append("=").append(URLEncoder.ALL.encode(value.toString(), charset));
+					String encodeValue = URLEncoder.ALL.encode(value.toString(), charset);
+					sb.append("=").append(encodeValue);
 				}
 			}
 		}

@@ -389,8 +389,14 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             String searchKeyword = ((SearchTextField) searchPanel2).getText(); // 替换成你的匹配关键字
             String cellValue = String.valueOf(value);
             JLabel jLabel = (JLabel) component;
+            int width = table.getColumnModel().getColumn(column).getWidth();
+            String realValue = cellValue;
+            if(cellValue.length() * 7.5 > width){
+                realValue = realValue.substring(0, (int)(width/7.5)) + "...";
+            }
+            jLabel.setToolTipText(cellValue);
             if(cellValue.toLowerCase().contains(searchKeyword.toLowerCase())){
-                jLabel.setText("<html>" + cellValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>")  + "</html>");
+                jLabel.setText("<html>" + realValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>")  + "</html>");
             }
             return component;
         }
