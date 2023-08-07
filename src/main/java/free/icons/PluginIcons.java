@@ -92,4 +92,6 @@ public interface PluginIcons {
     Icon ICON_SYNC = IconLoader.getIcon("/free.icon/sync.svg", PluginIcons.class);
 
     Icon ICON_DUBBO = IconLoader.getIcon("/free.icon/dubbo.svg", PluginIcons.class);
+
+    Icon ICON_GROUP = IconLoader.getIcon("/free.icon/group.svg", PluginIcons.class);
 }

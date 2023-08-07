@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.8.4'
+version '2023.8.7'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,6 +47,10 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.8.7</h3 >
+    <ul>
+        <li>最新版IDEA的支持，修复一些适配及图标优化</li>
+    </ul>
     <h3>v2023.8.4</h3 >
     <ul>
         <li>修复历史请求列表url列显示换行问题</li>

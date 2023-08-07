@@ -2055,7 +2055,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ).setRemoveAction(anActionButton -> {
             removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new AnAction(MyResourceBundleUtil.getKey("header.group.manage"), "", AllIcons.Actions.ListChanges) {
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new AnAction(MyResourceBundleUtil.getKey("header.group.manage"), "", PluginIcons.ICON_GROUP) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 int idx = -1;

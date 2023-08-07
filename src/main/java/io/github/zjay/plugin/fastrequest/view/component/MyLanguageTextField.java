@@ -28,18 +28,17 @@ import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.EditorSettings;
-import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.ex.SoftWrapChangeListener;
+import com.intellij.openapi.editor.impl.EditorFactoryImpl;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.impl.EditorTabbedContainer;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
 import com.intellij.openapi.project.Project;
@@ -50,6 +49,7 @@ import com.intellij.openapi.wm.ToolWindowId;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.ui.ErrorStripeEditorCustomization;
 import com.intellij.ui.LanguageTextField;
@@ -57,6 +57,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.util.LocalTimeCounter;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import free.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.config.Constant;
@@ -104,42 +105,49 @@ public class MyLanguageTextField extends LanguageTextField {
 
     @Override
     public void setText(@Nullable String text) {
-        Language finalLanguage = getLanguage(text);
+        if(text == null){
+            text = "";
+        }
+        String finalText = text;
+        PsiFileFactory psiFileFactory = PsiFileFactory.getInstance(myProject);
+        Language finalLanguage = getLanguage(finalText);
+        LanguageFileType associatedFileType = finalLanguage.getAssociatedFileType();
         ApplicationManager.getApplication().invokeAndWait(() -> {
-            Document document = createDocument(text, finalLanguage, myProject, new SimpleDocumentCreator());
+            PsiFile psiFile = psiFileFactory.createFileFromText("ZJay." + associatedFileType.getDefaultExtension(), associatedFileType, finalText, LocalTimeCounter.currentTime(), true, false);
+            SimpleDocumentCreator simpleDocumentCreator = new SimpleDocumentCreator();
+            simpleDocumentCreator.customizePsiFile(psiFile);
+            Document document = PsiDocumentManager.getInstance(myProject).getDocument(psiFile);
             setDocument(document);
-            PsiFile psiFile = PsiDocumentManager.getInstance(myProject).getPsiFile(document);
-            if (psiFile != null) {
-                WriteCommandAction.runWriteCommandAction(
-                        myProject,
-                        () -> {
-                            CodeStyleManager.getInstance(getProject()).reformat(psiFile);
-                        }
-                );
-            }
+            PsiDocumentManager.getInstance(myProject).commitDocument(document);
+            WriteCommandAction.runWriteCommandAction(
+                    myProject,
+                    () -> {
+                        CodeStyleManager.getInstance(getProject()).reformat(psiFile);
+                    }
+            );
         });
     }
 
     private Language getLanguage(String text) {
-        if(!needPretty){
-            return language;
+        if (!needPretty) {
+            return PlainTextLanguage.INSTANCE;
         }
         Language myLanguage = null;
         try {
             JSONObject.parseObject(text);
             myLanguage = JsonLanguage.INSTANCE;
             super.setFileType(JsonFileType.INSTANCE);
-        }catch (Exception e){
+        } catch (Exception e) {
             //ignore
         }
-        if(myLanguage == null){
-            if(text.matches("<\\s*html[\\s\\S]*>")){
+        if (myLanguage == null) {
+            if (text.matches("<\\s*html[\\s\\S]*>")) {
                 myLanguage = HTMLLanguage.INSTANCE;
                 super.setFileType(HtmlFileType.INSTANCE);
-            }else if(text.matches("<\\s*[A-Za-z][A-Za-z0-9_]*[\\s\\S]*>")){
+            } else if (text.matches("<\\s*[A-Za-z][A-Za-z0-9_]*[\\s\\S]*>")) {
                 myLanguage = XMLLanguage.INSTANCE;
                 super.setFileType(XmlFileType.INSTANCE);
-            }else {
+            } else {
                 myLanguage = PlainTextLanguage.INSTANCE;
                 super.setFileType(PlainTextFileType.INSTANCE);
             }
@@ -188,7 +196,6 @@ public class MyLanguageTextField extends LanguageTextField {
     public void setLanguage(Language language) {
         this.language = language;
     }
-
 
 
 }

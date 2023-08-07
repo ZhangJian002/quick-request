@@ -24,6 +24,8 @@
     <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.modules.platform</depends>
 
+    <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestComponent"
@@ -41,11 +43,11 @@
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
         <applicationService
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.DubboMethodGenerator"/>
-        <applicationConfigurable id="p" displayName="Quick Request"
+        <applicationConfigurable id="quickRequest" displayName="Quick Request"
                                  instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
-            <configurable parentId="p"
+            <configurable parentId="quickRequest" key="DateTypeConfig"
                           instance="io.github.zjay.plugin.fastrequest.configurable.DataMappingConfigurable"/>
-            <configurable parentId="p"
+            <configurable parentId="quickRequest" key="OtherConfig"
                           instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
         </applicationConfigurable>
         <toolWindow id="Quick Request" anchor="right" icon="free.icons.PluginIcons.fastRequest_toolwindow"
