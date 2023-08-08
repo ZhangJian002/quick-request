@@ -31,6 +31,7 @@ import com.intellij.json.JsonLanguage;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
@@ -175,6 +176,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private MyLanguageTextField jsonParamsLanguageTextField;
 
     private JBPopupMenu tablePopupMenu;
+
+    private JBPopupMenu headerPopupMenu;
     private JBTable urlParamsTable;
     private JBTable urlEncodedTable;
     private JBTable multipartTable;
@@ -320,6 +323,54 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         tablePopupMenu.add(clearMenItem);
     }
 
+    private void setHeaderButtons() {
+        headerPopupMenu = new JBPopupMenu();
+        JBMenuItem localMenItem = new JBMenuItem(" Add to Local ");
+//        delMenItem.setIcon(AllIcons.General.Remove);
+        localMenItem.addActionListener(evt -> {
+            int selectedRow = responseTable.getSelectedRow();
+            CustomNode node = (CustomNode) ((ListTreeTableModelOnColumns) responseTable.getTableModel()).getRowValue(selectedRow);
+            String key = node.getKey();
+            Object value = node.getValue();
+            DataMapping dataMapping = headerParamsKeyValueList.stream().filter(q -> q.getType().equals(key)).findFirst().orElse(null);
+            if (dataMapping == null) {
+                DataMapping addOne = new DataMapping(key, value.toString());
+                headerParamsKeyValueList.add(addOne);
+            } else {
+                dataMapping.setValue(value.toString());
+            }
+            FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+            assert config != null;
+            config.setHeaderList(headerParamsKeyValueList);
+            saveAndChangeHeader();
+            //refreshTable(headerTable);
+            headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
+            tabbedPane.setSelectedIndex(0);
+            headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
+        });
+        headerPopupMenu.add(localMenItem);
+        JBMenuItem globalMenItem = new JBMenuItem(" Add to Global ");
+//        clearMenItem.setIcon(PluginIcons.ICON_CLEAR);
+        globalMenItem.addActionListener(evt -> {
+            FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+            assert config != null;
+            List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
+            int selectedRow = responseTable.getSelectedRow();
+            CustomNode node = (CustomNode) ((ListTreeTableModelOnColumns) responseTable.getTableModel()).getRowValue(selectedRow);
+            String key = node.getKey();
+            Object value = node.getValue();
+            DataMapping dataMapping = globalHeaderList.stream().filter(q -> q.getType().equals(key)).findFirst().orElse(null);
+            if (dataMapping == null) {
+                DataMapping addOne = new DataMapping(key, value.toString());
+                globalHeaderList.add(addOne);
+            } else {
+                dataMapping.setValue(value.toString());
+            }
+            config.setGlobalHeaderList(globalHeaderList);
+        });
+        headerPopupMenu.add(globalMenItem);
+    }
+
     private ComboBox getNormalTypeAndFileComboBox(String type) {
         ComboBox<String> typeJComboBox = new ComboBox<>();
         typeJComboBox.setRenderer(new IconListRenderer(TYPE_ICONS));
@@ -351,6 +402,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         urlCompleteChangeFlag = new AtomicBoolean(false);
 
         setTableButtons();
+        setHeaderButtons();
 
         renderingHeaderTablePanel();
         renderingUrlParamsTablePanel();
@@ -1240,13 +1292,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             boolean finalFileMode = fileMode || (StringUtils.isNotBlank(header) && header.contains("attachment"));
             //download file
             fileHandler(finalFileMode, status, response);
-            String body = "";
-            try {
-                body = response.body().string();
-            } catch (IOException e) {
-            }
-            //not a file
-            resultHandler(finalFileMode, body);
             //response渲染
             responsePageHandler(response, status, duration);
             ApplicationManager.getApplication().invokeLater(() -> {
@@ -1425,10 +1470,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         sendButtonFlag = false;
                         InputStream inputStream = null;
                         FileOutputStream outputStream = null;
+                        File finalFile = null;
                         try {
                             FileSaverDialog fd = FileChooserFactory.getInstance().createSaveFileDialog(new FileSaverDescriptor("Save As", ""), myProject);
                             File f = new File(myProject.getBasePath());
-                            File finalFile = FileUtil.completeFileNameFromHeader(f, response);
+                            finalFile = FileUtil.completeFileNameFromHeader(f, response);
                             inputStream = response.body().byteStream();
                             outputStream = new FileOutputStream(finalFile);
                             // Buffer to read data from the input stream
@@ -1439,6 +1485,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                                 outputStream.write(buffer, 0, bytesRead);
                             }
                             outputStream.flush();
+                            outputStream.close();
                             VirtualFileWrapper fileWrapper = fd.save(URLDecoder.decode(finalFile.getName(), StandardCharsets.UTF_8));
                             if (fileWrapper != null) {
                                 File file = fileWrapper.getFile();
@@ -1447,17 +1494,17 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                                         .addAction(new GotoFile(file))
                                         .notify(myProject);
                             }
-                            finalFile.delete();
-                        } catch (Exception ignored) {
+                        } catch (Exception e) {
+                            NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("出现了个未知问题，请联系作者处理~", MessageType.ERROR).notify(myProject);
                         }finally {
                             try {
-                                if(outputStream != null){
-                                    outputStream.close();
-                                }
                                 if(inputStream != null){
                                     inputStream.close();
                                 }
                             } catch (IOException e) {
+                            }
+                            if(finalFile != null){
+                                finalFile.delete();
                             }
                             sendButtonFlag = true;
                         }
@@ -1465,6 +1512,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 }
             };
             ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
+        }else {
+             String body = "";
+            try {
+                body = response.body().string();
+            } catch (IOException ignored) {
+            }
+            resultHandler(finalFileMode, body);
         }
     }
 
@@ -2097,27 +2151,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(responseTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.setAddActionName("Add to Headers").setAddAction(anActionButton -> {
-                    int selectedRow = responseTable.getSelectedRow();
-                    CustomNode node = (CustomNode) ((ListTreeTableModelOnColumns) responseTable.getTableModel()).getRowValue(selectedRow);
-                    String key = node.getKey();
-                    Object value = node.getValue();
-                    DataMapping dataMapping = headerParamsKeyValueList.stream().filter(q -> q.getType().equals(key)).findFirst().orElse(null);
-                    if (dataMapping == null) {
-                        DataMapping addOne = new DataMapping(key, value.toString());
-                        headerParamsKeyValueList.add(addOne);
-                    } else {
-                        dataMapping.setValue(value.toString());
-                    }
-                    FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
-                    assert config != null;
-                    config.setHeaderList(headerParamsKeyValueList);
-                    saveAndChangeHeader();
-                    //refreshTable(headerTable);
-                    headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
-                    tabbedPane.setSelectedIndex(0);
-                    headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
-                }
+        toolbarDecorator.setAddActionName("Add to Headers").setAddIcon(PluginIcons.ICON_ADD_HEADER).setAddAction(anActionButton -> {
+                //弹出菜单
+                Rectangle bounds = anActionButton.getContextComponent().getBounds();
+                headerPopupMenu.show(jsonResponsePanel, bounds.x, bounds.y);
+            }
         );
         toolbarDecorator.setRemoveAction(null);
 
@@ -2228,7 +2266,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         }
     }
-
 
     private void removeUrlParamsTableLines(JBTable targetTable, List<ParamKeyValue> paramsKeyValueList,
                                            JTextArea targetArea, AtomicBoolean flag, List<DataMapping> headerParamsList) {
@@ -2564,18 +2601,18 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
             @Override
             public TableCellRenderer getCellRenderer(int row, int column) {
-                if (row != 0 && column == 1) {
-                    return new MyWrapCellRenderer();
-                }
+//                if (row != 0 && column == 1) {
+//                    return new MyWrapCellRenderer();
+//                }
                 return super.getCellRenderer(row, column);
             }
 
 
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-                if (row != 0 && column == 1) {
-                    return new MyWrapCellEditor();
-                }
+//                if (row != 0 && column == 1) {
+//                    return new MyWrapCellEditor();
+//                }
                 return super.getCellEditor(row, column);
             }
 
@@ -2601,7 +2638,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         };
         table.setRootVisible(true);
         table.setVisible(true);
-//        table.setCellSelectionEnabled(true);
+        table.setCellSelectionEnabled(true);
         return table;
     }
 

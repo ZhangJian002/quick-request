@@ -30,12 +30,22 @@ public class FileUtil {
         String fileName = HttpUtil.getFileNameFromDisposition(response);
         if (StringUtils.isBlank(fileName)) {
             final String path = response.request().url().toString();
-            // 从路径中获取文件名
-            fileName = HttpUtil.subSuf(path, path.lastIndexOf('/') + 1);
+            String[] split = path.split("/");
+            for (int i = split.length - 1; i >= 0; i--) {
+                if(StringUtils.isNotBlank(split[i])){
+                    if(split[i].contains("?")){
+                        fileName = split[i].substring(0, split[i].indexOf("?"));
+                    }else {
+                        fileName = split[i];
+                    }
+                    break;
+                }
+            }
             if (StringUtils.isBlank(fileName)) {
                 // 编码后的路径做为文件名
                 fileName = encodeQuery(path, StandardCharsets.UTF_8);
             }
+            fileName = fileName.concat(".txt");
         }
         return file(destFile, fileName);
     }

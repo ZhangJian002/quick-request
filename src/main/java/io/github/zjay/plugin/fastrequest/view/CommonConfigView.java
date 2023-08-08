@@ -27,10 +27,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.TreeTableModel;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
-import io.github.zjay.plugin.fastrequest.model.DataMapping;
-import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
-import io.github.zjay.plugin.fastrequest.model.HostGroup;
-import io.github.zjay.plugin.fastrequest.model.NameGroup;
+import io.github.zjay.plugin.fastrequest.model.*;
 import io.github.zjay.plugin.fastrequest.view.inner.EnvAddView;
 import io.github.zjay.plugin.fastrequest.view.inner.GlobalHeaderAddView;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,6 +158,7 @@ public class CommonConfigView extends AbstractConfigurableView {
         envJbList = new JBList<>(new CollectionListModel<>(viewEnvList));
         envJbList.setEmptyText("Please add env");
         ToolbarDecorator toolbarDecoratorEnv = ToolbarDecorator.createDecorator(envJbList);
+        toolbarDecoratorEnv.setToolbarBorder(null);
         toolbarDecoratorEnv.setMoveUpAction(null).setMoveDownAction(null);
         toolbarDecoratorEnv.setAddAction(button -> {
             EnvAddView envAddView = new EnvAddView("Add env", "Please add env");

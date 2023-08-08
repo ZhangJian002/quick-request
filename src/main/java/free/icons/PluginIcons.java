@@ -94,4 +94,6 @@ public interface PluginIcons {
     Icon ICON_DUBBO = IconLoader.getIcon("/free.icon/dubbo.svg", PluginIcons.class);
 
     Icon ICON_GROUP = IconLoader.getIcon("/free.icon/group.svg", PluginIcons.class);
+
+    Icon ICON_ADD_HEADER = IconLoader.getIcon("/free.icon/add-header.svg", PluginIcons.class);
 }
