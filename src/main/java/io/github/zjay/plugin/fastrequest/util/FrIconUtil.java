@@ -17,7 +17,7 @@
 package io.github.zjay.plugin.fastrequest.util;
 
 import com.intellij.icons.AllIcons;
-import free.icons.PluginIcons;
+import quickRequest.icons.PluginIcons;
 
 import javax.swing.*;
 

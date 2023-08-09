@@ -18,10 +18,8 @@ package io.github.zjay.plugin.fastrequest.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.intellij.lang.jvm.types.JvmPrimitiveTypeKind;
 import com.intellij.openapi.util.Key;
-import com.intellij.psi.PsiPrimitiveType;
-import free.icons.PluginIcons;
+import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.model.MethodType;
 
 import java.util.List;

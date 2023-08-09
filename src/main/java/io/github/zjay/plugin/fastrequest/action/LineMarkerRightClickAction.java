@@ -1,7 +1,6 @@
 package io.github.zjay.plugin.fastrequest.action;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.ide.actions.AboutDialog;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -15,26 +14,14 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
-import com.intellij.openapi.ui.popup.Balloon;
-import com.intellij.openapi.ui.popup.BalloonBuilder;
-import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.PsiElement;
-import com.intellij.ui.awt.RelativePoint;
-import com.intellij.xdebugger.breakpoints.XBreakpoint;
-import com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory;
-import com.intellij.xdebugger.impl.ui.BreakpointEditor;
-import com.intellij.xdebugger.impl.ui.DebuggerUIUtil;
-import free.icons.PluginIcons;
+import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
-import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class LineMarkerRightClickAction extends AnAction implements DumbAware {
 

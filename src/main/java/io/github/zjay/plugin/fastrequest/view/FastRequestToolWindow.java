@@ -31,7 +31,6 @@ import com.intellij.json.JsonLanguage;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.*;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
@@ -64,7 +63,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
-import free.icons.PluginIcons;
+import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.action.*;
 import io.github.zjay.plugin.fastrequest.config.*;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
@@ -325,19 +324,24 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     private void setHeaderButtons() {
         headerPopupMenu = new JBPopupMenu();
-        JBMenuItem localMenItem = new JBMenuItem(" Add to Local ");
-//        delMenItem.setIcon(AllIcons.General.Remove);
+        JBMenuItem localMenItem = new JBMenuItem(MyResourceBundleUtil.getKey("AddLocalHeader"));
+        localMenItem.setIcon(PluginIcons.ICON_ADD_GREEN);
         localMenItem.addActionListener(evt -> {
-            int selectedRow = responseTable.getSelectedRow();
-            CustomNode node = (CustomNode) ((ListTreeTableModelOnColumns) responseTable.getTableModel()).getRowValue(selectedRow);
-            String key = node.getKey();
-            Object value = node.getValue();
-            DataMapping dataMapping = headerParamsKeyValueList.stream().filter(q -> q.getType().equals(key)).findFirst().orElse(null);
-            if (dataMapping == null) {
-                DataMapping addOne = new DataMapping(key, value.toString());
-                headerParamsKeyValueList.add(addOne);
-            } else {
-                dataMapping.setValue(value.toString());
+            int[] selectedRows = responseTable.getSelectedRows();
+            for (int selectedRow : selectedRows) {
+                CustomNode node = (CustomNode) ((ListTreeTableModelOnColumns) responseTable.getTableModel()).getRowValue(selectedRow);
+                String key = node.getKey();
+                Object value = node.getValue();
+                if(StringUtils.isBlank(key) || value == null ||StringUtils.isBlank(value.toString())){
+                    continue;
+                }
+                DataMapping dataMapping = headerParamsKeyValueList.stream().filter(q -> q.getType().equals(key)).findFirst().orElse(null);
+                if (dataMapping == null) {
+                    DataMapping addOne = new DataMapping(key, value.toString());
+                    headerParamsKeyValueList.add(addOne);
+                } else {
+                    dataMapping.setValue(value.toString());
+                }
             }
             FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
             assert config != null;
@@ -349,22 +353,27 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
         });
         headerPopupMenu.add(localMenItem);
-        JBMenuItem globalMenItem = new JBMenuItem(" Add to Global ");
-//        clearMenItem.setIcon(PluginIcons.ICON_CLEAR);
+        JBMenuItem globalMenItem = new JBMenuItem(MyResourceBundleUtil.getKey("AddGlobalHeader"));
+        globalMenItem.setIcon(PluginIcons.ICON_ADD_YELLOW);
         globalMenItem.addActionListener(evt -> {
             FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
             assert config != null;
             List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
-            int selectedRow = responseTable.getSelectedRow();
-            CustomNode node = (CustomNode) ((ListTreeTableModelOnColumns) responseTable.getTableModel()).getRowValue(selectedRow);
-            String key = node.getKey();
-            Object value = node.getValue();
-            DataMapping dataMapping = globalHeaderList.stream().filter(q -> q.getType().equals(key)).findFirst().orElse(null);
-            if (dataMapping == null) {
-                DataMapping addOne = new DataMapping(key, value.toString());
-                globalHeaderList.add(addOne);
-            } else {
-                dataMapping.setValue(value.toString());
+            int[] selectedRows = responseTable.getSelectedRows();
+            for (int selectedRow : selectedRows) {
+                CustomNode node = (CustomNode) ((ListTreeTableModelOnColumns) responseTable.getTableModel()).getRowValue(selectedRow);
+                String key = node.getKey();
+                Object value = node.getValue();
+                if(StringUtils.isBlank(key) || value == null ||StringUtils.isBlank(value.toString())){
+                    continue;
+                }
+                DataMapping dataMapping = globalHeaderList.stream().filter(q -> q.getType().equals(key)).findFirst().orElse(null);
+                if (dataMapping == null) {
+                    DataMapping addOne = new DataMapping(key, value.toString());
+                    globalHeaderList.add(addOne);
+                } else {
+                    dataMapping.setValue(value.toString());
+                }
             }
             config.setGlobalHeaderList(globalHeaderList);
         });
@@ -417,6 +426,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         bindTableOperations(urlEncodedTable);
         bindTableOperations(multipartTable);
         bindTableOperations(pathParamsTable);
+        bindHeaderOperations(responseTable);
 
 
         ActionLink managerConfigLink = new ActionLink("config", e -> {
@@ -2151,20 +2161,21 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(responseTable);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
-        toolbarDecorator.setAddActionName("Add to Headers").setAddIcon(PluginIcons.ICON_ADD_HEADER).setAddAction(anActionButton -> {
-                //弹出菜单
-                Rectangle bounds = anActionButton.getContextComponent().getBounds();
-                headerPopupMenu.show(jsonResponsePanel, bounds.x, bounds.y);
-            }
-        );
+//        toolbarDecorator.setAddActionName("Add to Headers").setAddIcon(PluginIcons.ICON_ADD_GREEN).setAddAction(anActionButton -> {
+//                //弹出菜单
+//                Rectangle bounds = anActionButton.getContextComponent().getBounds();
+//                headerPopupMenu.show(jsonResponsePanel, bounds.x, bounds.y);
+//            }
+//        );
         toolbarDecorator.setRemoveAction(null);
+        toolbarDecorator.setAddAction(null);
 
-        toolbarDecorator.setAddActionUpdater(e -> {
-            int selectedRow = responseTable.getSelectedRow();
-            ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) responseTable.getTableModel();
-            CustomNode node = (CustomNode) myModel.getRowValue(selectedRow);
-            return node != null && node.isLeaf() && selectedRow != 0;
-        }).setToolbarPosition(ActionToolbarPosition.TOP);
+//        toolbarDecorator.setAddActionUpdater(e -> {
+//            int selectedRow = responseTable.getSelectedRow();
+//            ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) responseTable.getTableModel();
+//            CustomNode node = (CustomNode) myModel.getRowValue(selectedRow);
+//            return node != null && node.isLeaf() && selectedRow != 0;
+//        }).setToolbarPosition(ActionToolbarPosition.TOP);
         jsonResponsePanel = toolbarDecorator.createPanel();
     }
 
@@ -3883,6 +3894,27 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     }
                     //弹出菜单
                     tablePopupMenu.show(table, evt.getX(), evt.getY());
+                }
+            }
+        });
+    }
+
+    private void bindHeaderOperations(JBTable table) {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getButton() == java.awt.event.MouseEvent.BUTTON3) {
+                    //通过点击位置找到点击为表格中的行
+                    int focusedRowIndex = table.rowAtPoint(evt.getPoint());
+                    if (focusedRowIndex == -1) {
+                        return;
+                    }
+                    if (table.getSelectedRows().length <= 1) {
+                        //将表格所选项设为当前右键点击的行
+                        table.setRowSelectionInterval(focusedRowIndex, focusedRowIndex);
+                    }
+                    //弹出菜单
+                    headerPopupMenu.show(table, evt.getX(), evt.getY());
                 }
             }
         });
