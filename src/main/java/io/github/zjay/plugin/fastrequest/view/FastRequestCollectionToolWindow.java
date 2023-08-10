@@ -691,18 +691,29 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);
         toolbarDecorator.setRemoveAction(e -> {
-            int i = Messages.showOkCancelDialog("Confirm deletion ?", "Delete", "Delete", "Cancel", Messages.getInformationIcon());
-            if (i == 0) {
-                int[] selectedIndices = collectionTable2.getSelectionModel().getSelectedIndices();
-                ListTableModel model = (ListTableModel)collectionTable2.getModel();
-                List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-                indexes.forEach(model::removeRow);
-                refreshTable2();
-            }
+            int[] selectedIndices = collectionTable2.getSelectionModel().getSelectedIndices();
+            ListTableModel model = (ListTableModel)collectionTable2.getModel();
+            List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+            indexes.forEach(model::removeRow);
+            refreshTable2();
         });
         MyActionGroup myActionGroup = new MyActionGroup(() -> new AnAction("Refresh", "", AllIcons.Actions.Refresh) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
+                refresh2();
+            }
+        });
+        myActionGroup.add( new AnAction("Delete All", "", PluginIcons.ICON_DELETE_STH) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent e) {
+                if(historyTableDataList.isEmpty()){
+                    return;
+                }
+                int i = Messages.showOkCancelDialog("Are you sure to <b>delete all</b> ?", "Delete", "Delete", "Cancel", Messages.getQuestionIcon());
+                if(i != 0){
+                    return;
+                }
+                historyTableDataList.clear();
                 refresh2();
             }
         });

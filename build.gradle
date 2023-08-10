@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.8.7'
+version '2023.8.9'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,31 +47,42 @@ intellij {
 patchPluginXml {
     changeNotes """
 
-    <h3>v2023.8.7</h3 >
+    <h3>v2023.8.9</h3>
+    <p>中文</p>
+    <ul>
+        <li>在Response->Json中，支持右键弹出菜单，可以将响应字段(可多选)添加到(全局或者当前)请求头中，并且会自动屏蔽key或value为空的字段</li>
+        <li>历史记录页面中添加可以删除所有历史记录的按钮</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>In Response -> Json, right-click popup menu is supported, and response fields (multiple choices are allowed) can be added to the (global or local) request header, and fields with empty key or value will be automatically blocked</li>
+        <li>Add a button on the history page that can delete all history records</li>
+    </ul>
+    <h3>v2023.8.7</h3>
     <ul>
         <li>最新版IDEA的支持，修复一些适配及图标优化，下载文件时的bug修复</li>
     </ul>
-    <h3>v2023.8.4</h3 >
+    <h3>v2023.8.4</h3>
     <ul>
         <li>修复历史请求列表url列显示换行问题</li>
     </ul>
-    <h3>v2023.8.2</h3 >
+    <h3>v2023.8.2</h3>
     <ul>
         <li>修复get请求下，请求参数encode问题</li>
     </ul>
-    <h3>v2023.7.28</h3 >
+    <h3>v2023.7.28</h3>
     <ul>
         <li>优化okhttp3的体积，实现更轻量化运用</li>
     </ul>
-    <h3>v2023.7.26</h3 >
+    <h3>v2023.7.26</h3>
     <ul>
         <li>修复已保存的请求，如果修改url后导致url不能实时更新的问题</li>
     </ul>
-    <h3>v2023.7.19</h3 >
+    <h3>v2023.7.19</h3>
     <ul>
         <li>修复get请求时，body也有数据导致请求报错的问题</li>
     </ul>
-    <h3>v2023.7.18</h3 >
+    <h3>v2023.7.18</h3>
     <ul>
         <li>压测部分优化</li>
         <li>优化请求响应的tab快速切换，提升流畅性</li>
@@ -79,29 +90,29 @@ patchPluginXml {
         <li>修复全局请求头不生效的问题</li>
         <li>修复@RequestBody修饰的基础数据类型解析成字符串的问题</li>
     </ul>
-    <h3>v2023.7.17</h3 >
+    <h3>v2023.7.17</h3>
     <ul>
         <li>JMH压测功能正式发布，可自由设置并发线程数、执行次数等，并含有丰富的图表展示(暂时支持Restful请求，且不支持物理中断)，压测受到本地环境影响，如IDEA、操作系统等</li>
     </ul>
-    <h3>v2023.7.4</h3 >
+    <h3>v2023.7.4</h3>
     <ul>
         <li>新增压测功能，只是个体验版，启用线程数为cpu核数(如果有超线程，则为超线程数)乘2</li>
     </ul>
-    <h3>v2023.6.27</h3 >
+    <h3>v2023.6.27</h3>
     <ul>
         <li>兼容性修改</li>
         <li>局部优化</li>
     </ul>
-    <h3>v2023.6.20</h3 >
+    <h3>v2023.6.20</h3>
     <ul>
         <li>兼容性修改</li>
         <li>Navigate页面新增搜索框(可根据url或者方法名搜索)</li>
     </ul>
-    <h3>v2023.6.19</h3 >
+    <h3>v2023.6.19</h3>
     <ul> 
         <li>编辑器增加Soft-wrap支持，并且支持美化、html预览</li>
     </ul>
-    <h3>v2023.6.16</h3 >
+    <h3>v2023.6.16</h3>
     <ul>
         <li>支持Dubbo2.X版本的请求生成及简单测试(点send按钮)
         注：1、暂时只支持官方提供的@Service、@DubboService注解，xml文件的支持会在后续版本中提供(但是不一定)；

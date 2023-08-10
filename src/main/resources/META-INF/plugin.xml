@@ -6,13 +6,14 @@
     <description><![CDATA[
         <p>The request is so simple. With it, you can abandon Postman.
         It has features such as easy debugging, saving requests, and generating methods.
-        If you find any issues, you can send me an email.
+        If you find any issues, please refer to <a href="https://github.com/zhangjianay/quick-request/issues">Github</a>.
         Enjoy it</p>
         <ul>
             <li>1、Support requests for spring mvc frameworks,support GET PUT DELETE POST PATCH</li>
             <li>2、Support requests for dubbo frameworks,support @Service @DubboService @Method</li>
             <li>3、Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
             <li>4、Support for save requests and history queries</li>
+            <li>5、Support pressure testing</li>
         </ul>
         <h2>Links</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a>
@@ -50,7 +51,7 @@
             <configurable parentId="quickRequest" key="OtherConfig"
                           instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
         </applicationConfigurable>
-        <toolWindow id="Quick Request" anchor="right" icon="free.icons.PluginIcons.fastRequest_toolwindow"
+        <toolWindow id="Quick Request" anchor="right" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow"
                     factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
                     secondary="false"/>
 
@@ -69,7 +70,7 @@
 
     <actions>
         <!-- Add your actions here -->
-        <group id="generateUrlAndParamFree" text="QuickRequest" description="QuickRequest" popup="true" icon="free.icons.PluginIcons.fastRequest_toolwindow">
+        <group id="generateUrlAndParamFree" text="QuickRequest" description="QuickRequest" popup="true" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow">
             <separator/>
             <group id="generateSubGroupFree"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
