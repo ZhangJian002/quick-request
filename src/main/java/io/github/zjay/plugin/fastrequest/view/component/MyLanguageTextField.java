@@ -102,9 +102,6 @@ public class MyLanguageTextField extends LanguageTextField {
     }
 
     private Language getLanguage(String text) {
-        if (!needPretty) {
-            return PlainTextLanguage.INSTANCE;
-        }
         Language myLanguage = null;
         try {
             JSONObject.parseObject(text);

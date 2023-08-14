@@ -4,9 +4,12 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.impl.HTMLEditorProvider;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiFile;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,11 +38,20 @@ public class OpenHtmlAction extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        Editor editor = (Editor)e.getData(CommonDataKeys.EDITOR);
-        if(editor.isViewer()){
-            e.getPresentation().setEnabledAndVisible(true);
-        }else {
-            e.getPresentation().setEnabledAndVisible(false);
+        super.update(e);
+        Presentation presentation = e.getPresentation();
+        if (presentation.isEnabled()) {
+            Editor editor = e.getData(CommonDataKeys.EDITOR);
+            if (editor != null && e.getProject() != null) {
+                PsiFile file = PsiDocumentManager.getInstance(e.getProject()).getPsiFile(editor.getDocument());
+                if (file != null && file.getVirtualFile() != null) {
+                    e.getPresentation().setEnabledAndVisible(file.getName().startsWith("ZJay."));
+                }
+            } else {
+                e.getPresentation().setEnabledAndVisible(false);
+            }
         }
     }
+
+
 }

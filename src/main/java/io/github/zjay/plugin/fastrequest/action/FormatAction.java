@@ -69,7 +69,7 @@ public class FormatAction extends AnAction {
             if (editor != null && e.getProject() != null) {
                 PsiFile file = PsiDocumentManager.getInstance(e.getProject()).getPsiFile(editor.getDocument());
                 if (file.getVirtualFile() != null) {
-                    e.getPresentation().setEnabledAndVisible(file.getName().startsWith("Dummy."));
+                        e.getPresentation().setEnabledAndVisible(file.getName().startsWith("ZJay."));
                 }
             } else {
                 e.getPresentation().setEnabledAndVisible(false);

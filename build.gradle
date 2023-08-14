@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.8.9'
+version '2023.8.11'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,16 +47,18 @@ intellij {
 patchPluginXml {
     changeNotes """
 
-    <h3>v2023.8.9</h3>
+    <h3>v2023.8.11</h3>
     <p>中文</p>
     <ul>
         <li>在Response->Json中，支持右键弹出菜单，可以将响应字段(可多选)添加到(全局或者当前)请求头中，并且会自动屏蔽key或value为空的字段</li>
         <li>历史记录页面中添加可以删除所有历史记录的按钮</li>
+        <li>格式化按钮显示位置优化，去除浏览Html的按钮</li>
     </ul>
     <p>English</p>
     <ul>
         <li>In Response -> Json, right-click popup menu is supported, and response fields (multiple choices are allowed) can be added to the (global or local) request header, and fields with empty key or value will be automatically blocked</li>
         <li>Add a button on the history page that can delete all history records</li>
+        <li>Optimize the display position of formatting buttons, remove buttons for browsing HTML</li>
     </ul>
     <h3>v2023.8.7</h3>
     <ul>
