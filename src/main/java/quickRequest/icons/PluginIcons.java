@@ -100,4 +100,8 @@ public interface PluginIcons {
     Icon ICON_ADD_YELLOW = IconLoader.getIcon("/quickRequest.icon/add-yellow.svg", PluginIcons.class);
 
     Icon ICON_DELETE_STH = IconLoader.getIcon("/quickRequest.icon/deleteSth.svg", PluginIcons.class);
+
+    Icon ICON_HISTORY = IconLoader.getIcon("/quickRequest.icon/history.svg", PluginIcons.class);
+
+
 }

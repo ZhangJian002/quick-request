@@ -146,6 +146,8 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         refresh();
         refresh2();
+        apiTab.setIconAt(0, PluginIcons.ICON_HISTORY);
+        apiTab.setIconAt(1, PluginIcons.ICON_SAVE);
 
         myInstalledSearchGroup = new DefaultActionGroup();
         for (SearchTypeEnum option : SearchTypeEnum.values()) {
@@ -205,7 +207,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         searchTextField.putClientProperty("JTextField.variant", "search");
         searchTextField.getDocument().addDocumentListener(new DelayedDocumentListener(1));
         setSearchPanel2();
-
     }
 
     private void setSearchPanel2() {
