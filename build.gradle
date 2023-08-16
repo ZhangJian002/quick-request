@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.8.11'
+version '2023.8.16'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,6 +47,15 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.8.16</h3>
+    <p>中文</p>
+    <ul>
+        <li>优化图标、页面一些元素</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Optimize icons, page elements</li>
+    </ul>
     <h3>v2023.8.11</h3>
     <p>中文</p>
     <ul>

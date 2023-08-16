@@ -28,6 +28,7 @@ public class RootNode extends BaseNode<String> {
 
     @Override
     public @Nullable Icon getIcon(boolean selected) {
-        return AllIcons.Actions.ShortcutFilter;
+        return AllIcons.Nodes.PpLib;
+//        return AllIcons.Actions.ShortcutFilter;
     }
 }

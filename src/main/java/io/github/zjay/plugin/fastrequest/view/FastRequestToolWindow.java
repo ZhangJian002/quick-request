@@ -2650,6 +2650,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         table.setRootVisible(true);
         table.setVisible(true);
         table.setCellSelectionEnabled(true);
+        table.setRowHeight(25);
         return table;
     }
 

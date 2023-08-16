@@ -29,6 +29,7 @@ import com.intellij.ide.plugins.newui.ListPluginComponent;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
@@ -65,11 +66,8 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.StatusText;
+import io.github.zjay.plugin.fastrequest.config.*;
 import quickRequest.icons.PluginIcons;
-import io.github.zjay.plugin.fastrequest.config.AddAnActionFunction;
-import io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent;
-import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
-import io.github.zjay.plugin.fastrequest.config.FastRequestHistoryCollectionComponent;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.idea.ExportToFileUtil;
 import io.github.zjay.plugin.fastrequest.util.*;
@@ -717,6 +715,11 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 historyTableDataList.clear();
                 refresh2();
             }
+
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                e.getPresentation().setEnabled(!historyTableDataList.isEmpty());
+            }
         });
         toolbarDecorator.setActionGroup(myActionGroup);
 //        toolbarDecorator.addExtraActions(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.exportToPostman"), PluginIcons.ICON_POSTMAN) {
@@ -865,7 +868,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
                 if (column == 0) {
-                    ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) getTableModel();
+//                    ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) getTableModel();
                     String name = (String) getValueAt(row, column);
                     return new DefaultCellEditor(new JTextField(name));
                 } else if (column == 2) {
@@ -902,6 +905,10 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         table.setTransferHandler(new TransferHelper());
         table.setRootVisible(false);
         table.setVisible(true);
+        table.getColumnModel().getColumn(1).setMinWidth(120);
+        table.getColumnModel().getColumn(2).setMinWidth(90);
+        table.getColumnModel().getColumn(2).setMaxWidth(90);
+        table.setRowHeight(25);
 //        table.addMouseListener(new MouseAdapter() {
 //            @Override
 //            public void mouseClicked(MouseEvent event) {
@@ -950,8 +957,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 return false;
             }
 
-
-
             @Override
             public Object getValueAt(int row, int column) {
                 if (historyTableDataList.isEmpty()) {
@@ -979,19 +984,13 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 return super.getCellEditor(row, column);
             }
         };
-        TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
-        jbTable.setRowSorter(sorter);
-        sorter.setSortable(0, false);
-        sorter.setSortable(1, false);
-        sorter.setSortable(2, false);
-        sorter.setSortable(3, false);
         jbTable.getColumnModel().getColumn(0).setMinWidth(70);
         jbTable.getColumnModel().getColumn(0).setMaxWidth(70);
         jbTable.getColumnModel().getColumn(2).setMinWidth(150);
         jbTable.getColumnModel().getColumn(2).setMaxWidth(150);
         jbTable.getColumnModel().getColumn(3).setMinWidth(120);
         jbTable.getColumnModel().getColumn(3).setMaxWidth(120);
-        jbTable.setRowHeight(35);
+        jbTable.setRowHeight(30);
         return jbTable;
     }
 
@@ -1035,7 +1034,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     public JBPanel renderButtons(JBPanel jbPanel, int row){
         BorderLayout borderLayout = new BorderLayout();
         jbPanel.setLayout(borderLayout);
-        Dimension dimension = new Dimension(40, 20);
+        Dimension dimension = new Dimension(45, 20);
         JButton jButton = new JButton();
         jButton.setPreferredSize(dimension);
         jButton.setIcon(PluginIcons.ICON_LOCAL_SCOPE);

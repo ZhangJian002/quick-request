@@ -74,6 +74,9 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         allApis.setIcon(AllIcons.Ide.LocalScopeAction);
         allApis.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
         toolWindow.getContentManager().addContent(allApis);
+        //隐藏标题
+        toolWindow.getComponent().putClientProperty("HideIdLabel", "true");
+
 
         //change data
         MessageBus messageBus = project.getMessageBus();
