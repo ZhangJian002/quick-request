@@ -28,21 +28,21 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
     private final GutterIconRenderer myRenderer;
     private final MyLineMarkerInfo myPoint;
 
-    private final static JBPopupMenu clickIconPopupMenu  = new JBPopupMenu();
-
-    private static final JBMenuItem clickAndSendItem = new JBMenuItem(" Generate And Send ");
-    private static final JBMenuItem clickAndConfigItem = new JBMenuItem(" Configuration Management ");
+    private static JBPopupMenu clickIconPopupMenu;
 
     private static PsiElement psiElement;
 
     private static Project myProject;
 
-    static {
+    void createPopMenu() {
+        clickIconPopupMenu  = new JBPopupMenu();
+        JBMenuItem clickAndSendItem = new JBMenuItem(" Generate And Send ");
         clickAndSendItem.setIcon(PluginIcons.ICON_SEND);
         clickAndSendItem.addActionListener(evt -> {
             GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
             ToolWindowUtil.generatorUrlAndSend(myProject, generatorUrlService, psiElement.getParent(), true);
         });
+        JBMenuItem clickAndConfigItem = new JBMenuItem(" Configuration Management ");
         clickAndConfigItem.setIcon(AllIcons.General.Settings);
         clickAndConfigItem.addActionListener(evt -> {
             ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
@@ -71,6 +71,7 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
             point = new Point(gutterComponent.getWidth(),
                     editor.visualPositionToXY(editor.getCaretModel().getVisualPosition()).y + editor.getLineHeight() / 2);
         }
+        createPopMenu();
         clickIconPopupMenu.show(gutterComponent, point.x, point.y);
 
     }

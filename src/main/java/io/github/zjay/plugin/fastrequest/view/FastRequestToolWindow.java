@@ -54,6 +54,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
@@ -410,8 +411,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         urlParamsChangeFlag = new AtomicBoolean(true);
         urlCompleteChangeFlag = new AtomicBoolean(false);
 
-        setTableButtons();
-        setHeaderButtons();
+//        setTableButtons();
+//        setHeaderButtons();
 
         renderingHeaderTablePanel();
         renderingUrlParamsTablePanel();
@@ -1311,8 +1312,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 if (urlTextField.getText().isBlank()) {
                     return;
                 }
-                //saveToHistory
-                saveTableRequest(1, request.method());
+                if(status >= 200 && status < 300){
+                    //saveToHistory
+                    saveTableRequest(1, request.method());
+                }
             });
 
         });
@@ -1385,16 +1388,34 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     private void responsePageHandler(Response response, int status, String duration) {
+        String statusDis = status + " " + Constant.HttpStatusDesc.STATUS_MAP.get(status);
+        if(status >= 200 && status < 300){
+            statusDis = "<html><span style=\"color: #0CCD08;\">" + statusDis + "</span></html>";
+        }else {
+            statusDis = "<html><span style=\"color: #FB1A00;\">" + statusDis + "</span></html>";
+        }
         responseInfoParamsKeyValueList = Lists.newArrayList(
-                new ParamKeyValue("Url", response.request().url().toString(), 2, TypeUtil.Type.String.name()),
-                new ParamKeyValue("Response status", status + " " + Constant.HttpStatusDesc.STATUS_MAP.get(status)),
-                new ParamKeyValue("Content-Type", response.header(Header.CONTENT_TYPE.getValue()), 2, TypeUtil.Type.String.name()),
-                new ParamKeyValue("Transfer-Encoding", response.header(Header.TRANSFER_ENCODING.getValue()), 2, TypeUtil.Type.String.name()),
-                new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
-                new ParamKeyValue("Date", response.header(Header.DATE.getValue()))
+//                new ParamKeyValue("Url", response.request().url().toString(), 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Status", statusDis),
+                new ParamKeyValue("Time", duration + " ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue(Header.DATE.getValue(), response.header(Header.DATE.getValue())),
+                new ParamKeyValue(Header.CONTENT_TYPE.getValue(), response.header(Header.CONTENT_TYPE.getValue()), 2, TypeUtil.Type.String.name())
         );
+        if(StringUtils.isNotBlank(response.header(Header.CONTENT_LENGTH.getValue()))){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue(Header.CONTENT_LENGTH.getValue(), response.header(Header.CONTENT_LENGTH.getValue()), 2, TypeUtil.Type.String.name()));
+        }
+        if(StringUtils.isNotBlank(response.header(Header.TRANSFER_ENCODING.getValue()))){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue(Header.TRANSFER_ENCODING.getValue(), response.header(Header.TRANSFER_ENCODING.getValue()), 2, TypeUtil.Type.String.name()));
+        }
+        if(StringUtils.isNotBlank(response.header("Server"))){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue("Server", response.header("Server"), 2, TypeUtil.Type.String.name()));
+        }
+        if(StringUtils.isNotBlank(response.header(Header.CONTENT_ENCODING.getValue()))){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue(Header.CONTENT_ENCODING.getValue(), response.header(Header.CONTENT_ENCODING.getValue()), 2, TypeUtil.Type.String.name()));
+        }
+
         //refreshTable(responseInfoTable);
-        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Key", "Value")), responseInfoParamsKeyValueList));
         responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
         responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
 //                        responseStatusComboBox.setSelectedItem(status);
@@ -1405,10 +1426,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         responseInfoParamsKeyValueList = Lists.newArrayList(
                 new ParamKeyValue("Url", getDubboSendUrl(), 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue("Message", message, 2, TypeUtil.Type.String.name()),
-                new ParamKeyValue("Cost", duration + " ms", 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("Time", duration + " ms", 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue("Date", new Date())
         );
-        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Name", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Key", "Value")), responseInfoParamsKeyValueList));
         responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
         responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
     }
@@ -3732,7 +3753,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     private JBTable createResponseInfoTable() {
-        ColumnInfo<Object, Object>[] columns = getColumns(Lists.newArrayList("Name", "Value"));
+        ColumnInfo<Object, Object>[] columns = getColumns(Lists.newArrayList("Key", "Value"));
         if (responseInfoParamsKeyValueList == null) {
             responseInfoParamsKeyValueList = new ArrayList<>();
         }
@@ -3743,7 +3764,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 //默认只允许修改value不允许修改key
                 return false;
             }
-
 
             @Override
             public Object getValueAt(int row, int column) {
@@ -3893,6 +3913,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         //将表格所选项设为当前右键点击的行
                         table.setRowSelectionInterval(focusedRowIndex, focusedRowIndex);
                     }
+                    setTableButtons();
                     //弹出菜单
                     tablePopupMenu.show(table, evt.getX(), evt.getY());
                 }
@@ -3915,6 +3936,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                         table.setRowSelectionInterval(focusedRowIndex, focusedRowIndex);
                     }
                     //弹出菜单
+                    setHeaderButtons();
                     headerPopupMenu.show(table, evt.getX(), evt.getY());
                 }
             }
