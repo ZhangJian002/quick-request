@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
+import com.intellij.ide.ui.UISettings;
 import com.intellij.json.JsonFileType;
 import com.intellij.json.JsonLanguage;
 import com.intellij.notification.NotificationGroupManager;
@@ -352,6 +353,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
             tabbedPane.setSelectedIndex(0);
             headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
+            setHeaderTitle();
         });
         headerPopupMenu.add(localMenItem);
         JBMenuItem globalMenItem = new JBMenuItem(MyResourceBundleUtil.getKey("AddGlobalHeader"));
@@ -438,7 +440,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true, true);
         responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false);
 
-        jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, false);
+        jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true);
 
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
@@ -1036,6 +1038,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         requestProgressBar.setVisible(true);
         requestProgressBar.setForeground(ColorProgressBar.GREEN);
     }
+
+    public static final Color BLUE = new JBColor(() -> {
+        UISettings settings = UISettings.getInstance();
+        return null == settings.getColorBlindness()
+                ? new JBColor(new Color(0x074BFA), new Color(0x0425F8))
+                : new JBColor(new Color(0x074BFA), new Color(0x074BFA));
+    });
 
 //    public HttpRequest buildRequest() {
 //        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
@@ -1862,7 +1871,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         methodTypeComboBox.setSelectedItem(methodType);
 
         //headers默认取最新的
-//        calcHeaderList();
+        calcHeaderList();
 
         if ("GET".equals(methodType)) {
 //            urlParamsTextArea.setText(urlParamsKeyValueListText);
@@ -2095,7 +2104,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         if (StringUtils.isNotBlank(paramGroup.getMethodType())) {
             methodTypeComboBox.setSelectedItem(paramGroup.getMethodType());
         }
-//        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
+//        tabbedPane.setTitleAt(0, "Headers(" + headerParamsKeyValueList.size() + ")");
     }
 
     private String buildPathParamUrl(String url) {
@@ -2136,6 +2145,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     //refreshTable(headerTable);
                     headerTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("", "Header Name", "Header Value")), headerParamsKeyValueList));
                     headerTable.getColumnModel().getColumn(0).setMaxWidth(30);
+                    setHeaderTitle();
                 }
         ).setRemoveAction(anActionButton -> {
             removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
@@ -4386,6 +4396,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     private void calcHeaderList() {
+        setHeaderTitle();
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
         List<HeaderGroup> headerGroupList = config.getHeaderGroupList();
@@ -4419,6 +4430,17 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             headerList.add(new DataMapping(entry.getKey(), entry.getValue(), true));
         }
         headerParamsKeyValueList = headerList;
+        setHeaderTitle();
+    }
+
+    private void setHeaderTitle(){
+        if(tabbedPane != null && headerParamsKeyValueList != null){
+            if(headerParamsKeyValueList.isEmpty()){
+                tabbedPane.setTitleAt(0, "Headers");
+            }else {
+                tabbedPane.setTitleAt(0, "Headers(" + headerParamsKeyValueList.size() + ")");
+            }
+        }
     }
 
     private void switchHeaderParam() {

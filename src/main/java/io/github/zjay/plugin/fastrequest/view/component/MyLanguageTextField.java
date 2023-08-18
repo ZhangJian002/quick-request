@@ -56,8 +56,6 @@ public class MyLanguageTextField extends LanguageTextField {
 
     public boolean needPretty;
 
-    JButton button;
-
     public MyLanguageTextField(Project myProject, Language language, FileType fileType, boolean isViewer, boolean needPretty) {
         super(language, myProject, "", false);
         this.myProject = myProject;
@@ -102,6 +100,9 @@ public class MyLanguageTextField extends LanguageTextField {
     }
 
     private Language getLanguage(String text) {
+        if (!needPretty) {
+            return PlainTextLanguage.INSTANCE;
+        }
         Language myLanguage = null;
         try {
             JSONObject.parseObject(text);

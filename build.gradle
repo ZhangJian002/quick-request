@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.8.16'
+version '2023.8.18'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,6 +47,19 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.8.18</h3>
+    <p>中文</p>
+    <ul>
+        <li>Response->Info页面优化显示</li>
+        <li>所有的右键弹出框优化，可随着IDEA切换背景</li>
+        <li>Headers选项卡标题会显示数量</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Response ->Info page optimization display</li>
+        <li>All right-click pop-up box optimizations allow for background switching with IDEA</li>
+        <li>The Headers tab title will display the quantity</li>
+    </ul>
     <h3>v2023.8.16</h3>
     <p>中文</p>
     <ul>
