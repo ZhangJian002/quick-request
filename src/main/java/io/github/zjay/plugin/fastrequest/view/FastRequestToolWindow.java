@@ -1039,12 +1039,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         requestProgressBar.setForeground(ColorProgressBar.GREEN);
     }
 
-    public static final Color BLUE = new JBColor(() -> {
-        UISettings settings = UISettings.getInstance();
-        return null == settings.getColorBlindness()
-                ? new JBColor(new Color(0x074BFA), new Color(0x0425F8))
-                : new JBColor(new Color(0x074BFA), new Color(0x074BFA));
-    });
+//    public static final Color BLUE = new JBColor(() -> {
+//        UISettings settings = UISettings.getInstance();
+//        return null == settings.getColorBlindness()
+//                ? new JBColor(new Color(0x074BFA), new Color(0x0425F8))
+//                : new JBColor(new Color(0x074BFA), new Color(0x074BFA));
+//    });
 
 //    public HttpRequest buildRequest() {
 //        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
@@ -1675,22 +1675,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         projectComboBox.setSelectedIndex(Math.max(0, idxProject + 1));
         envComboBox.setSelectedIndex(Math.max(0, idxEnv + 1));
         setDomain(config);
-    }
-
-    private JBColor buildMethodColor(String method) {
-        JBColor jbColor = JBColor.darkGray;
-        if ("POST".equals(method)) {
-            jbColor = MyColor.green;
-        } else if ("DELETE".equals(method)) {
-            jbColor = MyColor.red;
-        } else if ("PUT".equals(method)) {
-            jbColor = MyColor.yellow;
-        } else if ("GET".equals(method)) {
-            jbColor = MyColor.blue;
-        } else if ("PATCH".equals(method)) {
-            jbColor = MyColor.purple;
-        }
-        return jbColor;
     }
 
     /**
