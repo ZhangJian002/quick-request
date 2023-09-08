@@ -778,7 +778,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     /**
      * 这个类 完全是为了兼容新版本做的，因为新版本addExtraActions 和 addExtraAction方法都已经标记为过期
      */
-    static class MyActionGroup extends ActionGroup{
+    public static class MyActionGroup extends ActionGroup{
 
         List<AnAction> allActions = new LinkedList<>();
 
@@ -792,6 +792,10 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         public void add(AnAction anAction){
             allActions.add(anAction);
+        }
+
+        public boolean isNotEmpty(){
+            return !allActions.isEmpty();
         }
 
         @Override

@@ -72,7 +72,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     }
 
     public @Nullable @Nls String getAdvertisement() {
-        return "type [/url] to search";
+        return null;
     }
 
     protected @NotNull FilteringGotoByModel<?> createModel(@NotNull Project project) {
@@ -80,7 +80,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     }
 
     public @NotNull @Nls String getGroupName() {
-        return "Quick Request";
+        return "Apis";
     }
 
     public int getSortWeight() {

@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.8.30'
+version '2023.9.8'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,6 +47,17 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.9.7</h3>
+    <p>中文</p>
+    <ul>
+        <li>部分页面优化</li>
+        <li>请求Body下的'JSON'tab改为Row，并且支持Text、JavaScript、JSON、HTML及XML的请求类型</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Partial page optimization</li>
+        <li>Change the 'JSON' tab under the request body to 'Row' and support request types for Text, JavaScript, JSON, HTML, and XML</li>
+    </ul>
     <h3>v2023.8.30</h3>
     <p>中文</p>
     <ul>

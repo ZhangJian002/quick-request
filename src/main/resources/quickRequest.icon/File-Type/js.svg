@@ -1,0 +1,12 @@
+<svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
+
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="22" width="52" y="-1" x="-1"/>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <polygon stroke="null" id="svg_1" points="44.227901838719845,13.869361758232117 49.78452720493078,8.037140727043152 38.67127265781164,8.037140727043152 " fill-rule="evenodd" fill="#acada4"/>
+  <text stroke="null" transform="matrix(2.089454715172435,0,0,1.7679302754978683,-3.0490023010309892,-1.8986810250077635) " font-style="normal" font-weight="bold" xml:space="preserve" text-anchor="start" font-family="Arvo, sans-serif" font-size="8" id="svg_4" y="9.280816" x="6.831832" stroke-opacity="null" stroke-width="0" fill="#33ce4d">JS</text>
+ </g>
+</svg>

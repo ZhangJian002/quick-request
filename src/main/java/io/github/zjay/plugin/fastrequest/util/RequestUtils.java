@@ -13,15 +13,15 @@ public class RequestUtils {
                 case '{':
                 case '[':
                     // JSON请求体
-                    contentType = "application/json";
+                    contentType = "application/json;charset=UTF-8";
                     break;
                 case '<':
                     // XML请求体
-                    contentType = "application/xml";
+                    contentType = "application/xml;charset=UTF-8";
                     break;
                 default:
                     // 请求体
-                    contentType = "application/x-www-form-urlencoded";
+                    contentType = "application/x-www-form-urlencoded;charset=UTF-8";
                     break;
             }
         }

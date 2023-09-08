@@ -104,4 +104,11 @@ public interface PluginIcons {
     Icon ICON_HISTORY = IconLoader.getIcon("/quickRequest.icon/history.svg", PluginIcons.class);
 
 
+    Icon ICON_JSON = IconLoader.getIcon("/quickRequest.icon/File-Type/json.svg", PluginIcons.class);
+    Icon ICON_TEXT = IconLoader.getIcon("/quickRequest.icon/File-Type/text.svg", PluginIcons.class);
+    Icon ICON_JS = IconLoader.getIcon("/quickRequest.icon/File-Type/js.svg", PluginIcons.class);
+    Icon ICON_HTML = IconLoader.getIcon("/quickRequest.icon/File-Type/html.svg", PluginIcons.class);
+    Icon ICON_XML = IconLoader.getIcon("/quickRequest.icon/File-Type/xml.svg", PluginIcons.class);
+
+
 }

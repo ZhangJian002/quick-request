@@ -45,7 +45,6 @@ public class FileUtil {
                 // 编码后的路径做为文件名
                 fileName = encodeQuery(path, StandardCharsets.UTF_8);
             }
-            fileName = fileName.concat(".txt");
         }
         return file(destFile, fileName);
     }

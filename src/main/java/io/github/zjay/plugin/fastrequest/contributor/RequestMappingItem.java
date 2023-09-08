@@ -111,7 +111,7 @@ public  class RequestMappingItem extends FakePsiElement {
          String location = null;
          if (psiElement instanceof PsiMethod) {
             PsiMethod psiMethod = ((PsiMethod) psiElement);;
-            location = psiMethod.getContainingClass().getName().concat("#").concat(psiMethod.getName());
+            location = psiMethod.getContainingClass().getName().concat(".").concat(psiMethod.getName());
          }
          return "(" + location + ")";
       }
@@ -126,7 +126,4 @@ public  class RequestMappingItem extends FakePsiElement {
       }
    }
 
-   public String getUrlPath() {
-      return urlPath;
-   }
 }

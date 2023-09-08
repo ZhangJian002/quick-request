@@ -24,6 +24,7 @@ import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
 import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
+import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.*;
@@ -41,10 +42,9 @@ import com.intellij.ui.ErrorStripeEditorCustomization;
 import com.intellij.ui.LanguageTextField;
 import com.intellij.util.LocalTimeCounter;
 import io.github.zjay.plugin.fastrequest.config.Constant;
+import io.github.zjay.plugin.fastrequest.util.http.BodyContentType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
 
 public class MyLanguageTextField extends LanguageTextField {
 
@@ -80,9 +80,13 @@ public class MyLanguageTextField extends LanguageTextField {
             text = "";
         }
         String finalText = text;
-        PsiFileFactory psiFileFactory = PsiFileFactory.getInstance(myProject);
         Language finalLanguage = getLanguage(finalText);
         LanguageFileType associatedFileType = finalLanguage.getAssociatedFileType();
+        updateFileLanguage(associatedFileType, text);
+    }
+
+    public void updateFileLanguage(FileType associatedFileType, String finalText){
+        PsiFileFactory psiFileFactory = PsiFileFactory.getInstance(myProject);
         ApplicationManager.getApplication().invokeAndWait(() -> {
             PsiFile psiFile = psiFileFactory.createFileFromText("ZJay." + associatedFileType.getDefaultExtension(), associatedFileType, finalText, LocalTimeCounter.currentTime(), true, false);
             SimpleDocumentCreator simpleDocumentCreator = new SimpleDocumentCreator();
@@ -168,5 +172,12 @@ public class MyLanguageTextField extends LanguageTextField {
         this.language = language;
     }
 
+    @Override
+    public FileType getFileType() {
+        return fileType;
+    }
 
+    public Language getLanguage() {
+        return language;
+    }
 }

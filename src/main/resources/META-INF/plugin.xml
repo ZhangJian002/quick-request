@@ -101,9 +101,9 @@
         </action>
 
         <group id="quickRequest.editor.floatGroup">
+            <action id="quickRequest.bodyFormat" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction" />
             <action id="quickRequest.format" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.FormatAction" />
             <action id="quickRequest.softWrap" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.SoftWrapAction" />
-<!--            <action id="quickRequest.openAsHtml" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.OpenHtmlAction" />-->
         </group>
 
     </actions>

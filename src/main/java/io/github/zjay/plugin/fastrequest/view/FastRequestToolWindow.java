@@ -26,14 +26,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
-import com.intellij.ide.ui.UISettings;
+import com.intellij.ide.highlighter.HtmlFileType;
+import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.json.JsonFileType;
 import com.intellij.json.JsonLanguage;
+import com.intellij.lang.Language;
+import com.intellij.lang.html.HTMLLanguage;
+import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.*;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
 import com.intellij.openapi.options.ShowSettingsUtil;
@@ -55,7 +60,6 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
@@ -65,6 +69,8 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
+import io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction;
+import io.github.zjay.plugin.fastrequest.util.http.BodyContentType;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.action.*;
 import io.github.zjay.plugin.fastrequest.config.*;
@@ -140,7 +146,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JComboBox<String> methodTypeComboBox;
     private JComboBox<AnAction> sendComboBox;
     private JTextArea urlParamsTextArea;
-    private JPanel jsonParamsTextArea;
+    private JPanel rowParamsTextArea;
     private JTextArea urlEncodedTextArea;
     private JTabbedPane urlEncodedTabbedPane;
     private JTabbedPane urlParamsTabbedPane;
@@ -440,7 +446,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true, true);
         responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false);
 
-        jsonParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true);
+        rowParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true);
 
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
@@ -451,9 +457,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         responseTextAreaPanel.setPreferredSize(new Dimension(-1, 120));
         responseTextAreaPanel.setMaximumSize(new Dimension(-1, 1000));
 
-        jsonParamsTextArea.setMinimumSize(new Dimension(-1, 120));
-        jsonParamsTextArea.setPreferredSize(new Dimension(-1, 120));
-        jsonParamsTextArea.setMaximumSize(new Dimension(-1, 1000));
+        rowParamsTextArea.setMinimumSize(new Dimension(-1, 120));
+        rowParamsTextArea.setPreferredSize(new Dimension(-1, 120));
+        rowParamsTextArea.setMaximumSize(new Dimension(-1, 1000));
 
         chartPanel = new JPanel();
 //        chartPanel.setLayout(new BorderLayout());
@@ -768,7 +774,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
 
         //copy param
-//        jsonParamsTextArea.addMouseListener(copyMouseAdapter(jsonParamsTextArea));
+//        rowParamsTextArea.addMouseListener(copyMouseAdapter(rowParamsTextArea));
 //        urlEncodedTextArea.addMouseListener(copyMouseAdapter(urlEncodedTextArea));
 //        urlParamsTextArea.addMouseListener(copyMouseAdapter(urlParamsTextArea));
 //        urlTextField.addMouseListener(copyMouseAdapterField(urlTextField));
@@ -819,7 +825,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String url = urlTextField.getText();
         List<DataMapping> headerList = headerParamsKeyValueList;
         String urlParam = urlParamsTextArea.getText();
-        String jsonParam = ((LanguageTextField) jsonParamsTextArea).getText();
+        String jsonParam = ((LanguageTextField) rowParamsTextArea).getText();
         String urlEncodedParam = urlEncodedTextArea.getText();
 
         if (StringUtils.isEmpty(url)) {
@@ -1094,7 +1100,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //                }, HashMap::putAll);
 //
 //        Map<String, Object> urlParam = urlParamsKeyValueList.stream().filter(ParamKeyValue::getEnabled).collect(Collectors.toMap(ParamKeyValue::getKey, ParamKeyValue::getValue, (existing, replacement) -> existing));
-//        String jsonParam = ((LanguageTextField) jsonParamsTextArea).getText();
+//        String jsonParam = ((LanguageTextField) rowParamsTextArea).getText();
 //        StringBuilder urlEncodedParam = new StringBuilder("");
 //        urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> {
 //            urlEncodedParam.append(q.getKey()).append("=").append(q.getValue()).append("&");
@@ -1171,7 +1177,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     }
                 }, HashMap::putAll);
         Map<String, Object> urlParam = urlParamsKeyValueList.stream().filter(ParamKeyValue::getEnabled).collect(Collectors.toMap(ParamKeyValue::getKey, ParamKeyValue::getValue, (existing, replacement) -> existing));
-        String jsonParam = ((LanguageTextField) jsonParamsTextArea).getText();
+        String rowParams = ((LanguageTextField) rowParamsTextArea).getText();
         StringBuilder urlEncodedParam = new StringBuilder("");
         urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> {
             urlEncodedParam.append(q.getKey()).append("=").append(q.getValue()).append("&");
@@ -1194,8 +1200,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             request.method(methodType, body);
             formFlag = false;
         }
-        if (StringUtils.isNotEmpty(jsonParam)) {
-            RequestBody body = RequestBody.create(JSON.toJSONString(JSON.parse(jsonParam)), MediaType.parse("application/json"));
+        if (StringUtils.isNotEmpty(rowParams)) {
+            RequestBody body = RequestBody.create(rowParams, MediaType.parse(getTargetContentType()));
             request.method(methodType, body);
             formFlag = false;
         }
@@ -1221,6 +1227,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             request.method(methodType, multipartBody.build());
         }
         return request.build();
+    }
+
+    private String getTargetContentType() {
+        BodyContentType bodyContentType = BodyContentType.valueOf(BodyFormatAction.chooseBodyType);
+        return bodyContentType.getValue();
     }
 
     private String getSendUrl() {
@@ -1383,7 +1394,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             if (CollectionUtils.isNotEmpty(urlEncodedKeyValueList)) {
                 historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
             }
-            historyTableData.setJsonParam(((LanguageTextField) jsonParamsTextArea).getText());
+            historyTableData.setJsonParam(((LanguageTextField) rowParamsTextArea).getText());
             if (CollectionUtils.isNotEmpty(multipartKeyValueList)) {
                 historyTableData.setMultipart(JSONArray.toJSONString(multipartKeyValueList));
             }
@@ -1685,7 +1696,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         multipartKeyValueList = new ArrayList<>();
         urlParamsTextArea.setText("");
-        ((LanguageTextField) jsonParamsTextArea).setText("");
+        ((LanguageTextField) rowParamsTextArea).setText("");
         urlEncodedTextArea.setText("");
         ParamGroupCollection paramGroup = detail.getParamGroup();
         //更新相关信息
@@ -1734,12 +1745,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             //get请求urlencoded param参数为空
             urlEncodedKeyValueList = new ArrayList<>();
             urlEncodedTextArea.setText("");
-            ((LanguageTextField) jsonParamsTextArea).setText("");
+            ((LanguageTextField) rowParamsTextArea).setText("");
         } else {
             //body param
             if (!bodyKeyValueListJson.isBlank()) {
                 //json
-                ((LanguageTextField) jsonParamsTextArea).setText(bodyKeyValueListJson);
+                ((LanguageTextField) rowParamsTextArea).setText(bodyKeyValueListJson);
                 tabbedPane.setSelectedIndex(3);
                 bodyTabbedPane.setSelectedIndex(0);
                 urlEncodedTextArea.setText("");
@@ -1758,7 +1769,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     bodyTabbedPane.setSelectedIndex(1);
                 }
                 //json设置为空
-                ((LanguageTextField) jsonParamsTextArea).setText("");
+                ((LanguageTextField) rowParamsTextArea).setText("");
                 //如果是非get请求则request Param为空转到url Encoded参数下
                 urlParamsKeyValueList = new ArrayList<>();
                 urlParamsTextArea.setText("");
@@ -1804,7 +1815,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         multipartKeyValueList = new ArrayList<>();
         urlParamsTextArea.setText("");
-        ((LanguageTextField) jsonParamsTextArea).setText("");
+        ((LanguageTextField) rowParamsTextArea).setText("");
         urlEncodedTextArea.setText("");
         //更新相关信息
 
@@ -1870,12 +1881,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             //get请求urlencoded param参数为空
             urlEncodedKeyValueList = new ArrayList<>();
             urlEncodedTextArea.setText("");
-            ((LanguageTextField) jsonParamsTextArea).setText("");
+            ((LanguageTextField) rowParamsTextArea).setText("");
         } else {
             //body param
             if (StringUtils.isNotBlank(bodyKeyValueListJson)) {
                 //json
-                ((LanguageTextField) jsonParamsTextArea).setText(bodyKeyValueListJson);
+                ((LanguageTextField) rowParamsTextArea).setText(bodyKeyValueListJson);
                 tabbedPane.setSelectedIndex(3);
                 bodyTabbedPane.setSelectedIndex(0);
                 urlEncodedTextArea.setText("");
@@ -1896,7 +1907,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     bodyTabbedPane.setSelectedIndex(1);
                 }
                 //json设置为空
-                ((LanguageTextField) jsonParamsTextArea).setText("");
+                ((LanguageTextField) rowParamsTextArea).setText("");
                 //如果是非get请求则request Param为空转到url Encoded参数下
                 urlParamsKeyValueList = new ArrayList<>();
                 urlParamsTextArea.setText("");
@@ -1961,7 +1972,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         //reset value
         multipartKeyValueList = new ArrayList<>();
         urlParamsTextArea.setText("");
-        ((LanguageTextField) jsonParamsTextArea).setText("");
+        ((LanguageTextField) rowParamsTextArea).setText("");
         urlEncodedTextArea.setText("");
 
 
@@ -1997,14 +2008,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             //get请求urlencoded param参数为空
             urlEncodedKeyValueList = new ArrayList<>();
             urlEncodedTextArea.setText("");
-            ((LanguageTextField) jsonParamsTextArea).setText("");
+            ((LanguageTextField) rowParamsTextArea).setText("");
         } else {
             //body param(form和body只能存在其一)
             if (!bodyParamMap.isEmpty()) {
                 //json
                 tabbedPane.setSelectedIndex(3);
                 bodyTabbedPane.setSelectedIndex(0);
-                ((LanguageTextField) jsonParamsTextArea).setText(bodyParamMapToJson());
+                ((LanguageTextField) rowParamsTextArea).setText(bodyParamMapToJson());
                 //body去除form参数
                 urlEncodedTextArea.setText("");
                 urlEncodedKeyValueList = new ArrayList<>();
@@ -2026,7 +2037,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     urlEncodedKeyValueList = conventMapToList(requestParamMap);
                 }
                 //json设置为空(form去除body参数)
-                ((LanguageTextField) jsonParamsTextArea).setText("");
+                ((LanguageTextField) rowParamsTextArea).setText("");
                 //如果是非get请求则request Param为空转到url Encoded参数下
                 urlParamsKeyValueList = new ArrayList<>();
                 urlParamsTextArea.setText("");
@@ -4090,7 +4101,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         paramGroupCollection.setUrlParamsKeyValueListText(urlParamsTextArea.getText());
         paramGroupCollection.setUrlEncodedKeyValueListJson(JSON.toJSONString(urlEncodedKeyValueList));
         paramGroupCollection.setUrlEncodedKeyValueListText(urlEncodedTextArea.getText());
-        paramGroupCollection.setBodyKeyValueListJson(((LanguageTextField) jsonParamsTextArea).getText());
+        paramGroupCollection.setBodyKeyValueListJson(((LanguageTextField) rowParamsTextArea).getText());
         paramGroupCollection.setMultipartKeyValueListJson(JSON.toJSONString(multipartKeyValueList));
         collectionDetail.setParamGroup(paramGroupCollection);
         collectionDetail.setHeaderList(headerParamsKeyValueList);
@@ -4514,5 +4525,34 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     public List<DataMapping> getHeaderParamsKeyValueList() {
         return headerParamsKeyValueList;
+    }
+
+
+    public void setBodyFormat(BodyContentType bodyContentType){
+        MyLanguageTextField myLanguageTextField = (MyLanguageTextField) this.rowParamsTextArea;
+        Language language;
+        FileType fileType;
+        switch (bodyContentType){
+            case JSON:
+                language = JsonLanguage.INSTANCE;
+                fileType = JsonFileType.INSTANCE;
+                break;
+            case XML:
+                language = XMLLanguage.INSTANCE;
+                fileType = XmlFileType.INSTANCE;
+                break;
+            case HTML:
+                language = HTMLLanguage.INSTANCE;
+                fileType = HtmlFileType.INSTANCE;
+                break;
+            default:
+                language = PlainTextLanguage.INSTANCE;
+                fileType = PlainTextFileType.INSTANCE;
+                break;
+        }
+        String text = myLanguageTextField.getText();
+        myLanguageTextField.updateFileLanguage(fileType, text);
+        myLanguageTextField.setLanguage(language);
+
     }
 }
