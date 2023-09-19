@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.9.8'
+version '2023.9.18'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,6 +47,18 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.9.18</h3>
+    <p>中文</p>
+    <ul>
+        <li>(全局/局部)请求头编辑支持自动补全功能，但是不支持级联</li>
+        <li>部分编辑器优化</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>(Global/Local) Request header editing supports automatic completion function, but does not support cascading</li>
+        <li>Partial editor optimization</li>
+    </ul>
+    
     <h3>v2023.9.7</h3>
     <p>中文</p>
     <ul>

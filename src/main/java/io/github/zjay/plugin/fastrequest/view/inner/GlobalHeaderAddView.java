@@ -16,9 +16,14 @@
 
 package io.github.zjay.plugin.fastrequest.view.inner;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.UI;
+import io.github.zjay.plugin.fastrequest.config.Constant;
+import io.github.zjay.plugin.fastrequest.config.GeneralTextAutoComplete;
 import io.github.zjay.plugin.fastrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
@@ -28,20 +33,24 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class GlobalHeaderAddView extends DialogWrapper {
-    private JTextField keyTextField;
-    private JTextField valueTextField;
+    private TextFieldWithCompletion keyTextField;
+    private TextFieldWithCompletion valueTextField;
 
-    public GlobalHeaderAddView() {
+    private Project project;
+
+    public GlobalHeaderAddView(Project project) {
         super(false);
+        this.project = project;
         init();
         setSize(500, 100);
-        setTitle("Add Global Request Header");
+        setTitle("Add Global Request Headers");
     }
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
-        keyTextField = new JTextField();
-        valueTextField = new JTextField();
+        Project defaultProject = ProjectManager.getInstance().getDefaultProject();
+        keyTextField = new TextFieldWithCompletion(defaultProject, new GeneralTextAutoComplete(Constant.AutoCompleteType.Header_Name), "", true, true, false);;
+        valueTextField = new TextFieldWithCompletion(defaultProject, new GeneralTextAutoComplete(Constant.AutoCompleteType.Header_value), "", true, true, false);;
         return new MyPanelGridBuilder().splitColumns()
                 .add(new MyComponentPanelBuilder(keyTextField).withLabel("Key"))
                 .add(new MyComponentPanelBuilder(valueTextField).withLabel("Value"))

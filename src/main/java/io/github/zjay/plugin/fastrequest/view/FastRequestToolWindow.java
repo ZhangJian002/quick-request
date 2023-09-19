@@ -24,6 +24,8 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.ide.highlighter.HtmlFileType;
@@ -49,6 +51,7 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.progress.util.ColorProgressBar;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
+import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
@@ -60,15 +63,19 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
 import com.intellij.ui.treeStructure.treetable.TreeColumnInfo;
 import com.intellij.util.PsiNavigateUtil;
+import com.intellij.util.TextFieldCompletionProvider;
 import com.intellij.util.messages.MessageBus;
+import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
+import com.intellij.xml.util.HtmlUtil;
 import io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction;
 import io.github.zjay.plugin.fastrequest.util.http.BodyContentType;
 import quickRequest.icons.PluginIcons;
@@ -443,10 +450,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
         managerConfigLink.setExternalLinkIcon();
         manageConfigButton = managerConfigLink;
-        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true, true);
-        responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false);
+        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true, true, 1);
+        responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false, 1);
 
-        rowParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true);
+        rowParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true, 1);
 
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
@@ -3700,7 +3707,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
             @Override
             public @NotNull Component prepareRenderer(@NotNull TableCellRenderer renderer, int row, int column) {
-                if (column == 0 && !headerParamsKeyValueList.isEmpty()) {
+                if(headerParamsKeyValueList.isEmpty()){
+                    return super.prepareRenderer(renderer, row, column);
+                }
+                if (column == 0) {
                     DataMapping dataMapping = headerParamsKeyValueList.get(row);
                     boolean enabled = dataMapping.getEnabled();
                     return new JCheckBox("", enabled);
@@ -3710,9 +3720,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-                if (column == 0 && !headerParamsKeyValueList.isEmpty()) {
+                if(headerParamsKeyValueList.isEmpty()){
+                    return super.getCellEditor(row, column);
+                }
+                if (column == 0) {
                     boolean enable = (boolean) getValueAt(row, column);
                     return new DefaultCellEditor(new JCheckBox("", enable));
+                }else if(column == 1){
+                    return new GeneralTextAutoCompleteEditor(myProject, Constant.AutoCompleteType.Header_Name);
+                } else if (column == 2) {
+                    return new GeneralTextAutoCompleteEditor(myProject, Constant.AutoCompleteType.Header_value);
                 }
                 return super.getCellEditor(row, column);
             }
@@ -3750,12 +3767,19 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 saveAndChangeHeader();
 //                config.setHeaderList(headerParamsKeyValueList);
             }
+
+
         };
+        DefaultTableCellRenderer defaultTableCellRenderer = new DefaultTableCellRenderer();
+        defaultTableCellRenderer.setHorizontalAlignment(JLabel.CENTER);
         table.getColumnModel().getColumn(0).setMaxWidth(30);
-        table.setRowHeight(35);
+        table.setRowHeight(23);
         table.setVisible(true);
         return table;
     }
+
+
+
 
     private JBTable createResponseInfoTable() {
         ColumnInfo<Object, Object>[] columns = getColumns(Lists.newArrayList("Key", "Value"));

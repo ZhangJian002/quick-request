@@ -109,7 +109,7 @@ public class BodyFormatAction extends AnAction {
             if (virtualFile != null) {
                 if(virtualFile.isWritable()){
                     Integer integer = editor.getUserData(Constant.KEY_QUICKREQUEST);
-                    paramAnActionEvent.getPresentation().setEnabledAndVisible(integer != null);
+                    paramAnActionEvent.getPresentation().setEnabledAndVisible(integer != null && integer == 1);
                 }else {
                     paramAnActionEvent.getPresentation().setEnabledAndVisible(false);
                 }

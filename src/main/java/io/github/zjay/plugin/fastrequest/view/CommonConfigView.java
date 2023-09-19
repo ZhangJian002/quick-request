@@ -207,7 +207,7 @@ public class CommonConfigView extends AbstractConfigurableView {
         toolbarDecorator.setMoveUpAction(null);
 
         toolbarDecorator.setAddAction(event -> {
-            GlobalHeaderAddView dataMappingAddView = new GlobalHeaderAddView();
+            GlobalHeaderAddView dataMappingAddView = new GlobalHeaderAddView(null);
             if (dataMappingAddView.showAndGet()) {
                 DataMapping dataMapping = dataMappingAddView.getValue();
                 if (globalHeaderList.stream().anyMatch(q -> dataMapping.getType().equals(q.getType()))) {

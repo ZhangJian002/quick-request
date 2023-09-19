@@ -56,20 +56,23 @@ public class MyLanguageTextField extends LanguageTextField {
 
     public boolean needPretty;
 
-    public MyLanguageTextField(Project myProject, Language language, FileType fileType, boolean isViewer, boolean needPretty) {
+    private int type;
+
+    public MyLanguageTextField(Project myProject, Language language, FileType fileType, boolean isViewer, boolean needPretty, int type) {
         super(language, myProject, "", false);
         this.myProject = myProject;
         this.fileType = fileType;
         this.language = language;
         this.isViewer = isViewer;
         this.needPretty = needPretty;
+        this.type = type;
     }
 
     @Override
     protected @NotNull EditorEx createEditor() {
         EditorEx editor = super.createEditor();
         setUpEditor(editor);
-        editor.putUserData(Constant.KEY_QUICKREQUEST, 1);
+        editor.putUserData(Constant.KEY_QUICKREQUEST, type);
         editor.setViewer(isViewer);
         return editor;
     }
