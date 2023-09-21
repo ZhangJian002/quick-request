@@ -37,6 +37,7 @@ import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.*;
@@ -63,6 +64,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
+import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.table.JBTable;
@@ -74,6 +76,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.xml.util.HtmlUtil;
 import io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction;
@@ -151,7 +154,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JComboBox<String> projectComboBox;
     public JTextField urlTextField;
     private JComboBox<String> methodTypeComboBox;
-    private JComboBox<AnAction> sendComboBox;
     private JTextArea urlParamsTextArea;
     private JPanel rowParamsTextArea;
     private JTextArea urlEncodedTextArea;
@@ -166,7 +168,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     /**
      * tab：Headers、Path Param、URL params、Body ...
      */
-    private JTabbedPane tabbedPane;
+    public JTabbedPane tabbedPane;
     private JTabbedPane responseTabbedPanel;
     private JScrollPane responseBodyScrollPanel;
     private JScrollPane responseInfoScrollPanel;
@@ -185,6 +187,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private JPanel responseTextAreaPanel;
     private JCheckBox completeCheckBox;
     private JPanel chartPanel;
+    private JPanel sendPanel;
 
     private MyLanguageTextField prettyJsonLanguageTextField;
     private MyLanguageTextField jsonParamsLanguageTextField;
@@ -469,6 +472,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         rowParamsTextArea.setMaximumSize(new Dimension(-1, 1000));
 
         chartPanel = new JPanel();
+        sendPanel = new JPanel();
 //        chartPanel.setLayout(new BorderLayout());
 //        chartPanel.setPreferredSize(new Dimension(-1, 400));
 //        chartPanel.setSize(-1, 400);
@@ -495,10 +499,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(gotoFastRequestAction);
         group.add(new OpenConfigAction());
         group.addSeparator("  |  ");
-        ToolbarSendRequestAction toolbarSendRequestAction = (ToolbarSendRequestAction) ActionManager.getInstance().getAction("quickRequest.sendAction");
-        ToolbarSendAndDownloadRequestAction sendAndDownloadRequestAction = (ToolbarSendAndDownloadRequestAction) ActionManager.getInstance().getAction("quickRequest.sendDownloadAction");
-        ToolbarPressureRequestAction toolbarPressureRequestAction = (ToolbarPressureRequestAction) ActionManager.getInstance().getAction("quickRequest.pressureAction");
-
 // todo idea暂时有bug
 //        DefaultActionGroup sendGroup = DefaultActionGroup.createPopupGroupWithEmptyText();
 //        sendGroup.addAll(Lists.newArrayList(toolbarSendRequestAction, sendAndDownloadRequestAction));
@@ -511,19 +511,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //        CollectionComboBoxModel<AnAction> sendModel = new CollectionComboBoxModel<>(sendListClone);
 //        sendComboBox.setModel(sendModel);
 //        group.add(sendComboBox);
-        DefaultActionGroup sendGroup = new DefaultActionGroup();
-        sendGroup.add(toolbarSendRequestAction);
-        sendGroup.add(sendAndDownloadRequestAction);
-        if(ClassUtils.existMath3Class()){
-            sendGroup.add(toolbarPressureRequestAction);
-        }
-        SplitButtonAction splitButtonAction = new SplitButtonAction(sendGroup);
-        group.add(splitButtonAction);
+//        group.add(splitButtonAction);
 
-        group.add(new StopPositionAction());
+//        group.add(new StopPositionAction());
         group.add(new FixPositionAction());
         group.add(new SaveRequestAction());
         group.add(new RetryAction());
+        group.add(new CompleteUrlAction());
 //        group.add(new SynchronizationAction());
 //        group.add(new CopyCurlAction());
 //        group.addSeparator("  |  ");
@@ -793,23 +787,26 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         //2秒内不允许狂点
         requestProgressBar.setIndeterminate(true);
         requestProgressBar.setVisible(false);
-        completeCheckBox.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                urlCompleteChangeFlag.set(true);
-                if (Objects.equals(methodTypeComboBox.getSelectedItem(), "DUBBO")) {
-                    if (!UrlUtil.isDubboURL(urlTextField.getText())) {
-                        urlTextField.setText(getActiveDomain() + urlTextField.getText());
-                    }
-                } else {
-                    if (!UrlUtil.isHttpURL(urlTextField.getText())) {
-                        urlTextField.setText(getActiveDomain() + urlTextField.getText());
-                    }
-                }
-            } else {
-                urlCompleteChangeFlag.set(false);
-                urlTextField.setText(urlTextField.getText().replace(getActiveDomain(), ""));
-            }
-        });
+        //Send按钮
+        ToolbarSendRequestAction toolbarSendRequestAction = (ToolbarSendRequestAction) ActionManager.getInstance().getAction("quickRequest.sendAction");
+        ToolbarSendAndDownloadRequestAction sendAndDownloadRequestAction = (ToolbarSendAndDownloadRequestAction) ActionManager.getInstance().getAction("quickRequest.sendDownloadAction");
+        ToolbarPressureRequestAction toolbarPressureRequestAction = (ToolbarPressureRequestAction) ActionManager.getInstance().getAction("quickRequest.pressureAction");
+
+        DefaultActionGroup sendGroup = new DefaultActionGroup();
+        sendGroup.add(toolbarSendRequestAction);
+        sendGroup.add(sendAndDownloadRequestAction);
+        if(ClassUtils.existMath3Class()){
+            sendGroup.add(toolbarPressureRequestAction);
+        }
+        SplitButtonAction splitButtonAction = new SplitButtonAction(sendGroup);
+        DefaultActionGroup sendAndStopGroup = new DefaultActionGroup();
+        sendAndStopGroup.add(splitButtonAction);
+        StopPositionAction stopPositionAction = new StopPositionAction();
+        sendAndStopGroup.add(stopPositionAction);
+        ActionToolbar actionToolbar1 = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT, sendAndStopGroup, true);
+        actionToolbar1.setTargetComponent(sendPanel);
+        JComponent component = actionToolbar1.getComponent();
+        sendPanel.add(component);
     }
 
     private void changeUrlParamsText() {
@@ -878,6 +875,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     public boolean getSendButtonFlag() {
         return sendButtonFlag;
+    }
+
+    public boolean isRunning() {
+        return futureAtomicReference.get() == null;
     }
 
     public void sendRequestEvent(boolean... conditions) {
@@ -1140,12 +1141,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String sendUrl = getSendUrl();
 
         if (!UrlUtil.isURL(sendUrl)) {
-            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
-            ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required.Http url should start with http(s)://ip:port.");
-            tabbedPane.setSelectedIndex(4);
-            responseTabbedPanel.setSelectedIndex(2);
-            sendButtonFlag = true;
-            requestProgressBar.setVisible(false);
+            ApplicationManager.getApplication().invokeLater(() -> {
+                ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+                ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required.Http url should start with http(s)://ip:port.");
+                tabbedPane.setSelectedIndex(4);
+                responseTabbedPanel.setSelectedIndex(2);
+                sendButtonFlag = true;
+                requestProgressBar.setVisible(false);
+            });
             return null;
         }
         String methodType = (String) methodTypeComboBox.getSelectedItem();
@@ -4013,12 +4016,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private final class StopPositionAction extends AnAction {
         public StopPositionAction() {
             super("Stop", "Stop", AllIcons.Actions.Suspend);
+
         }
 
         @Override
         public void update(@NotNull AnActionEvent e) {
             e.getPresentation().setEnabled(futureAtomicReference.get() != null);
         }
+
 
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
@@ -4317,6 +4322,32 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         public void actionPerformed(@NotNull AnActionEvent event) {
             SupportView supportView = new SupportView();
             supportView.show();
+        }
+    }
+
+    private final class CompleteUrlAction extends AnAction {
+        public CompleteUrlAction() {
+            super("Complete", "Complete", PluginIcons.ICON_COMPLETE);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent event) {
+            String activeDomain = getActiveDomain();
+            if (!urlTextField.getText().startsWith(activeDomain)) {
+                urlCompleteChangeFlag.set(true);
+                if (Objects.equals(methodTypeComboBox.getSelectedItem(), "DUBBO")) {
+                    if (!UrlUtil.isDubboURL(urlTextField.getText())) {
+                        urlTextField.setText(activeDomain + urlTextField.getText());
+                    }
+                } else {
+                    if (!UrlUtil.isHttpURL(urlTextField.getText())) {
+                        urlTextField.setText(activeDomain + urlTextField.getText());
+                    }
+                }
+            } else {
+                urlCompleteChangeFlag.set(false);
+                urlTextField.setText(urlTextField.getText().replace(activeDomain, ""));
+            }
         }
     }
 

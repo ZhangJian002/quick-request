@@ -20,11 +20,16 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.plaf.LayerUI;
+import java.awt.*;
 
 public class ToolbarSendAndDownloadRequestAction extends DumbAwareAction {
 

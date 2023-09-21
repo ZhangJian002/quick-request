@@ -988,8 +988,8 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 return super.getCellEditor(row, column);
             }
         };
-        jbTable.getColumnModel().getColumn(0).setMinWidth(70);
-        jbTable.getColumnModel().getColumn(0).setMaxWidth(70);
+        jbTable.getColumnModel().getColumn(0).setMinWidth(100);
+        jbTable.getColumnModel().getColumn(0).setMaxWidth(100);
         jbTable.getColumnModel().getColumn(2).setMinWidth(150);
         jbTable.getColumnModel().getColumn(2).setMaxWidth(150);
         jbTable.getColumnModel().getColumn(3).setMinWidth(120);

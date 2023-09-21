@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.9.18'
+version '2023.9.21'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,6 +47,18 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.9.21</h3>
+    <p>中文</p>
+    <ul>
+        <li>请求和停止按钮从顶部移到url框后面，移除自动补全的勾选按钮，顶部新增自动补全的按钮</li>
+        <li>Tab页面背景优化</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Move the send and stop buttons from the top to the back of the URL box, remove the check button for automatic completion, and add an automatic completion button at the top</li>
+        <li>Tab page background optimization</li>
+    </ul>
+    
     <h3>v2023.9.18</h3>
     <p>中文</p>
     <ul>

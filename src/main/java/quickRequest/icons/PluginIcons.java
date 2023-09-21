@@ -111,4 +111,6 @@ public interface PluginIcons {
     Icon ICON_XML = IconLoader.getIcon("/quickRequest.icon/File-Type/xml.svg", PluginIcons.class);
 
 
+    Icon ICON_COMPLETE = IconLoader.getIcon("/quickRequest.icon/complete.svg", PluginIcons.class);
+
 }
