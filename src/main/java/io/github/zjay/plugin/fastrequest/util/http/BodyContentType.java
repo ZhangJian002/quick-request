@@ -115,4 +115,5 @@ public enum BodyContentType {
 	public static String buildUTF_8(String contentType) {
 		return build(contentType, StandardCharsets.UTF_8);
 	}
+
 }

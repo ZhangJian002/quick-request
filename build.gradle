@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.9.21'
+version '2023.9.22'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,6 +47,16 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.9.22</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复存在请求体的bug：提示枚举不存在的问题</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix bug with request body: prompt enumeration does not exist</li>
+    </ul>
+    
     <h3>v2023.9.21</h3>
     <p>中文</p>
     <ul>

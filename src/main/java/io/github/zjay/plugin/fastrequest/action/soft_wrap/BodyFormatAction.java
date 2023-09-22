@@ -27,7 +27,7 @@ import java.awt.*;
 
 public class BodyFormatAction extends AnAction {
 
-    public static volatile String chooseBodyType = "";
+    public static volatile String chooseBodyType = "JSON";
 
     private static final FastRequestCollectionToolWindow.MyActionGroup myActionGroup = new FastRequestCollectionToolWindow.MyActionGroup();
 
