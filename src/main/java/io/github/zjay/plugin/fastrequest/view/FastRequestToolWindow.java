@@ -519,7 +519,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(new RetryAction());
         group.add(new CompleteUrlAction());
 //        group.add(new SynchronizationAction());
-//        group.add(new CopyCurlAction());
+        group.add(new CopyCurlAction());
 //        group.addSeparator("  |  ");
 //        group.add(new DocAction());
 //        group.add(new WhatsNewAction());
@@ -825,6 +825,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
         String methodType = (String) methodTypeComboBox.getSelectedItem();
+        if(Objects.equals(methodType.toLowerCase(), "dubbo")){
+            NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Dubbo doesn't support!", MessageType.ERROR).notify(myProject);
+            return "";
+        }
 //        String domain = getActiveDomain();
         String url = urlTextField.getText();
         List<DataMapping> headerList = headerParamsKeyValueList;
@@ -4186,7 +4190,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
     private final class CopyCurlAction extends AnAction {
         public CopyCurlAction() {
-            super("Copy as CURL", "Copy as cURL", PluginIcons.ICON_CURL);
+            super("Copy as CURL", "Copy as CURL", PluginIcons.ICON_CURL);
         }
 
         @Override

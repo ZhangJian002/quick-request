@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.10.8'
+version '2023.10.9'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -47,14 +47,16 @@ intellij {
 patchPluginXml {
     changeNotes """
 
-    <h3>v2023.10.8</h3>
+    <h3>v2023.10.9</h3>
     <p>中文</p>
     <ul>
         <li>兼容性修改</li>
+        <li>支持Copy Curl</li>
     </ul>
     <p>English</p>
     <ul>
         <li>Compatibility modification</li>
+        <li>Support Copy Curl</li>
     </ul>
     
     <h3>v2023.9.22</h3>
