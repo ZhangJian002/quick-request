@@ -2,19 +2,18 @@ package io.github.zjay.plugin.fastrequest.dubbo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.intellij.lang.jvm.types.JvmPrimitiveTypeKind;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
 import com.intellij.psi.search.ProjectAndLibrariesScope;
-import org.apache.commons.lang.math.RandomUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
+import io.github.zjay.plugin.fastrequest.util.random.RandomStringUtils;
+import io.github.zjay.plugin.fastrequest.util.random.RandomUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public enum SupportType {
+
 
     BOOLEAN {
         @Override
@@ -55,10 +54,11 @@ public enum SupportType {
         @Override
         Integer getValue(PsiVariable psiVariable, Map<String, String> defaultValueMap) {
             String defaultValue = defaultValueMap.get(psiVariable.getName());
-            if(defaultValue != null && StringUtils.isNumeric(defaultValue)){
+            try {
                 return Integer.valueOf(defaultValue);
+            }catch (Exception e){
+                return getRandomValue(psiVariable);
             }
-            return getRandomValue(psiVariable);
         }
     },
     FLOAT {
@@ -70,16 +70,17 @@ public enum SupportType {
         @Override
         Float getValue(PsiVariable psiVariable, Map<String, String> defaultValueMap) {
             String defaultValue = defaultValueMap.get(psiVariable.getName());
-            if(defaultValue != null && StringUtils.isNumeric(defaultValue)){
+            try {
                 return Float.valueOf(defaultValue);
+            }catch (Exception e){
+                return getRandomValue(psiVariable);
             }
-            return getRandomValue(psiVariable);
         }
     },
     STRING {
         @Override
         String getRandomValue(PsiVariable psiVariable) {
-            return RandomStringUtils.randomAlphanumeric(10);
+            return RandomStringUtils.randomAlphabetic(10);
         }
 
         @Override

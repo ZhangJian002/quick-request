@@ -232,8 +232,8 @@ public class MyComponentPanelBuilder implements GridBagPanelBuilder {
 
     @NotNull
     public static Insets computeCommentInsets(@NotNull JComponent component, boolean commentBelow) {
-        boolean isMacDefault = UIUtil.isUnderDefaultMacTheme();
-        boolean isWin10 = UIUtil.isUnderWin10LookAndFeel();
+        boolean isMacDefault = true;
+        boolean isWin10 = true;
 
         if (commentBelow) {
             int top = 8, left = 2, bottom = 0;

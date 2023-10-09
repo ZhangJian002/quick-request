@@ -19,7 +19,10 @@ package io.github.zjay.plugin.fastrequest.contributor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.impl.java.stubs.index.JavaAnnotationIndex;
+import com.intellij.psi.impl.java.stubs.index.JavaStubIndexKeys;
+import com.intellij.psi.impl.search.JavaSourceFilterScope;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.stubs.StubIndex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +32,12 @@ public class JavaRequestMappingContributor extends RequestMappingByNameContribut
 
     @Override
     List<PsiAnnotation> getAnnotationSearchers(String annotationName, Project project) {
-        return new ArrayList<>(JavaAnnotationIndex
-                .getInstance()
-                .get(annotationName, project, GlobalSearchScope.projectScope(project)));
+//         new ArrayList<>(JavaAnnotationIndex
+//                .getInstance()
+//                .get(annotationName, project, GlobalSearchScope.projectScope(project)));
+
+
+        return new ArrayList<>(StubIndex.getElements(JavaStubIndexKeys.ANNOTATIONS, annotationName, project, new JavaSourceFilterScope(GlobalSearchScope.projectScope(project)), PsiAnnotation.class));
     }
 
 
