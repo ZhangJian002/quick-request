@@ -99,10 +99,6 @@ public class BodyFormatAction extends AnAction {
             paramAnActionEvent.getPresentation().setEnabledAndVisible(false);
             return;
         }
-        if(editor.getDocument().getTextLength() == 0){
-            paramAnActionEvent.getPresentation().setEnabled(false);
-            return;
-        }
         Presentation presentation = paramAnActionEvent.getPresentation();
         if (presentation.isEnabled()) {
             VirtualFile virtualFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
@@ -118,6 +114,9 @@ public class BodyFormatAction extends AnAction {
             }
         }else {
             paramAnActionEvent.getPresentation().setEnabledAndVisible(false);
+        }
+        if(editor.getDocument().getTextLength() == 0){
+            paramAnActionEvent.getPresentation().setEnabled(false);
         }
     }
 

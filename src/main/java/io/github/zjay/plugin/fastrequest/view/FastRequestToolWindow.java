@@ -830,7 +830,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             return "";
         }
 //        String domain = getActiveDomain();
-        String url = urlTextField.getText();
+        String url = getSendUrl();
         List<DataMapping> headerList = headerParamsKeyValueList;
         String urlParam = urlParamsTextArea.getText();
         String jsonParam = ((LanguageTextField) rowParamsTextArea).getText();
