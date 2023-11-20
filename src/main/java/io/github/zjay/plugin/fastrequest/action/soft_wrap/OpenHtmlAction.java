@@ -38,7 +38,7 @@ public class OpenHtmlAction extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        super.update(e);
+//        super.update(e);
         Presentation presentation = e.getPresentation();
         if (presentation.isEnabled()) {
             Editor editor = e.getData(CommonDataKeys.EDITOR);

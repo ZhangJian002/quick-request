@@ -28,21 +28,17 @@ public class SoftWrapAction extends AbstractToggleUseSoftWrapsAction {
 
     @Override
     public void update(@NotNull AnActionEvent paramAnActionEvent) {
-        if(paramAnActionEvent == null){
-            super.update(paramAnActionEvent);
-        }else {
-            Editor editor = (Editor)paramAnActionEvent.getData(CommonDataKeys.EDITOR);
-            if (editor == null) {
-                return;
-            }
-            Integer integer = (Integer)editor.getUserData(Constant.KEY_QUICKREQUEST);
-            paramAnActionEvent.getPresentation().setIcon(AllIcons.Actions.ToggleSoftWrap);
-            if (integer != null) {
-                paramAnActionEvent.getPresentation().setText(ActionsBundle.messagePointer("action.EditorGutterToggleLocalSoftWraps.gutterText", new Object[0]));
-                paramAnActionEvent.getPresentation().setEnabledAndVisible(true);
-            } else {
-                paramAnActionEvent.getPresentation().setEnabledAndVisible(false);
-            }
+        Editor editor = (Editor) paramAnActionEvent.getData(CommonDataKeys.EDITOR);
+        if (editor == null) {
+            return;
+        }
+        Integer integer = (Integer)editor.getUserData(Constant.KEY_QUICKREQUEST);
+        paramAnActionEvent.getPresentation().setIcon(AllIcons.Actions.ToggleSoftWrap);
+        if (integer != null) {
+            paramAnActionEvent.getPresentation().setText(ActionsBundle.messagePointer("action.EditorGutterToggleLocalSoftWraps.gutterText", new Object[0]));
+            paramAnActionEvent.getPresentation().setEnabledAndVisible(true);
+        } else {
+            paramAnActionEvent.getPresentation().setEnabledAndVisible(false);
         }
 
     }

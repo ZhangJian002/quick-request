@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.10.12'
+version '2023.11.20'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
@@ -46,6 +46,18 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+
+    <h3>v2023.11.20</h3>
+    <p>中文</p>
+    <ul>
+        <li>兼容性修改</li>
+        <li>主页面请求方式颜色区分，加粗显示</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Compatibility modification</li>
+        <li>Main page request method color differentiation, bold display</li>
+    </ul>
 
     <h3>v2023.10.12</h3>
     <p>中文</p>

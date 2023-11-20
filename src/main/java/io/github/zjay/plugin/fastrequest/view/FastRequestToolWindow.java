@@ -81,6 +81,7 @@ import com.intellij.util.ui.ListTableModel;
 import com.intellij.xml.util.HtmlUtil;
 import io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction;
 import io.github.zjay.plugin.fastrequest.util.http.BodyContentType;
+import io.github.zjay.plugin.fastrequest.view.ui.MethodFontListCellRenderer;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.action.*;
 import io.github.zjay.plugin.fastrequest.config.*;
@@ -231,6 +232,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private ComboBox<String> normalTypeJComboBox;
 
     public boolean sendButtonFlag = true;
+
 
 
     public void stopCellEditing() {
@@ -541,29 +543,15 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         manageConfigButton.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
 //        warnLabel2.setVisible(StringUtils.isBlank(getActiveDomain()));
 
-
-        //method 颜色渲染
-//        methodTypeComboBox.setRenderer(new DefaultListCellRenderer() {
-//            @Override
-//            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-//                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-//                if (c instanceof JLabel) {
-//                    JLabel l = (JLabel) c;
-//                    l.setBackground(buildMethodColor(value.toString()));
-//                }
-//                return c;
-//            }
-//        });
-//
-//        methodTypeComboBox.addItemListener(event -> {
-//            if (event.getStateChange() == ItemEvent.SELECTED) {
-//                Object selectedItem = methodTypeComboBox.getSelectedItem();
-//                if (selectedItem != null) {
-//                    methodTypeComboBox.setBackground(buildMethodColor(selectedItem.toString()));
-//                }
-//            }
-//        });
-//        methodTypeComboBox.setForeground(Color.BLUE);
+        methodTypeComboBox.setRenderer(new MethodFontListCellRenderer());
+        methodTypeComboBox.setFont(methodTypeComboBox.getFont().deriveFont(Font.BOLD));
+        methodTypeComboBox.setForeground(MethodFontListCellRenderer.getColor(methodTypeComboBox.getSelectedItem().toString()));
+        methodTypeComboBox.addItemListener(event -> {
+            if (event.getStateChange() == ItemEvent.SELECTED) {
+                methodTypeComboBox.setForeground(MethodFontListCellRenderer.getColor(methodTypeComboBox.getSelectedItem().toString()));
+                methodTypeComboBox.updateUI();
+            }
+        });
 
         //responseStatus ComboBox
         List<Integer> values = new ArrayList<>(Constant.HttpStatusDesc.STATUS_MAP.keySet());
@@ -1740,7 +1728,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         String methodType = paramGroup.getMethodType();
 
-//        methodTypeComboBox.setBackground(buildMethodColor(methodType));
+//        methodTypeComboBox.setFont(Font.BOLD);
+        methodTypeComboBox.setForeground(JBColor.BLUE);
 
         //method
         methodTypeComboBox.setSelectedItem(methodType);
