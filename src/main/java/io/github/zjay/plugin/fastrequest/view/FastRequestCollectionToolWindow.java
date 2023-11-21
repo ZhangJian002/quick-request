@@ -67,6 +67,8 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.StatusText;
 import io.github.zjay.plugin.fastrequest.config.*;
+import io.github.zjay.plugin.fastrequest.view.ui.MethodFontListCellRenderer;
+import io.github.zjay.plugin.fastrequest.view.ui.MethodFontTableCellRenderer;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.idea.ExportToFileUtil;
@@ -949,6 +951,8 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                     renderer = new TableButtonRenderer();
                 }else if(column == 1){
                     renderer = new HighlightCellRenderer();
+                }else if(column == 0){
+                    renderer = new MethodFontTableCellRenderer();
                 }
                 return super.prepareRenderer(renderer, row, column);
             }

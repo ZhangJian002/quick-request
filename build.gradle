@@ -51,12 +51,12 @@ patchPluginXml {
     <p>中文</p>
     <ul>
         <li>兼容性修改</li>
-        <li>主页面请求方式颜色区分，加粗显示</li>
+        <li>请求方式颜色区分，加粗显示</li>
     </ul>
     <p>English</p>
     <ul>
         <li>Compatibility modification</li>
-        <li>Main page request method color differentiation, bold display</li>
+        <li>Request method color differentiation, bold display</li>
     </ul>
 
     <h3>v2023.10.12</h3>
