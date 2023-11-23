@@ -30,6 +30,9 @@ import io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator
 import io.github.zjay.plugin.fastrequest.util.FrPsiUtil;
 import io.github.zjay.plugin.fastrequest.view.linemarker.DubboLineMarkerProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.kotlin.asJava.classes.KtUltraLightMethod;
+import org.jetbrains.kotlin.asJava.elements.KtLightMethod;
+import org.jetbrains.kotlin.psi.KtNamedFunction;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -49,9 +52,8 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
     @Override
     public String @NotNull [] getNames(Project project, boolean includeNonProjectItems) {
         navigationItems = Constant.SUPPORTED_ANNOTATIONS.stream().flatMap(annotation -> findRequestMappingItems(project, annotation).stream()).collect(Collectors.toList());
-        String[] strings = navigationItems.stream()
+        return navigationItems.stream()
                 .map(RequestMappingItem::getName).distinct().toArray(String[]::new);
-        return strings;
     }
 
 
@@ -59,34 +61,16 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
 
     @Override
     public NavigationItem @NotNull [] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
-        RequestMappingItem[] requestMappingItems = navigationItems.stream().filter(q -> q.getName().equals(name)).toArray(RequestMappingItem[]::new);
-        return requestMappingItems;
+        return navigationItems.stream().filter(q -> q.getName().equals(name)).toArray(RequestMappingItem[]::new);
     }
 
     private List<RequestMappingItem> findRequestMappingItems(Project project, String annotationName) {
         List<PsiAnnotation> annotationSearchers = getAnnotationSearchers(annotationName, project);
-        annotationSearchers = annotationSearchers.stream().filter(x->{
-            PsiJavaCodeReferenceElement nameReferenceElement = x.getNameReferenceElement();
-            if(nameReferenceElement != null){
-                if(Objects.equals(nameReferenceElement.getText(), "Service")){
-                    if(!Objects.equals(x.getQualifiedName(), Constant.DubboMethodConfig.AliService.getCode()) &&
-                    !Objects.equals(x.getQualifiedName(), Constant.DubboMethodConfig.ApacheService.getCode())){
-                        //Service的注解 必须要是dubbo的
-                        return false;
-                    }else {
-                        return true;
-                    }
-                }
-                return true;
-            }
-            return false;
-        }).collect(Collectors.toList());
         //restful request
-        List<RequestMappingItem> restfulRequestList = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) instanceof PsiMethod)
-                .map(annotation -> mapItems(annotation))
+        List<RequestMappingItem> requestList = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) != null)
+                .map(this::mapItems)
                 .collect(Collectors.toList());
 
-        List<RequestMappingItem> dubboRequestList = new LinkedList<>();
         //dubbo
         annotationSearchers.stream().filter(x-> Constant.DubboMethodConfig.exist(x.getQualifiedName()) && x.getParent().getParent() instanceof PsiClass
             ).forEach(psiAnnotation -> {
@@ -96,18 +80,17 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
                 if(!DubboLineMarkerProvider.judgeMethod(method)){
                     continue;
                 }
-                dubboRequestList.add(new RequestMappingItem(method,dubboMethodGenerator.getMethodRequestMappingUrl(method),"DUBBO"));
+                requestList.add(new RequestMappingItem(method,dubboMethodGenerator.getMethodRequestMappingUrl(method),"DUBBO"));
             }
         });
-        dubboRequestList.addAll(restfulRequestList);
-        return dubboRequestList;
+        return requestList;
 
     }
 
 
 
     private RequestMappingItem mapItems(PsiAnnotation psiAnnotation){
-        PsiMethod method = (PsiMethod) fetchAnnotatedPsiElement(psiAnnotation);
+        PsiMethod method = fetchAnnotatedPsiElement(psiAnnotation);
         Constant.FrameworkType frameworkType = FrPsiUtil.calcFrameworkType(method);
         FastUrlGenerator generator;
         if (frameworkType.equals(Constant.FrameworkType.SPRING)) {
@@ -127,10 +110,12 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
     }
 
 
-    private PsiElement fetchAnnotatedPsiElement(PsiElement psiElement) {
+    private PsiMethod fetchAnnotatedPsiElement(PsiElement psiElement) {
         PsiElement parent = psiElement.getParent();
-        parent = parent == null? PsiUtilCore.NULL_PSI_ELEMENT : parent;
-        if (parent instanceof PsiMethod || parent instanceof PsiClass) return parent;
+        if(parent == null){
+            return null;
+        }
+        if (parent instanceof PsiMethod) return (PsiMethod)parent;
         return fetchAnnotatedPsiElement(parent);
     }
 }

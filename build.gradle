@@ -39,7 +39,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    plugins = ['java']
+    plugins = ['java', 'Kotlin']
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
     downloadSources true

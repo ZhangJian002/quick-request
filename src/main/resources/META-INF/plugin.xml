@@ -3,7 +3,8 @@
     <name>Quick Request</name>
     <vendor email="384448255@qq.com">zjay</vendor>
 
-    <description><![CDATA[
+    <description>
+        <![CDATA[
         <p>The request is so simple. With it, you can abandon Postman.
         It has features such as easy debugging, saving requests, and generating methods.
         If you find any issues, please refer to <a href="https://github.com/zhangjianay/quick-request/issues">Github</a>.
@@ -17,13 +18,13 @@
         </ul>
         <h2>Links</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a>
-]]>
+        ]]>
     </description>
 
     <!--    2021.1-->
     <idea-version since-build="211.6693.111" />
-    <depends>com.intellij.modules.java</depends>
-    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 
@@ -56,7 +57,10 @@
                     secondary="false"/>
 
         <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.FastRequestLineMarkerProvider"/>
+                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.JavaLineMarkerProvider"/>
+
+        <codeInsight.lineMarkerProvider language="kotlin"
+                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.KotlinLineMarkerProvider"/>
 
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.DubboLineMarkerProvider"/>

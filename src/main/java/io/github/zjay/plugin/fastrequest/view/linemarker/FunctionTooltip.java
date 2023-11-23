@@ -35,7 +35,7 @@ public class FunctionTooltip implements Function<PsiElement,String> {
 
     @Override
     public String fun(PsiElement psiElement) {
-        PsiMethod psiMethod = (PsiMethod) psiElement.getParent();
+        PsiMethod psiMethod = (PsiMethod)element;
         return msg + psiMethod.getName() + "(or right-click to set)";
     }
 }

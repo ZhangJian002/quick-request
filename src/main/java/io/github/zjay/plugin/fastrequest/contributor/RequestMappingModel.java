@@ -17,6 +17,7 @@
 package io.github.zjay.plugin.fastrequest.contributor;
 
 import com.intellij.ide.util.gotoByName.ChooseByNameItemProvider;
+import com.intellij.ide.util.gotoByName.DefaultChooseByNameItemProvider;
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel;
 import com.intellij.navigation.ChooseByNameContributor;
 import com.intellij.navigation.NavigationItem;
@@ -39,7 +40,7 @@ public class RequestMappingModel extends FilteringGotoByModel<FileType> {
 
     @Override
     public @NotNull ChooseByNameItemProvider getItemProvider(@Nullable PsiElement context) {
-        return new RequestMappingItemProvider(context,this);
+        return new DefaultChooseByNameItemProvider(context);
     }
 
     @Override

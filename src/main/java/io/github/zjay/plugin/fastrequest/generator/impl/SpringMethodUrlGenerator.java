@@ -39,6 +39,14 @@ import io.github.zjay.plugin.fastrequest.parse.RequestParamParse;
 import io.github.zjay.plugin.fastrequest.util.UrlUtil;
 import io.github.zjay.plugin.fastrequest.view.CommonConfigView;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.kotlin.asJava.LightClassUtilKt;
+import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
+import org.jetbrains.kotlin.asJava.classes.KtLightClass;
+import org.jetbrains.kotlin.asJava.classes.KtUltraLightMethod;
+import org.jetbrains.kotlin.asJava.classes.KtUltraLightMethodForSourceDeclaration;
+import org.jetbrains.kotlin.asJava.elements.KtLightMethod;
+import org.jetbrains.kotlin.psi.KtDeclaration;
+import org.jetbrains.uast.kotlin.declarations.KotlinUMethod;
 
 import java.util.*;
 
@@ -84,8 +92,13 @@ public class SpringMethodUrlGenerator extends FastUrlGenerator {
         paramGroup.setBodyParamMap(bodyParamMap);
         paramGroup.setMethodType(methodType);
         paramGroup.setMethodDescription(methodDescription);
-
-        paramGroup.setClassName(((PsiMethodImpl) psiElement).getContainingClass().getQualifiedName());
+        if(psiElement instanceof PsiMethodImpl){
+            paramGroup.setClassName(((PsiMethodImpl) psiElement).getContainingClass().getQualifiedName());
+            paramGroup.setType(1);
+        } else if(psiElement instanceof KtLightMethod){
+            paramGroup.setClassName(((KtLightMethod) psiElement).getContainingClass().getQualifiedName());
+            paramGroup.setType(2);
+        }
         paramGroup.setMethod(psiMethod.getName());
 
         Module moduleForFile = ModuleUtil.findModuleForPsiElement(psiElement);

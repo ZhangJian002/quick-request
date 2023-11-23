@@ -36,6 +36,11 @@ public class ParamGroup implements Serializable {
     private String method;
     private String module;
 
+    /**
+     * 类型：1java、2Kotlin
+     */
+    private Integer type;
+
     public String getInterfaceName() {
         return interfaceName;
     }
@@ -130,5 +135,13 @@ public class ParamGroup implements Serializable {
 
     public void setModule(String module) {
         this.module = module;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }

@@ -30,7 +30,6 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.ui.JBUI;
 import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
 import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,13 +50,13 @@ public class CheckBoxFilterAction<T> extends AnAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public void actionPerformed( AnActionEvent e) {
         JPanel panel = initView(filter, rebuildRunnable);
         createPopup(e, panel);
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
+    public void update( AnActionEvent e) {
         Icon icon = getTemplatePresentation().getIcon();
         boolean isActive = filter.getAllElements().size() != filter.getSelectedElementList().size();
         boolean isSelected = myPopup != null && !myPopup.isDisposed();
@@ -69,7 +68,7 @@ public class CheckBoxFilterAction<T> extends AnAction {
     public void createPopup(AnActionEvent e, JPanel contentPanel) {
         JBPopupListener popupCloseListener = new JBPopupListener() {
             @Override
-            public void onClosed(@NotNull LightweightWindowEvent event) {
+            public void onClosed( LightweightWindowEvent event) {
                 checkBoxList = null;
                 myPopup = null;
             }
@@ -158,7 +157,7 @@ public class CheckBoxFilterAction<T> extends AnAction {
 
     public static class Filter<T> {
         private final List<T> myElementList;
-        private final Function<? super T, @Nls String> myTextExtractor;
+        private final Function<? super T,  String> myTextExtractor;
         private final Function<? super T, ? extends Icon> myIconExtractor;
         private final ChooseByNameFilterConfiguration<? super T> myPersistentConfiguration;
 
@@ -166,7 +165,7 @@ public class CheckBoxFilterAction<T> extends AnAction {
             return myElementList;
         }
 
-        public Filter(List<T> myElementList, Function<? super T, @Nls String> textExtractor, Function<? super T, ? extends Icon> iconExtractor, ChooseByNameFilterConfiguration<? super T> myPersistentConfiguration) {
+        public Filter(List<T> myElementList, Function<? super T,  String> textExtractor, Function<? super T, ? extends Icon> iconExtractor, ChooseByNameFilterConfiguration<? super T> myPersistentConfiguration) {
             this.myElementList = myElementList;
             this.myTextExtractor = textExtractor;
             this.myIconExtractor = iconExtractor;

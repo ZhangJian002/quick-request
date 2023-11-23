@@ -82,6 +82,13 @@ import com.intellij.xml.util.HtmlUtil;
 import io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction;
 import io.github.zjay.plugin.fastrequest.util.http.BodyContentType;
 import io.github.zjay.plugin.fastrequest.view.ui.MethodFontListCellRenderer;
+import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
+import org.jetbrains.kotlin.asJava.classes.KtLightClass;
+import org.jetbrains.kotlin.idea.stubindex.KotlinFullClassNameIndex;
+import org.jetbrains.kotlin.psi.KtClass;
+import org.jetbrains.kotlin.psi.KtClassOrObject;
+import org.jetbrains.kotlin.psi.KtDeclaration;
+import org.jetbrains.kotlin.psi.KtNamedFunction;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.action.*;
 import io.github.zjay.plugin.fastrequest.config.*;
@@ -4046,12 +4053,32 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             ParamGroup paramGroup = config.getParamGroup();
             String className = paramGroup.getClassName();
             String methodName = paramGroup.getMethod();
-            PsiClass psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
-            if (psiClass != null) {
-                PsiElement[] elementArray = psiClass.findMethodsByName(methodName, true);
-                if (elementArray.length > 0) {
-                    PsiMethod psiMethod = (PsiMethod) elementArray[0];
-                    PsiNavigateUtil.navigate(psiMethod);
+            Integer type = paramGroup.getType();
+            if(type == null || type == 1){
+                PsiClass psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
+                if (psiClass != null) {
+                    PsiElement[] elementArray = psiClass.findMethodsByName(methodName, true);
+                    if (elementArray.length > 0) {
+                        PsiMethod psiMethod = (PsiMethod) elementArray[0];
+                        PsiNavigateUtil.navigate(psiMethod);
+                    }
+                }
+            }else {
+                Collection<KtClassOrObject> ktClassOrObjects = KotlinFullClassNameIndex.getInstance().get(className, myProject, GlobalSearchScope.projectScope(myProject));
+                if(CollectionUtils.isNotEmpty(ktClassOrObjects)){
+                    for (KtClassOrObject ktClassOrObject : ktClassOrObjects) {
+                        if(ktClassOrObject instanceof KtClass){
+                            KtClass ktClass = (KtClass) ktClassOrObject;
+                            List<KtDeclaration> declarations = ktClass.getDeclarations();
+                            for (KtDeclaration declaration : declarations) {
+                                if(declaration instanceof KtNamedFunction && Objects.equals(methodName, declaration.getName())){
+                                    PsiNavigateUtil.navigate(declaration);
+                                    return;
+                                }
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         }

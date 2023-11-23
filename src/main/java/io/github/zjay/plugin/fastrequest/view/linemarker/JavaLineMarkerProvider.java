@@ -32,7 +32,7 @@ import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import org.jetbrains.annotations.NotNull;
 
-public class FastRequestLineMarkerProvider implements LineMarkerProvider {
+public class JavaLineMarkerProvider implements LineMarkerProvider {
 
     public LineMarkerInfo<PsiElement> getLineMarkerInfo(@NotNull PsiElement element) {
 
