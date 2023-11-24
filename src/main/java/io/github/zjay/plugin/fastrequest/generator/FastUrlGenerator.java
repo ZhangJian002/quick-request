@@ -33,7 +33,7 @@ public abstract class FastUrlGenerator {
      *
      * @param psiMethod psi的方法
      * @return {@link String }
-     * @author Kings
+     * @author ZJAY
      * @date 2021/05/23
      */
     public abstract String getMethodRequestMappingUrl(PsiMethod psiMethod);
@@ -44,7 +44,7 @@ public abstract class FastUrlGenerator {
      *
      * @param psiMethod psi的方法
      * @return {@link String }
-     * @author Kings
+     * @author ZJAY
      * @date 2021/05/23
      */
     public abstract String getClassRequestMappingUrl(PsiMethod psiMethod);
@@ -55,7 +55,7 @@ public abstract class FastUrlGenerator {
      *
      * @param psiMethod psi的方法
      * @return {@link List<String> }
-     * @author Kings
+     * @author ZJAY
      * @date 2021/05/24
      */
     public abstract List<ParamNameType> getMethodUrlParamList(PsiMethod psiMethod);
@@ -68,7 +68,7 @@ public abstract class FastUrlGenerator {
      *
      * @param psiMethod psi的方法
      * @return {@link String }
-     * @author Kings
+     * @author ZJAY
      * @date 2021/07/27
      */
     public abstract String getMethodDescription(PsiMethod psiMethod);

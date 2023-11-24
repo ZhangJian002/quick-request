@@ -72,7 +72,7 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
                 .collect(Collectors.toList());
 
         //dubbo
-        annotationSearchers.stream().filter(x-> Constant.DubboMethodConfig.exist(x.getQualifiedName()) && x.getParent().getParent() instanceof PsiClass
+        annotationSearchers.stream().filter(x-> x != null && x.getParent() != null && Constant.DubboMethodConfig.exist(x.getQualifiedName()) && x.getParent().getParent() instanceof PsiClass
             ).forEach(psiAnnotation -> {
             PsiClass parent = (PsiClass) psiAnnotation.getParent().getParent();
             PsiMethod[] methods = parent.getMethods();
@@ -111,10 +111,10 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
 
 
     private PsiMethod fetchAnnotatedPsiElement(PsiElement psiElement) {
-        PsiElement parent = psiElement.getParent();
-        if(parent == null){
+        if(psiElement == null){
             return null;
         }
+        PsiElement parent = psiElement.getParent();
         if (parent instanceof PsiMethod) return (PsiMethod)parent;
         return fetchAnnotatedPsiElement(parent);
     }
