@@ -821,7 +821,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         assert config != null;
         String methodType = (String) methodTypeComboBox.getSelectedItem();
         if(Objects.equals(methodType.toLowerCase(), "dubbo")){
-            NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Dubbo doesn't support!", MessageType.ERROR).notify(myProject);
+            NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Dubbo doesn't support!", MessageType.ERROR).notify(myProject);
             return "";
         }
 //        String domain = getActiveDomain();
@@ -1550,12 +1550,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                             if (fileWrapper != null) {
                                 File file = fileWrapper.getFile();
                                 FileUtil.move(finalFile, file, true);
-                                NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Success", MessageType.INFO)
+                                NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Success", MessageType.INFO)
                                         .addAction(new GotoFile(file))
                                         .notify(myProject);
                             }
                         } catch (Exception e) {
-                            NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("出现了个未知问题，请联系作者处理~", MessageType.ERROR).notify(myProject);
+                            NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("出现了个未知问题，请联系作者处理~", MessageType.ERROR).notify(myProject);
                         }finally {
                             try {
                                 if(inputStream != null){
@@ -4111,9 +4111,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             ConfigChangeNotifier configChangeNotifier = messageBus.syncPublisher(ConfigChangeNotifier.ADD_REQUEST_TOPIC);
             configChangeNotifier.configChanged(true, myProject.getName());
             //兼容性处理code
-            NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Success", MessageType.INFO).notify(myProject);
+            NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Success", MessageType.INFO).notify(myProject);
             // 2020.3 before
-            //new NotificationGroup("toolWindowNotificationGroup", NotificationDisplayType.TOOL_WINDOW, true).createNotification("Success", NotificationType.INFORMATION).notify(myProject);
+            //new NotificationGroup("quickRequestWindowNotificationGroup", NotificationDisplayType.TOOL_WINDOW, true).createNotification("Success", NotificationType.INFORMATION).notify(myProject);
         }
     }
 
@@ -4214,10 +4214,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             String curlData = getCurlDataAndCopy();
             //兼容性处理code
             if (StringUtils.isNoneBlank(curlData)) {
-                NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Copy success", MessageType.INFO).notify(myProject);
+                NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Copy success", MessageType.INFO).notify(myProject);
             }
             // 2020.3 before
-            //new NotificationGroup("toolWindowNotificationGroup", NotificationDisplayType.TOOL_WINDOW, true).createNotification("Success", NotificationType.INFORMATION).notify(myProject);
+            //new NotificationGroup("quickRequestWindowNotificationGroup", NotificationDisplayType.TOOL_WINDOW, true).createNotification("Success", NotificationType.INFORMATION).notify(myProject);
         }
     }
 
@@ -4416,7 +4416,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             String className = paramGroup.getClassName();
             String methodName = paramGroup.getMethod();
             if (StringUtils.isBlank(className)) {
-                NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("You should generate first", MessageType.ERROR)
+                NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("You should generate first", MessageType.ERROR)
 //                        .addAction(new NotificationAction("Document") {
 //                            @Override
 //                            public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {

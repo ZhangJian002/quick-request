@@ -19,6 +19,8 @@ package io.github.zjay.plugin.fastrequest.config;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.util.Key;
+import org.bouncycastle.jcajce.provider.symmetric.IDEA;
+import org.jetbrains.annotations.NotNull;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.model.MethodType;
 
@@ -298,6 +300,25 @@ public class Constant {
     public enum AutoCompleteType{
         Header_Name,Header_value
 
+    }
+
+    public enum JetBrainsProductName{
+        IntelliJ_IDEA("IntelliJ IDEA"),Aqua("Aqua"),Android_Studio("Android Studio");
+
+         final String name;
+
+        JetBrainsProductName(String name) {
+            this.name = name;
+        }
+
+        public static boolean isExist(@NotNull String name){
+            for (JetBrainsProductName value : values()) {
+                if(name.startsWith(value.name)){
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 

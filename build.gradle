@@ -1,14 +1,12 @@
 plugins {
-//    id 'groovy'
     id 'java'
     id 'org.jetbrains.intellij' version '0.7.3'
 }
 
 group 'io.github.zjay'
-version '2023.11.24'
+version '2023.11.24.1'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
-
 repositories {
     maven { name "Alibaba"; url "https://maven.aliyun.com/repository/public" }
     mavenCentral()
@@ -25,24 +23,16 @@ dependencies {
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
     }
     implementation ('org.openjdk.jmh:jmh-core:1.36') {
-//        exclude group: 'org.apache.commons', module: 'commons-math3'
     }
-
-
-
-
-
-
-
-
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    plugins = ['java', 'Kotlin']
+    plugins = ['java','Kotlin']
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
     downloadSources true
+//    type = "IU"
 }
 patchPluginXml {
     changeNotes """

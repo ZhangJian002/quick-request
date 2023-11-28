@@ -1309,7 +1309,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 try {
                     psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
                 } catch (IndexNotReadyException e) {
-                    NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Index should be ready first", MessageType.INFO).notify(myProject);
+                    NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Index should be ready first", MessageType.INFO).notify(myProject);
                 }
                 //used to navigate
                 if (psiClass != null) {
@@ -1320,7 +1320,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                         });
                         flag = true;
                     } else {
-                        NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Method not found", MessageType.INFO).notify(myProject);
+                        NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Method not found", MessageType.INFO).notify(myProject);
                     }
                 }
                 loadAncChangeTab(flag, detail, sendFlag);

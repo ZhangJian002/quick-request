@@ -23,110 +23,38 @@
 
     <!--    2021.1-->
     <idea-version since-build="211.6693.111" />
-    <depends>com.intellij.java</depends>
-    <depends>org.jetbrains.kotlin</depends>
+    <depends optional="true" config-file="config-java.xml">com.intellij.java</depends>
+    <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
+<!--    <depends optional="true" config-file="config-go.xml">com.intellij.modules.goland</depends>-->
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestComponent"
-                            order="first"/>
-        <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent"/>
-        <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestHistoryCollectionComponent"/>
-        <projectService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent"/>
-        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.service.GeneratorUrlService"/>
-        <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator"/>
-        <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
-        <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.DubboMethodGenerator"/>
-        <applicationConfigurable id="quickRequest" displayName="Quick Request"
-                                 instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
-            <configurable parentId="quickRequest" key="DateTypeConfig"
-                          instance="io.github.zjay.plugin.fastrequest.configurable.DataMappingConfigurable"/>
-            <configurable parentId="quickRequest" key="OtherConfig"
-                          instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
-        </applicationConfigurable>
-        <toolWindow id="Quick Request" anchor="right" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow"
-                    factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
-                    secondary="false"/>
 
-        <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.JavaLineMarkerProvider"/>
 
-        <codeInsight.lineMarkerProvider language="kotlin"
-                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.KotlinLineMarkerProvider"/>
-
-        <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.DubboLineMarkerProvider"/>
-
-        <!--兼容性处理code-->
-        <notificationGroup id="toolWindowNotificationGroup" displayType="TOOL_WINDOW"/>
-
+        <notificationGroup id="quickRequestWindowNotificationGroup" displayType="TOOL_WINDOW"/>
         <postStartupActivity implementation="io.github.zjay.plugin.fastrequest.update.WhatsNewActivity"/>
-
+        <iw.actionProvider implementation="io.github.zjay.plugin.fastrequest.action.soft_wrap.QuickRequestToggleAction" />
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
-        <group id="generateUrlAndParamFree" text="QuickRequest" description="QuickRequest" popup="true" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow">
-            <separator/>
-            <group id="generateSubGroupFree"/>
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <add-to-group group-id="EditorPopupMenu" anchor="first" />
-            <action id="quickRequest.generatorMethod" class="io.github.zjay.plugin.fastrequest.action.GenerateMethodAction"
-                    text="Generate Spring Method"
-                    description="Generate spring method">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
-            </action>
-            <action id="quickRequest.sendAction"
-                    class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>
-            </action>
-            <action id="quickRequest.pressureAction"
-                    class="io.github.zjay.plugin.fastrequest.action.ToolbarPressureRequestAction">
-<!--                <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>-->
-            </action>
-
-            <action id="quickRequest.sendDownloadAction"
-                    class="io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt MINUS"/>
-            </action>
-        </group>
-
-        <action id="quickRequest.gotoFastRequest"
-                class="io.github.zjay.plugin.fastrequest.action.GotoFastRequestAction">
-            <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
-        </action>
-
         <group id="quickRequest.editor.floatGroup">
             <action id="quickRequest.bodyFormat" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction" />
             <action id="quickRequest.format" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.FormatAction" />
             <action id="quickRequest.softWrap" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.SoftWrapAction" />
         </group>
-
     </actions>
+
+
 
     <extensionPoints>
         <extensionPoint name="requestMappingContributor" interface="com.intellij.navigation.ChooseByNameContributor"
                         dynamic="true"/>
     </extensionPoints>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <searchEverywhereContributor
-                implementation="io.github.zjay.plugin.fastrequest.contributor.FastRequestGotoContributor$Factory"/>
-        <iw.actionProvider implementation="io.github.zjay.plugin.fastrequest.action.soft_wrap.QuickRequestToggleAction" />
-    </extensions>
-
     <extensions defaultExtensionNs="QuickRequest">
         <requestMappingContributor
                 implementation="io.github.zjay.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
-
     </extensions>
 
 

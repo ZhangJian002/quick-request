@@ -315,7 +315,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                         ), methodTypeFilter.getSelectedElementList());
                         apiTree.setModel(new DefaultTreeModel(root));
                     }
-                    NotificationGroupManager.getInstance().getNotificationGroup("toolWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
+                    NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
                             .notify(myProject);
                 });
             }
