@@ -24,8 +24,6 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.intellij.codeInsight.completion.CompletionResultSet;
-import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.ide.highlighter.HtmlFileType;
@@ -37,7 +35,6 @@ import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.*;
@@ -52,50 +49,29 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
 import com.intellij.openapi.progress.util.ColorProgressBar;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
-import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.*;
 import com.intellij.ui.components.ActionLink;
-import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dualView.TreeTableView;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.treetable.ListTreeTableModelOnColumns;
 import com.intellij.ui.treeStructure.treetable.TreeColumnInfo;
-import com.intellij.util.PsiNavigateUtil;
-import com.intellij.util.TextFieldCompletionProvider;
 import com.intellij.util.messages.MessageBus;
-import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
-import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.ListTableModel;
-import com.intellij.xml.util.HtmlUtil;
 import io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction;
 import io.github.zjay.plugin.fastrequest.util.http.BodyContentType;
 import io.github.zjay.plugin.fastrequest.view.ui.MethodFontListCellRenderer;
-import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
-import org.jetbrains.kotlin.asJava.classes.KtLightClass;
-import org.jetbrains.kotlin.idea.stubindex.KotlinFullClassNameIndex;
-import org.jetbrains.kotlin.psi.KtClass;
-import org.jetbrains.kotlin.psi.KtClassOrObject;
-import org.jetbrains.kotlin.psi.KtDeclaration;
-import org.jetbrains.kotlin.psi.KtNamedFunction;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.action.*;
 import io.github.zjay.plugin.fastrequest.config.*;
 import io.github.zjay.plugin.fastrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.fastrequest.dubbo.DubboService;
 import io.github.zjay.plugin.fastrequest.jmh.JMHTest;
-import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.fastrequest.util.*;
 import io.github.zjay.plugin.fastrequest.util.file.FileUtil;
 import io.github.zjay.plugin.fastrequest.util.http.Header;
@@ -505,34 +481,22 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         DefaultActionGroup group = new DefaultActionGroup();
         GotoFastRequestAction gotoFastRequestAction = (GotoFastRequestAction) ActionManager.getInstance().getAction("quickRequest.gotoFastRequest");
-        group.add(gotoFastRequestAction);
+        if(gotoFastRequestAction != null){
+            group.add(gotoFastRequestAction);
+        }
         group.add(new OpenConfigAction());
         group.addSeparator("  |  ");
-// todo idea暂时有bug
-//        DefaultActionGroup sendGroup = DefaultActionGroup.createPopupGroupWithEmptyText();
-//        sendGroup.addAll(Lists.newArrayList(toolbarSendRequestAction, sendAndDownloadRequestAction));
-//        ActionGroup splitSendGroup = new SplitButtonAction(sendGroup);
-//        group.add(splitSendGroup);
-        //send下拉列表
-//        ArrayList<AnAction> sendListClone = Lists.newArrayList();
-//        sendListClone.add(toolbarSendRequestAction);
-//        sendListClone.add(sendAndDownloadRequestAction);
-//        CollectionComboBoxModel<AnAction> sendModel = new CollectionComboBoxModel<>(sendListClone);
-//        sendComboBox.setModel(sendModel);
-//        group.add(sendComboBox);
-//        group.add(splitButtonAction);
-
-//        group.add(new StopPositionAction());
-        group.add(new FixPositionAction());
+        if(ToolUtils.isSupportAction()){
+            group.add(new FixPositionAction(myProject));
+        }
         group.add(new SaveRequestAction());
-        group.add(new RetryAction());
+        if(ToolUtils.isSupportAction()){
+            group.add(new RetryAction());
+        }
         group.add(new CompleteUrlAction());
-//        group.add(new SynchronizationAction());
         group.add(new CopyCurlAction());
-//        group.addSeparator("  |  ");
-//        group.add(new DocAction());
-//        group.add(new WhatsNewAction());
-//        group.add(new CoffeeMeAction());
+        group.add(new CleanAction());
+        group.add(new CoffeeMeAction());
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT, group, true);
         actionToolbar.setTargetComponent(panel);
         JComponent toolbarComponent = actionToolbar.getComponent();
@@ -4041,48 +4005,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private final class FixPositionAction extends AnAction {
-        public FixPositionAction() {
-            super("Focus", "Focus", PluginIcons.ICON_LOCAL_SCOPE_LARGE);
-        }
 
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent e) {
-            FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
-            assert config != null;
-            ParamGroup paramGroup = config.getParamGroup();
-            String className = paramGroup.getClassName();
-            String methodName = paramGroup.getMethod();
-            Integer type = paramGroup.getType();
-            if(type == null || type == 1){
-                PsiClass psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
-                if (psiClass != null) {
-                    PsiElement[] elementArray = psiClass.findMethodsByName(methodName, true);
-                    if (elementArray.length > 0) {
-                        PsiMethod psiMethod = (PsiMethod) elementArray[0];
-                        PsiNavigateUtil.navigate(psiMethod);
-                    }
-                }
-            }else {
-                Collection<KtClassOrObject> ktClassOrObjects = KotlinFullClassNameIndex.getInstance().get(className, myProject, GlobalSearchScope.projectScope(myProject));
-                if(CollectionUtils.isNotEmpty(ktClassOrObjects)){
-                    for (KtClassOrObject ktClassOrObject : ktClassOrObjects) {
-                        if(ktClassOrObject instanceof KtClass){
-                            KtClass ktClass = (KtClass) ktClassOrObject;
-                            List<KtDeclaration> declarations = ktClass.getDeclarations();
-                            for (KtDeclaration declaration : declarations) {
-                                if(declaration instanceof KtNamedFunction && Objects.equals(methodName, declaration.getName())){
-                                    PsiNavigateUtil.navigate(declaration);
-                                    return;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private final class SaveRequestAction extends AnAction {
         public SaveRequestAction() {
@@ -4122,6 +4045,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         assert config != null;
         ParamGroup paramGroup = config.getParamGroup();
         assert collectionConfiguration != null;
+        if(StringUtils.isBlank(paramGroup.getClassName()) || StringUtils.isBlank(paramGroup.getMethod())){
+            paramGroup.setClassName("temp");
+            paramGroup.setMethod(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
+            paramGroup.setOriginUrl(urlTextField.getText());
+            paramGroup.setType(-1);
+        }
 
         CollectionConfiguration.CollectionDetail collectionDetail;
         String id = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
@@ -4137,14 +4066,21 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         collectionDetail.setEnableEnv(getActiveEnv());
         collectionDetail.setEnableProject(getActiveProject());
         collectionDetail.setDomain(getActiveDomain());
-        collectionDetail.setName(StringUtils.isBlank(paramGroup.getMethodDescription()) ? paramGroup.getMethod() + "_request" : paramGroup.getMethodDescription());
         collectionDetail.setType(2);
+        collectionDetail.setName(paramGroup.getMethodDescription());
+        if(StringUtils.isBlank(paramGroup.getMethodDescription())){
+            collectionDetail.setName("req_" + config.getDefaultGroupCount());
+            config.setDefaultGroupCount(config.getDefaultGroupCount() + 1);
+        }else {
+            collectionDetail.setName(paramGroup.getMethodDescription() + "_req");
+        }
         paramGroupCollection.setOriginUrl(paramGroup.getOriginUrl());
         paramGroupCollection.setUrl(urlTextField.getText());
         paramGroupCollection.setMethodType((String) methodTypeComboBox.getSelectedItem());
-        paramGroupCollection.setMethodDescription(StringUtils.isBlank(paramGroup.getMethodDescription()) ? paramGroup.getMethod() + "_request" : paramGroup.getMethodDescription());
+        paramGroupCollection.setMethodDescription(StringUtils.isBlank(paramGroup.getMethodDescription()) ? paramGroup.getMethod() + "_req" : paramGroup.getMethodDescription());
         paramGroupCollection.setClassName(paramGroup.getClassName());
         paramGroupCollection.setMethod(paramGroup.getMethod());
+        paramGroupCollection.setType(paramGroup.getType());
         paramGroupCollection.setPathParamsKeyValueListJson(JSON.toJSONString(pathParamsKeyValueList));
         paramGroupCollection.setUrlParamsKeyValueListJson(JSON.toJSONString(urlParamsKeyValueList));
         paramGroupCollection.setUrlParamsKeyValueListText(urlParamsTextArea.getText());
@@ -4154,10 +4090,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         paramGroupCollection.setMultipartKeyValueListJson(JSON.toJSONString(multipartKeyValueList));
         collectionDetail.setParamGroup(paramGroupCollection);
         collectionDetail.setHeaderList(headerParamsKeyValueList);
-
-        String apiClassName = paramGroup.getClassName().substring(paramGroup.getClassName().lastIndexOf(".") + 1);
+        String apiClassName = "temp";
+        if(!Objects.equals(paramGroup.getClassName(), "temp")){
+            apiClassName = paramGroup.getClassName().substring(paramGroup.getClassName().lastIndexOf(".") + 1);
+        }
         CollectionConfiguration.CollectionDetail classNameGroup = filterClassGroupByName(apiClassName, collectionConfiguration.getDetail());
-
         if (insertFlag) {
             String module = paramGroup.getModule();
             CollectionConfiguration.CollectionDetail root = collectionConfiguration.getDetail();
@@ -4166,15 +4103,14 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             if (CollectionUtils.isEmpty(rootChildren)) {
                 defaultGroup = new CollectionConfiguration.CollectionDetail();
                 defaultGroup.setType(1);
-                defaultGroup.setId("1");
-                defaultGroup.setGroupId("1");
-                defaultGroup.setGroupId("1");
+                defaultGroup.setId("11");
                 defaultGroup.setName("Default Group");
+                rootChildren.add(defaultGroup);
             } else {
                 defaultGroup = rootChildren.get(0);
             }
             CollectionConfiguration.CollectionDetail group;
-            if (module == null) {
+            if (module == null || module.isEmpty()) {
                 group = defaultGroup;
             } else {
                 group = rootChildren.stream().filter(q -> module.equals(q.getName())).findFirst().orElse(null);
@@ -4186,8 +4122,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     rootChildren.add(group);
                 }
             }
-
-
             //classGroup
             if (classNameGroup == null) {
                 CollectionConfiguration.CollectionDetail groupDetail = new CollectionConfiguration.CollectionDetail();
@@ -4218,6 +4152,19 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             }
             // 2020.3 before
             //new NotificationGroup("quickRequestWindowNotificationGroup", NotificationDisplayType.TOOL_WINDOW, true).createNotification("Success", NotificationType.INFORMATION).notify(myProject);
+        }
+    }
+
+    private final class CleanAction extends AnAction {
+        public CleanAction() {
+            super("Clear[Help you create a new request instead of modifying a saved or historical one.]", "Clear[Help you create a new request instead of modifying a saved or historical one.]", PluginIcons.ICON_CLEAR);
+        }
+
+        @Override
+        public void actionPerformed(@NotNull AnActionEvent e) {
+            FastRequestConfiguration state = FastRequestComponent.getInstance().getState();
+            state.getParamGroup().clear();
+            urlTextField.setText("");
         }
     }
 
@@ -4403,53 +4350,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private class RetryAction extends AnAction {
-        public RetryAction() {
-            super(MyResourceBundleUtil.getKey("regenerate"), MyResourceBundleUtil.getKey("regenerate"), PluginIcons.ICON_REDO);
-        }
-
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent event) {
-            FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
-            assert config != null;
-            ParamGroup paramGroup = config.getParamGroup();
-            String className = paramGroup.getClassName();
-            String methodName = paramGroup.getMethod();
-            if (StringUtils.isBlank(className)) {
-                NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("You should generate first", MessageType.ERROR)
-//                        .addAction(new NotificationAction("Document") {
-//                            @Override
-//                            public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
-//                                Desktop dp = Desktop.getDesktop();
-//                                if (dp.isSupported(Desktop.Action.BROWSE)) {
-//                                    try {
-//                                        if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-//                                            dp.browse(URI.create(Constant.CN_DOC_DOMAIN + "/guide/feature/#%E9%87%8D%E6%96%B0%E7%94%9F%E5%AD%98%E8%AF%B7%E6%B1%82"));
-//                                        } else {
-//                                            dp.browse(URI.create(String.format("%s/guide/getstarted/#regenetate", Constant.EN_DOC_DOMAIN)));
-//                                        }
-//                                    } catch (IOException ex) {
-//                                        LOGGER.error("open url fail:%s/guide/getstarted/#regenetate", ex, Constant.EN_DOC_DOMAIN);
-//                                    }
-//                                }
-//                            }
-//                        })
-                        .notify(myProject);
-                return;
-            }
-            PsiClass psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
-            if (psiClass != null) {
-                PsiElement[] elementArray = psiClass.findMethodsByName(methodName, true);
-                if (elementArray.length > 0) {
-                    PsiMethod psiMethod = (PsiMethod) elementArray[0];
-                    PsiNavigateUtil.navigate(psiMethod);
-                    GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
-                    generatorUrlService.generate(psiMethod);
-                    refresh(true);
-                }
-            }
-        }
-    }
 
     private class GotoFile extends AnAction {
         private File file;

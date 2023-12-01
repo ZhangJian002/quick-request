@@ -7,6 +7,7 @@
         <![CDATA[
         <p>The request is so simple. With it, you can abandon Postman.
         It has features such as easy debugging, saving requests, and generating methods.
+        It already supports all JetBrains products, but some features may differ.
         If you find any issues, please refer to <a href="https://github.com/zhangjianay/quick-request/issues">Github</a>.
         Enjoy it</p>
         <ul>
@@ -15,6 +16,7 @@
             <li>3、Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
             <li>4、Support for save requests and history queries</li>
             <li>5、Support pressure testing</li>
+            <li>5、Supports automatic generation of [Go language's built-in HTTP requests and requests from frameworks such as Gin and Echo]. It only supports GET, POST, PUT, DELETE, PATCH, HandleFunc, and Handle methods (and the first parameter of the method must be a string rather than a variable), but the parameter cannot be generated</li>
         </ul>
         <h2>Links</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a>
@@ -23,21 +25,54 @@
 
     <!--    2021.1-->
     <idea-version since-build="211.6693.111" />
-    <depends optional="true" config-file="config-java.xml">com.intellij.java</depends>
+    <depends optional="true" config-file="config-java.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
-<!--    <depends optional="true" config-file="config-go.xml">com.intellij.modules.goland</depends>-->
+    <depends>com.intellij.modules.platform</depends>
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-
+        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestComponent"
+                            order="first"/>
+        <applicationService
+                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent"/>
+        <applicationService
+                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestHistoryCollectionComponent"/>
+        <projectService
+                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent"/>
+        <toolWindow id="Quick Request" anchor="right" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow"
+                    factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
+                    secondary="false"/>
+        <applicationConfigurable id="quickRequest" displayName="Quick Request"
+                                 instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
+            <configurable parentId="quickRequest" key="DateTypeConfig"
+                          instance="io.github.zjay.plugin.fastrequest.configurable.DataMappingConfigurable"/>
+            <configurable parentId="quickRequest" key="OtherConfig"
+                          instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
+        </applicationConfigurable>
 
         <notificationGroup id="quickRequestWindowNotificationGroup" displayType="TOOL_WINDOW"/>
         <postStartupActivity implementation="io.github.zjay.plugin.fastrequest.update.WhatsNewActivity"/>
         <iw.actionProvider implementation="io.github.zjay.plugin.fastrequest.action.soft_wrap.QuickRequestToggleAction" />
+        <codeInsight.lineMarkerProvider language="go"
+                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.GoLineMarkerProvider"/>
+        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.GoMethodGenerator"/>
     </extensions>
 
     <actions>
+        <action id="quickRequest.sendAction"
+                class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>
+        </action>
+        <action id="quickRequest.pressureAction"
+                class="io.github.zjay.plugin.fastrequest.action.ToolbarPressureRequestAction">
+            <!--                <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>-->
+        </action>
+
+        <action id="quickRequest.sendDownloadAction"
+                class="io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt MINUS"/>
+        </action>
         <group id="quickRequest.editor.floatGroup">
             <action id="quickRequest.bodyFormat" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction" />
             <action id="quickRequest.format" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.FormatAction" />
@@ -56,6 +91,10 @@
         <requestMappingContributor
                 implementation="io.github.zjay.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
     </extensions>
+
+<!--    <applicationListeners>-->
+<!--        <listener class="io.github.zjay.plugin.fastrequest.ui.MyProgressBarUiComponent" topic="com.intellij.ide.ui.LafManagerListener"/>-->
+<!--    </applicationListeners>-->
 
 
 </idea-plugin>

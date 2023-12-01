@@ -50,7 +50,7 @@ public class JavaLineMarkerProvider implements LineMarkerProvider {
                         GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
                         ToolWindowUtil.generatorUrlAndSend(project, generatorUrlService, methodElement, false);
                     },
-                    GutterIconRenderer.Alignment.LEFT, () -> "fastRequest");
+                    GutterIconRenderer.Alignment.LEFT, () -> "quickRequest");
             return lineMarkerInfo;
         }
         return null;

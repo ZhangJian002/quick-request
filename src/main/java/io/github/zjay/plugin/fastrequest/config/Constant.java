@@ -303,21 +303,32 @@ public class Constant {
     }
 
     public enum JetBrainsProductName{
-        IntelliJ_IDEA("IntelliJ IDEA"),Aqua("Aqua"),Android_Studio("Android Studio");
+        IntelliJ_IDEA("IntelliJ IDEA"),Aqua("Aqua"),Android_Studio("Android Studio"),Go_Land("GoLand");
 
-         final String name;
+         final String value;
 
-        JetBrainsProductName(String name) {
-            this.name = name;
+        JetBrainsProductName(String value) {
+            this.value = value;
         }
 
         public static boolean isExist(@NotNull String name){
             for (JetBrainsProductName value : values()) {
-                if(name.startsWith(value.name)){
+                if(name.startsWith(value.value)){
                     return true;
                 }
             }
             return false;
+        }
+
+        public static boolean isButtonSupport(@NotNull String name){
+            if(name.startsWith(IntelliJ_IDEA.value) || name.startsWith(Aqua.value) || name.startsWith(Android_Studio.value)){
+                return true;
+            }
+            return false;
+        }
+
+        public String getValue() {
+            return value;
         }
     }
 

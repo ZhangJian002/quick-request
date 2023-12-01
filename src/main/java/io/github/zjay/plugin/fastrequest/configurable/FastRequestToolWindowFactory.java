@@ -28,6 +28,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import io.github.zjay.plugin.fastrequest.model.CollectionConfiguration;
 import io.github.zjay.plugin.fastrequest.model.HistoryTableData;
+import io.github.zjay.plugin.fastrequest.util.ToolUtils;
 import io.github.zjay.plugin.fastrequest.view.AllApisNavToolWindow;
 import io.github.zjay.plugin.fastrequest.view.FastRequestCollectionToolWindow;
 import io.github.zjay.plugin.fastrequest.view.FastRequestToolWindow;
@@ -52,10 +53,8 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         window = new FastRequestToolWindow(toolWindow, project);
         collectionToolWindow = new FastRequestCollectionToolWindow(project, toolWindow);
-        allApisNavToolWindow = new AllApisNavToolWindow(project, toolWindow);
         windowMap.put(project.getName(), window);
         apiWindowMap.put(project.getName(), collectionToolWindow);
-        allApisNavToolWindowMap.put(project.getName(), allApisNavToolWindow);
 
         ContentFactory contentFactory = ApplicationManager.getApplication().getService(ContentFactory.class);
         window.getComponent().add(window.getContent());
@@ -69,11 +68,15 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         contentCollection.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
         toolWindow.getContentManager().addContent(contentCollection);
 
-        allApisNavToolWindow.getComponent().add(allApisNavToolWindow.getContent());
-        Content allApis = contentFactory.createContent(allApisNavToolWindow, "Navigate", true);
-        allApis.setIcon(AllIcons.Ide.LocalScopeAction);
-        allApis.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
-        toolWindow.getContentManager().addContent(allApis);
+        if(ToolUtils.isSupportAction()){
+            allApisNavToolWindow = new AllApisNavToolWindow(project, toolWindow);
+            allApisNavToolWindowMap.put(project.getName(), allApisNavToolWindow);
+            allApisNavToolWindow.getComponent().add(allApisNavToolWindow.getContent());
+            Content allApis = contentFactory.createContent(allApisNavToolWindow, "Navigate", true);
+            allApis.setIcon(AllIcons.Ide.LocalScopeAction);
+            allApis.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
+            toolWindow.getContentManager().addContent(allApis);
+        }
         //隐藏标题
         toolWindow.getComponent().putClientProperty("HideIdLabel", "true");
 

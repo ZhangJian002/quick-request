@@ -30,6 +30,7 @@ import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.updateSettings.impl.PluginDownloader;
 import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
+import io.github.zjay.plugin.fastrequest.util.ToolUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class WhatsNewActivity implements StartupActivity {
@@ -37,27 +38,18 @@ public class WhatsNewActivity implements StartupActivity {
     @Override
     public void runActivity(@NotNull Project project) {
         IdeaPluginDescriptor plugin = PluginManagerCore.getPlugin(PluginId.getId("QuickRequest"));
-        ApplicationInfo applicationInfo = ApplicationManager.getApplication().getService(ApplicationInfo.class);
-        if(Constant.JetBrainsProductName.isExist(applicationInfo.getFullApplicationName())){
-            return;
-        }
-        String msg = "We are very sorry that Quick Request does not support this IDE product yet. If you would like to obtain support, please report it to <a href='https://github.com/zhangjianay/quick-request/issues'>Github</a>.";
-        NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification(msg, MessageType.WARNING)
-                .notify(project);
 //        if (plugin != null) {
 //            System.out.println("当前版本：" +plugin.getVersion());
 //            PluginDownloader downloader = PluginDownloader.getInstance();
 //            String latestVersion = downloader.get(id);
 //            Runtime.Version.parse(plugin.getVersion());
-//            RunOnceUtil.runOnceForApp(lastVersion, () -> {
-//                ApplicationManager.getApplication().invokeLater(() -> {
-//                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-//                        HTMLEditorProvider.openEditor(project, "最新变化", GITEE_DOC_URL, "<div style=\"padding-top: 1rem; margin-bottom: 0.8rem;\">加载失败!</div> <br/><div><a href=" + GITEE_DOC_URL + " target=\"_blank\" style=\"font-size: 2rem\">浏览器打开</a></div>");
-//                    } else {
-//                        HTMLEditorProvider.openEditor(project, "What's New", GITHUB_DOC_URL, "<div style=\"padding-top: 1rem; margin-bottom: 0.8rem;\">Failed to load!</div> <br/><div><a href=" + GITHUB_DOC_URL + " target=\"_blank\" style=\"font-size: 2rem\">Open in browser</a></div>");
-//                    }
-//                });
-//            });
+            RunOnceUtil.runOnceForApp("Quick Request Tip", () -> {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    String msg = "Welcome to Quick Request. If you have any questions, please report to me https://github.com/zhangjianay/quick-request/issues.";
+                    NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification(msg, MessageType.INFO)
+                            .notify(project);
+                });
+            });
 //        }
 
 

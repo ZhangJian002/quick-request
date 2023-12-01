@@ -37,6 +37,11 @@ public class ParamGroupCollection implements Serializable {
     private String className;
     private String method;
 
+    /**
+     * 0 null 代表java  1：go
+     */
+    private Integer type;
+
 
     public String getOriginUrl() {
         return originUrl;
@@ -149,5 +154,13 @@ public class ParamGroupCollection implements Serializable {
 
     public void setMultipartKeyValueListJson(String multipartKeyValueListJson) {
         this.multipartKeyValueListJson = multipartKeyValueListJson;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }

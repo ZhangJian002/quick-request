@@ -109,6 +109,8 @@ public class FastRequestConfiguration implements Serializable {
 
     private int randomStringLength = 3;
 
+    private long defaultGroupCount = 0;
+
     /**
      * String生成策略
      * name+random
@@ -130,6 +132,14 @@ public class FastRequestConfiguration implements Serializable {
 
     public List<String> getProjectList() {
         return projectList;
+    }
+
+    public long getDefaultGroupCount() {
+        return defaultGroupCount;
+    }
+
+    public void setDefaultGroupCount(long defaultGroupCount) {
+        this.defaultGroupCount = defaultGroupCount;
     }
 
     public void setProjectList(List<String> projectList) {

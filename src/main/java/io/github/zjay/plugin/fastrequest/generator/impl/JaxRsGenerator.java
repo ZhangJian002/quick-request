@@ -87,7 +87,7 @@ public class JaxRsGenerator extends FastUrlGenerator {
         paramGroup.setRequestParamMap(requestParamMap);
         paramGroup.setBodyParamMap(bodyParamMap);
         paramGroup.setMethodType(methodType);
-        paramGroup.setMethodDescription(methodDescription);
+        paramGroup.setMethodDescription(StringUtils.isBlank(methodDescription) ? psiMethod.getName() : methodDescription);
 
         paramGroup.setClassName(((PsiMethodImpl) psiElement).getContainingClass().getQualifiedName());
         paramGroup.setMethod(psiMethod.getName());
@@ -96,6 +96,7 @@ public class JaxRsGenerator extends FastUrlGenerator {
             String name = moduleForFile.getName();
             paramGroup.setModule(name);
         }
+        paramGroup.setType(0);
         return null;
     }
 

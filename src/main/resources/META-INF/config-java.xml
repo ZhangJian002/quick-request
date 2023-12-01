@@ -1,19 +1,8 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Quick Request" anchor="right" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow"
-                    factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
-                    secondary="false"/>
         <searchEverywhereContributor
                 implementation="io.github.zjay.plugin.fastrequest.contributor.FastRequestGotoContributor$Factory"/>
         <!-- Add your extensions here -->
-        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestComponent"
-                            order="first"/>
-        <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent"/>
-        <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestHistoryCollectionComponent"/>
-        <projectService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.service.GeneratorUrlService"/>
         <applicationService
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.JaxRsGenerator"/>
@@ -21,14 +10,6 @@
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.SpringMethodUrlGenerator"/>
         <applicationService
                 serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.DubboMethodGenerator"/>
-        <applicationConfigurable id="quickRequest" displayName="Quick Request"
-                                 instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
-            <configurable parentId="quickRequest" key="DateTypeConfig"
-                          instance="io.github.zjay.plugin.fastrequest.configurable.DataMappingConfigurable"/>
-            <configurable parentId="quickRequest" key="OtherConfig"
-                          instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
-        </applicationConfigurable>
-
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.JavaLineMarkerProvider"/>
 
@@ -46,19 +27,6 @@
                     text="Generate Spring Method"
                     description="Generate spring method">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
-            </action>
-            <action id="quickRequest.sendAction"
-                    class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>
-            </action>
-            <action id="quickRequest.pressureAction"
-                    class="io.github.zjay.plugin.fastrequest.action.ToolbarPressureRequestAction">
-                <!--                <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>-->
-            </action>
-
-            <action id="quickRequest.sendDownloadAction"
-                    class="io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt MINUS"/>
             </action>
         </group>
 

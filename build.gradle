@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.11.24.1'
+version '2023.12.1'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 repositories {
@@ -37,6 +37,19 @@ intellij {
 patchPluginXml {
     changeNotes """
 
+    <h3>v2023.12.1</h3>
+    <p>中文</p>
+    <ul>
+        <li>此插件已支持所有JetBrains的产品，但有些功能会有区别</li>
+        <li>支持Go语言内置http请求和框架Gin、echo的请求自动生成，只支持GET、POST、PUT、DELETE、PATCH、HandleFunc和Handle方法(并且方法第一个参数必须是字符串而不是一个变量)，但是参数没法生成</li>
+        <li>优化保存请求的保存方式，在主界面增加清除按钮，点击后可帮你清理掉当前请求，从而你可以新建请求并保存</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>This plugin already supports all JetBrains products, but some features may differ</li>
+        <li>Supports automatic generation of Go language's built-in HTTP requests and requests from frameworks such as Gin and Echo. It only supports GET, POST, PUT, DELETE, PATCH, HandleFunc, and Handle methods (and the first parameter of the method must be a string rather than a variable), but the parameter cannot be generated</li>
+        <li>Optimize the saving method for saving requests by adding a clear button on the main interface. Clicking on it can help you clear the current request, allowing you to create a new request and save it</li>
+    </ul>
     <h3>v2023.11.24</h3>
     <p>中文</p>
     <ul>

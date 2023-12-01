@@ -37,6 +37,7 @@ import io.github.zjay.plugin.fastrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.util.MyResourceBundleUtil;
+import io.github.zjay.plugin.fastrequest.util.ToolUtils;
 import io.github.zjay.plugin.fastrequest.view.AbstractConfigurableView;
 import io.github.zjay.plugin.fastrequest.view.inner.DataMappingAddView;
 import io.github.zjay.plugin.fastrequest.view.inner.IgnoreDataMappingAddView;
@@ -72,51 +73,54 @@ public class DataMappingConfigViewNew extends AbstractConfigurableView {
 
     public DataMappingConfigViewNew(FastRequestConfiguration config) {
         super(config);
-        randomStringTextField = new JTextField();
-        randomStringDelimiterTextField = new JTextField();
-        FastRequestConfiguration configOld = JSONObject.parseObject(JSONObject.toJSONString(config), FastRequestConfiguration.class);
-        int randomStringLength = configOld.getRandomStringLength();
-        String randomStringStrategy = configOld.getRandomStringStrategy();
-        String randomStringDelimiter = configOld.getRandomStringDelimiter();
-        randomStringTextField.setText(randomStringLength + "");
+        if(ToolUtils.isSupportAction()){
+            randomStringTextField = new JTextField();
+            randomStringDelimiterTextField = new JTextField();
+            FastRequestConfiguration configOld = JSONObject.parseObject(JSONObject.toJSONString(config), FastRequestConfiguration.class);
+            int randomStringLength = configOld.getRandomStringLength();
+            String randomStringStrategy = configOld.getRandomStringStrategy();
+            String randomStringDelimiter = configOld.getRandomStringDelimiter();
+            randomStringTextField.setText(randomStringLength + "");
 
-        randomStringDelimiterTextField.setText(randomStringDelimiter);
-        randomStringTextField.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent jComponent) {
-                String text = randomStringTextField.getText();
-                try {
-                    viewRandomStringLength = Integer.parseInt(text);
-                    if(viewRandomStringLength < 0){
-                        throw new Exception("Positive integer required");
+            randomStringDelimiterTextField.setText(randomStringDelimiter);
+            randomStringTextField.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent jComponent) {
+                    String text = randomStringTextField.getText();
+                    try {
+                        viewRandomStringLength = Integer.parseInt(text);
+                        if(viewRandomStringLength < 0){
+                            throw new Exception("Positive integer required");
+                        }
+                        return true;
+                    } catch (Exception e) {
+                        Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
+                        randomStringTextField.setText(randomStringLength + "");
+                        return false;
                     }
-                    return true;
-                } catch (Exception e) {
-                    Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
-                    randomStringTextField.setText(randomStringLength + "");
-                    return false;
                 }
-            }
-        });
+            });
 
-        randomStringDelimiterTextField.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent jComponent) {
-                String text = randomStringDelimiterTextField.getText();
-                try {
-                    if("&".equals(text) || "?".equals(text)){
-                        throw new Exception("content error");
+            randomStringDelimiterTextField.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent jComponent) {
+                    String text = randomStringDelimiterTextField.getText();
+                    try {
+                        if("&".equals(text) || "?".equals(text)){
+                            throw new Exception("content error");
+                        }
+                        return true;
+                    } catch (Exception e) {
+                        Messages.showMessageDialog("Character & or ? is not allowed", "Error", Messages.getInformationIcon());
+                        randomStringDelimiterTextField.setText(randomStringDelimiter);
+                        return false;
                     }
-                    return true;
-                } catch (Exception e) {
-                    Messages.showMessageDialog("Character & or ? is not allowed", "Error", Messages.getInformationIcon());
-                    randomStringDelimiterTextField.setText(randomStringDelimiter);
-                    return false;
                 }
-            }
-        });
-        setLayout(new BorderLayout());
-        add(createMainComponent());
+            });
+            setLayout(new BorderLayout());
+            add(createMainComponent());
+        }else {
+        }
     }
 
     private JComponent createMainComponent(){

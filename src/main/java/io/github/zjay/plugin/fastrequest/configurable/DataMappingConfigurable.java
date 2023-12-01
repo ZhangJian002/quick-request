@@ -25,6 +25,7 @@ import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.model.DataMapping;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.util.KV;
+import io.github.zjay.plugin.fastrequest.util.ToolUtils;
 import io.github.zjay.plugin.fastrequest.view.AbstractConfigurableView;
 import io.github.zjay.plugin.fastrequest.view.sub.DataMappingConfigViewNew;
 import org.apache.commons.collections.ListUtils;
@@ -36,7 +37,7 @@ import java.util.ResourceBundle;
 
 public class DataMappingConfigurable extends AbstractConfigConfigurable {
     protected FastRequestConfiguration config;
-    private final DataMappingConfigViewNew view;
+    private DataMappingConfigViewNew view;
 
     public DataMappingConfigurable() {
         config = FastRequestComponent.getInstance().getState();
@@ -61,6 +62,9 @@ public class DataMappingConfigurable extends AbstractConfigConfigurable {
 
     @Override
     public boolean isModified() {
+        if(!ToolUtils.isSupportAction()){
+            return false;
+        }
         List<DataMapping> currentCustomDataMappingList = view.getViewCustomDataMappingList();
         List<DataMapping> customDataMappingList = config.getCustomDataMappingList();
         List<DataMapping> currentDefaultDataMappingList = view.getViewDefaultDataMappingList();
@@ -89,6 +93,9 @@ public class DataMappingConfigurable extends AbstractConfigConfigurable {
 
     @Override
     public void apply() {
+        if(!ToolUtils.isSupportAction()){
+            return;
+        }
         List<DataMapping> viewCustomDataMappingList = view.getViewCustomDataMappingList();
         List<DataMapping> changeCustomDataMappingList = JSONArray.parseArray(JSON.toJSONString(viewCustomDataMappingList), DataMapping.class);
         config.setCustomDataMappingList(changeCustomDataMappingList);
@@ -114,6 +121,9 @@ public class DataMappingConfigurable extends AbstractConfigConfigurable {
 
     @Override
     public void reset() {
+        if(!ToolUtils.isSupportAction()){
+            return;
+        }
         super.reset();
         List<DataMapping> oldCustomDataMappingList = config.getCustomDataMappingList();
         List<DataMapping> oldCustomDataMappingListNew = JSONArray.parseArray(JSON.toJSONString(oldCustomDataMappingList), DataMapping.class);

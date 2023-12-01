@@ -41,6 +41,22 @@ public class ParamGroup implements Serializable {
      */
     private Integer type;
 
+    public void clear() {
+        this.originUrl = "";
+        this.url = "";
+        this.methodType = "";
+        this.postType = "json";
+        this.pathParamMap = new LinkedHashMap<>();
+        this.requestParamMap = new LinkedHashMap<>();
+        this.bodyParamMap = new LinkedHashMap<>();
+        this.methodDescription = "";
+        this.className = "";
+        this.interfaceName = "";
+        this.method = "";
+        this.module = "";
+        this.type = 1;
+    }
+
     public String getInterfaceName() {
         return interfaceName;
     }

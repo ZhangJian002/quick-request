@@ -91,7 +91,7 @@ public class SpringMethodUrlGenerator extends FastUrlGenerator {
         paramGroup.setRequestParamMap(requestParamMap);
         paramGroup.setBodyParamMap(bodyParamMap);
         paramGroup.setMethodType(methodType);
-        paramGroup.setMethodDescription(methodDescription);
+        paramGroup.setMethodDescription(StringUtils.isBlank(methodDescription) ? psiMethod.getName() : methodDescription);
         if(psiElement instanceof PsiMethodImpl){
             paramGroup.setClassName(((PsiMethodImpl) psiElement).getContainingClass().getQualifiedName());
             paramGroup.setType(1);
@@ -106,7 +106,7 @@ public class SpringMethodUrlGenerator extends FastUrlGenerator {
             String name = moduleForFile.getName();
             paramGroup.setModule(name);
         }
-
+        paramGroup.setType(0);
         return null;
     }
 

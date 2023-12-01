@@ -20,7 +20,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
 import com.intellij.ui.content.Content;
 import com.intellij.util.messages.MessageBus;
 import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
@@ -43,6 +42,10 @@ public class ToolWindowUtil {
 
     public static void generatorUrl(Project project, GeneratorUrlService generatorUrlService, PsiElement methodElement) {
         generatorUrlService.generate(methodElement);
+        openToolWindow(project);
+    }
+
+    public static void openToolWindow(Project project) {
         //打开工具窗口
         ToolWindow fastRequestToolWindow = ToolWindowManager.getInstance(project).getToolWindow("Quick Request");
         if (fastRequestToolWindow != null && !fastRequestToolWindow.isActive()) {
@@ -60,6 +63,10 @@ public class ToolWindowUtil {
 
     public static void generatorUrlAndSend(Project project, GeneratorUrlService generatorUrlService, PsiElement methodElement, boolean sendFlag){
         generatorUrl(project, generatorUrlService, methodElement);
+        sendRequest(project, sendFlag);
+    }
+
+    public static void sendRequest(Project project, boolean sendFlag) {
         FastRequestConfiguration state = FastRequestComponent.getInstance().getState();
         FastRequestToolWindow fastRequestToolWindow = getFastRequestToolWindow(project);
         if (fastRequestToolWindow != null && state != null) {

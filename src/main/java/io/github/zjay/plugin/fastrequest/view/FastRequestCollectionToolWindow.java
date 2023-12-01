@@ -18,6 +18,7 @@ package io.github.zjay.plugin.fastrequest.view;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -526,52 +527,43 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             if(selectedRow <= 0){
                 return;
             }
-            CollectionCustomNode root = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(0);
             String id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
             CollectionCustomNode addNode = null;
             CollectionConfiguration.CollectionDetail detail = null;
-            if (selectedRow == -1 || selectedRow == 0) {
-                addNode = new CollectionCustomNode(id, "Group " + root.getChildCount(), 1);
-                detail = new CollectionConfiguration.CollectionDetail(id, "Group " + root.getChildCount(), 1);
-                root.insert(addNode, 1);
-                rootDetail.getChildList().add(detail);
+            CollectionCustomNode node = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
+            if (node.getType() == 1) {
+                String idGroup = node.getId();
+                CollectionConfiguration.CollectionDetail detailGroup = filterById(idGroup, rootDetail);
+                if (detailGroup != null) {
+                    List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
+                    long count = childList.stream().filter(q -> q.getType() == 1).count();
+                    addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
+                    detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
+                    childList.add(detail);
+                    detailGroup.setChildList(childList);
+                    node.insert(addNode, 0);
+                }
             } else {
-                CollectionCustomNode node = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
-                if (node.getType() == 1) {
-                    String idGroup = node.getId();
-                    CollectionConfiguration.CollectionDetail detailGroup = filterById(idGroup, rootDetail);
-                    if (detailGroup != null) {
-                        List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
-                        long count = childList.stream().filter(q -> q.getType() == 1).count();
-                        addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
-                        detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
-                        childList.add(detail);
-                        detailGroup.setChildList(childList);
-                        node.insert(addNode, 0);
-                    }
-                } else {
 
-                    CollectionCustomNode parent = (CollectionCustomNode) node.getParent();
-                    String idParent = parent.getId();
-                    CollectionConfiguration.CollectionDetail detailGroup = filterById(idParent, rootDetail);
-                    if (detailGroup != null) {
-                        List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
-                        long count = childList.stream().filter(q -> q.getType() == 1).count();
-                        addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
-                        detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
-                        childList.add(detail);
-                        detailGroup.setChildList(childList);
-                        parent.insert(addNode, 0);
-                    }
+                CollectionCustomNode parent = (CollectionCustomNode) node.getParent();
+                String idParent = parent.getId();
+                CollectionConfiguration.CollectionDetail detailGroup = filterById(idParent, rootDetail);
+                if (detailGroup != null) {
+                    List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
+                    long count = childList.stream().filter(q -> q.getType() == 1).count();
+                    addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
+                    detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
+                    childList.add(detail);
+                    detailGroup.setChildList(childList);
+                    parent.insert(addNode, 0);
                 }
             }
-            int row = selectedRow == -1 ? 0 : selectedRow;
-            collectionTable.setRowSelectionInterval(row, row);
+            collectionTable.setRowSelectionInterval(selectedRow, selectedRow);
             refreshTable();
 
         });
         toolbarDecorator.setRemoveAction(e -> {
-            int i = Messages.showOkCancelDialog("Delete it(contains children)?", "Delete", "Delete", "Cancel", Messages.getInformationIcon());
+            int i = Messages.showOkCancelDialog("Delete it(contains children)?", "Delete", "Delete", "Cancel", Messages.getQuestionIcon());
             if (i == 0) {
                 int selectedRow = collectionTable.getSelectedRow();
                 CollectionCustomNode node = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
@@ -616,7 +608,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Expand All", "", AllIcons.Actions.Expandall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                CollectionCustomNode node = new CollectionCustomNode("0", "Root", 1);
                 SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),true);
             }
 
@@ -625,7 +616,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Collapse All", "", AllIcons.Actions.Collapseall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                CollectionCustomNode node = new CollectionCustomNode("0", "Root", 1);
                 SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),false);
             }
         }));
@@ -724,55 +714,6 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             }
         });
         toolbarDecorator.setActionGroup(myActionGroup);
-//        toolbarDecorator.addExtraActions(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.exportToPostman"), PluginIcons.ICON_POSTMAN) {
-//
-//            @Override
-//            public void actionPerformed(@NotNull AnActionEvent e) {
-//
-//                List<DataMapping> headerParamsKeyValueList;
-//                FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
-//                if(fastRequestToolWindow == null){
-//                    headerParamsKeyValueList = new ArrayList<>();
-//                } else {
-//                    headerParamsKeyValueList = fastRequestToolWindow.getHeaderParamsKeyValueList();
-//                }
-//                FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
-//                assert config != null;
-//                List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
-//                List<DataMapping> globalHeaderListNew = JSONArray.parseArray(JSON.toJSONString(globalHeaderList), DataMapping.class);
-//                globalHeaderListNew.removeIf(q->headerParamsKeyValueList.stream().anyMatch(p->p.getType().equals(q.getType())));
-//                headerParamsKeyValueList.addAll(globalHeaderListNew);
-//
-//                PostmanCollection postmanCollection = PostmanExportUtil.getPostmanCollection(headerParamsKeyValueList,rootDetail2,myProject.getName());
-//                ExporterToTextFile exporterToTextFile = new ExporterToTextFile(){
-//
-//                    @Override
-//                    public @NotNull String getReportText() {
-//                        return JSON.toJSONString(postmanCollection, SerializerFeature.DisableCircularReferenceDetect);
-//                    }
-//
-//                    @Override
-//                    public @NotNull String getDefaultFilePath() {
-//                        VirtualFile virtualFile = ProjectUtil.guessProjectDir(myProject);
-//                        if(virtualFile != null){
-//                            return virtualFile.getPath() + File.separator + "QuickRequest.postman_collection.json";
-//                        }
-//                        return "";
-//                    }
-//
-//                    @Override
-//                    public boolean canExport() {
-//                        return true;
-//                    }
-//                };
-//                ExportToFileUtil.chooseFileAndExport(myProject,exporterToTextFile);
-//            }
-//
-//            @Override
-//            public boolean isEnabled() {
-//                return true;
-//            }
-//        });
         toolbarDecorator.setToolbarPosition(ActionToolbarPosition.TOP);
         collectionPanel2 = toolbarDecorator.createPanel();
     }
@@ -1303,24 +1244,26 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                     return;
                 }
                 ParamGroupCollection paramGroup = detail.getParamGroup();
-                String className = paramGroup.getClassName();
-                String methodName = paramGroup.getMethod();
-                PsiClass psiClass = null;
-                try {
-                    psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
-                } catch (IndexNotReadyException e) {
-                    NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Index should be ready first", MessageType.INFO).notify(myProject);
-                }
-                //used to navigate
-                if (psiClass != null) {
-                    PsiElement[] psiClassMethodsByName = psiClass.findMethodsByName(methodName, true);
-                    if (psiClassMethodsByName.length > 0) {
-                        ApplicationManager.getApplication().invokeLater(() -> {
-                            PsiNavigateUtil.navigate(psiClassMethodsByName[0]);
-                        });
-                        flag = true;
-                    } else {
-                        NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Method not found", MessageType.INFO).notify(myProject);
+                if(paramGroup.getType() == null || paramGroup.getType() == 0){
+                    String className = paramGroup.getClassName();
+                    String methodName = paramGroup.getMethod();
+                    PsiClass psiClass = null;
+                    try {
+                        psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
+                    } catch (IndexNotReadyException e) {
+                        NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Index should be ready first", MessageType.INFO).notify(myProject);
+                    }
+                    //used to navigate
+                    if (psiClass != null) {
+                        PsiElement[] psiClassMethodsByName = psiClass.findMethodsByName(methodName, true);
+                        if (psiClassMethodsByName.length > 0) {
+                            ApplicationManager.getApplication().invokeLater(() -> {
+                                PsiNavigateUtil.navigate(psiClassMethodsByName[0]);
+                            });
+                            flag = true;
+                        } else {
+                            NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Method not found", MessageType.INFO).notify(myProject);
+                        }
                     }
                 }
                 loadAncChangeTab(flag, detail, sendFlag);

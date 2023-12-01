@@ -48,7 +48,7 @@ public class SupportView extends DialogWrapper {
         alipayLabel = new JLabel(alipayIcon);
         alipayLabel.setVisible(true);
 
-        ImageIcon wechatIcon = new ImageIcon(this.getClass().getResource("/wechat.jpg"));
+        ImageIcon wechatIcon = new ImageIcon(this.getClass().getResource("/wechat.png"));
         scale = 400d / wechatIcon.getIconHeight();
         wechatIcon.setImage(wechatIcon.getImage().getScaledInstance((int)(wechatIcon.getIconWidth() * scale), 400, Image.SCALE_DEFAULT));
         wechatLabel = new JLabel(wechatIcon);

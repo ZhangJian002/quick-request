@@ -54,7 +54,7 @@ public class DubboMethodGenerator extends FastUrlGenerator {
         paramGroup.getBodyParamMap().clear();
         paramGroup.setRequestParamMap(bodyParamMap);
         paramGroup.setMethodType(methodType);
-        paramGroup.setMethodDescription(methodDescription);
+        paramGroup.setMethodDescription(StringUtils.isBlank(methodDescription) ? psiMethod.getName() : methodDescription);
         PsiClass containingClass = ((PsiMethodImpl) psiElement).getContainingClass();
         paramGroup.setClassName(containingClass.getQualifiedName());
         PsiClass[] interfaces = containingClass.getInterfaces();
@@ -68,7 +68,7 @@ public class DubboMethodGenerator extends FastUrlGenerator {
             String name = moduleForFile.getName();
             paramGroup.setModule(name);
         }
-
+        paramGroup.setType(0);
         return null;
     }
 
