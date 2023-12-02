@@ -42,7 +42,7 @@ public final class FixPositionAction extends AnAction {
         String className = paramGroup.getClassName();
         String methodName = paramGroup.getMethod();
         Integer type = paramGroup.getType();
-        if(type == null || type == 1){
+        if(type == null || type == 0){
             PsiClass psiClass = JavaPsiFacade.getInstance(myProject).findClass(className, GlobalSearchScope.projectScope(myProject));
             if (psiClass != null) {
                 PsiElement[] elementArray = psiClass.findMethodsByName(methodName, true);
