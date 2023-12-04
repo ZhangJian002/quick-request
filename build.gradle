@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.12.1'
+version '2023.12.4'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 repositories {
@@ -36,6 +36,16 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+
+    <h3>v2023.12.4</h3>
+    <p>中文</p>
+    <ul>
+        <li>Focus按钮bug修复</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix bug in Focus button</li>
+    </ul>
 
     <h3>v2023.12.1</h3>
     <p>中文</p>

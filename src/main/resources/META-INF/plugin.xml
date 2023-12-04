@@ -16,7 +16,7 @@
             <li>3、Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
             <li>4、Support for save requests and history queries</li>
             <li>5、Support pressure testing</li>
-            <li>5、Supports automatic generation of [Go language's built-in HTTP requests and requests from frameworks such as Gin and Echo]. It only supports GET, POST, PUT, DELETE, PATCH, HandleFunc, and Handle methods (and the first parameter of the method must be a string rather than a variable), but the parameter cannot be generated</li>
+            <li>6、Supports automatic generation of [Go language's built-in HTTP requests and requests from frameworks such as Gin and Echo]. It only supports GET, POST, PUT, DELETE, PATCH, HandleFunc, and Handle methods (and the first parameter of the method must be a string rather than a variable), but the parameter cannot be generated</li>
         </ul>
         <h2>Links</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a>

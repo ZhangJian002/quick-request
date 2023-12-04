@@ -15,6 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.psi.PsiElement;
+import io.github.zjay.plugin.fastrequest.util.ToolUtils;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
@@ -36,19 +37,21 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
 
     void createPopMenu() {
         clickIconPopupMenu  = new JBPopupMenu();
-        JBMenuItem clickAndSendItem = new JBMenuItem(" Generate And Send ");
-        clickAndSendItem.setIcon(PluginIcons.ICON_SEND);
-        clickAndSendItem.addActionListener(evt -> {
-            GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
-            ToolWindowUtil.generatorUrlAndSend(myProject, generatorUrlService, psiElement.getParent(), true);
-        });
+        if(ToolUtils.isSupportAction()){
+            JBMenuItem clickAndSendItem = new JBMenuItem(" Generate And Send ");
+            clickAndSendItem.setIcon(PluginIcons.ICON_SEND);
+            clickAndSendItem.addActionListener(evt -> {
+                GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
+                ToolWindowUtil.generatorUrlAndSend(myProject, generatorUrlService, psiElement.getParent(), true);
+            });
+            clickIconPopupMenu.add(clickAndSendItem);
+            clickIconPopupMenu.addSeparator();
+        }
         JBMenuItem clickAndConfigItem = new JBMenuItem(" Configuration Management ");
         clickAndConfigItem.setIcon(AllIcons.General.Settings);
         clickAndConfigItem.addActionListener(evt -> {
             ShowSettingsUtil.getInstance().showSettingsDialog(myProject, "Quick Request");
         });
-        clickIconPopupMenu.add(clickAndSendItem);
-        clickIconPopupMenu.addSeparator();
         clickIconPopupMenu.add(clickAndConfigItem);
     }
 

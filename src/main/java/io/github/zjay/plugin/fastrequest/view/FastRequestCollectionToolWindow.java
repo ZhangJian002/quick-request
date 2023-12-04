@@ -608,6 +608,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Expand All", "", AllIcons.Actions.Expandall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
+                collectionTable.setRootVisible(false);
                 SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),true);
             }
 
@@ -616,6 +617,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Collapse All", "", AllIcons.Actions.Collapseall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
+                collectionTable.setRootVisible(true);
                 SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),false);
             }
         }));

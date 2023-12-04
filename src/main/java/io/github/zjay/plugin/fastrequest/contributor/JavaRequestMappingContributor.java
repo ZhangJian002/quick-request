@@ -44,6 +44,7 @@ public class JavaRequestMappingContributor extends RequestMappingByNameContribut
         //Java
         ArrayList<PsiAnnotation> javaAnnotations = new ArrayList<>(StubIndex.getElements(JavaStubIndexKeys.ANNOTATIONS, annotationName, project, new JavaSourceFilterScope(GlobalSearchScope.projectScope(project)), PsiAnnotation.class));
         List<PsiAnnotation> allAnnotations = new ArrayList<>(javaAnnotations);
+
         //Kotlin
         Collection<KtAnnotationEntry> ktAnnotationEntries =
                 KotlinAnnotationsIndex.getInstance().get(annotationName, project, GlobalSearchScope.everythingScope(project));
