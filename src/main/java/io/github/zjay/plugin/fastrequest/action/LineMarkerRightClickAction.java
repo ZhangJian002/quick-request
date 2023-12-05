@@ -15,7 +15,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiMethod;
+import io.github.zjay.plugin.fastrequest.generator.impl.GoMethodGenerator;
+import io.github.zjay.plugin.fastrequest.util.LanguageEnum;
 import io.github.zjay.plugin.fastrequest.util.ToolUtils;
+import io.github.zjay.plugin.fastrequest.util.go.GoMethod;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.BaseFunctionTooltip;
+import org.jetbrains.kotlin.psi.KtNamedFunction;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
@@ -29,24 +35,36 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
     private final GutterIconRenderer myRenderer;
     private final MyLineMarkerInfo myPoint;
 
-    private static JBPopupMenu clickIconPopupMenu;
+    private JBPopupMenu clickIconPopupMenu;
 
-    private static PsiElement psiElement;
-
-    private static Project myProject;
+    private Project myProject;
 
     void createPopMenu() {
         clickIconPopupMenu  = new JBPopupMenu();
-        if(ToolUtils.isSupportAction()){
-            JBMenuItem clickAndSendItem = new JBMenuItem(" Generate And Send ");
-            clickAndSendItem.setIcon(PluginIcons.ICON_SEND);
-            clickAndSendItem.addActionListener(evt -> {
-                GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
-                ToolWindowUtil.generatorUrlAndSend(myProject, generatorUrlService, psiElement.getParent(), true);
-            });
-            clickIconPopupMenu.add(clickAndSendItem);
-            clickIconPopupMenu.addSeparator();
-        }
+        JBMenuItem clickAndSendItem = new JBMenuItem(" Generate And Send ");
+        clickAndSendItem.setIcon(PluginIcons.ICON_SEND);
+        clickAndSendItem.addActionListener(evt -> {
+            PsiElement psiElement = myPoint.getElement();
+            BaseFunctionTooltip functionTooltip = myPoint.getFunctionTooltip();
+            LanguageEnum language = functionTooltip.getLanguage();
+            switch (language){
+                case java:
+                case Kotlin:
+                    //java、Kotlin
+                    GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);
+                    ToolWindowUtil.generatorUrlAndSend(myProject, generatorUrlService, functionTooltip.getElement(), true);
+                    break;
+                case go:
+                    //Go
+                    String method = GoMethod.getMethodType(psiElement.getText());
+                    ApplicationManager.getApplication().getService(GoMethodGenerator.class).generate(functionTooltip.getElement(), method, null);
+                    ToolWindowUtil.openToolWindow(myProject);
+                    ToolWindowUtil.sendRequest(myProject, true);
+                    break;
+            }
+        });
+        clickIconPopupMenu.add(clickAndSendItem);
+        clickIconPopupMenu.addSeparator();
         JBMenuItem clickAndConfigItem = new JBMenuItem(" Configuration Management ");
         clickAndConfigItem.setIcon(AllIcons.General.Settings);
         clickAndConfigItem.addActionListener(evt -> {
@@ -59,7 +77,6 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
     public LineMarkerRightClickAction(MyLineMarkerInfo point, GutterIconRenderer renderer){
         myRenderer = renderer;
         myPoint = point;
-        psiElement = point.getElement();
     }
 
     @Override

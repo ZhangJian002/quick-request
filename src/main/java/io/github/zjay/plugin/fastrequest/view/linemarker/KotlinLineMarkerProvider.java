@@ -21,20 +21,16 @@ import com.intellij.codeInsight.daemon.LineMarkerProvider;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
-import com.intellij.ui.content.Content;
 import io.github.zjay.plugin.fastrequest.config.Constant;
-import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
-import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
+import io.github.zjay.plugin.fastrequest.util.LanguageEnum;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.JavaFunctionTooltip;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.KotlinFunctionTooltip;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
 import org.jetbrains.kotlin.psi.KtNamedFunction;
@@ -55,7 +51,7 @@ public class KotlinLineMarkerProvider implements LineMarkerProvider {
             KtNamedFunction ktNamedFunction = (KtNamedFunction)element.getParent();
             PsiMethod methodElement = LightClassUtilsKt.getRepresentativeLightMethod(ktNamedFunction);
             lineMarkerInfo = new MyLineMarkerInfo<>(element, element.getTextRange(), PluginIcons.fastRequest_editor,
-                    new FunctionTooltip(methodElement),
+                    new KotlinFunctionTooltip(methodElement, LanguageEnum.Kotlin),
                     (e, elt) -> {
                         Project project = elt.getProject();
                         GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);

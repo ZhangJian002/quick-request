@@ -25,6 +25,8 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethod;
+import io.github.zjay.plugin.fastrequest.util.LanguageEnum;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.JavaFunctionTooltip;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
@@ -44,7 +46,7 @@ public class JavaLineMarkerProvider implements LineMarkerProvider {
             }
             PsiMethod methodElement = (PsiMethod) element.getParent();
             lineMarkerInfo = new MyLineMarkerInfo<>(element, element.getTextRange(), PluginIcons.fastRequest_editor,
-                    new FunctionTooltip(methodElement),
+                    new JavaFunctionTooltip(methodElement, LanguageEnum.java),
                     (e, elt) -> {
                         Project project = elt.getProject();
                         GeneratorUrlService generatorUrlService = ApplicationManager.getApplication().getService(GeneratorUrlService.class);

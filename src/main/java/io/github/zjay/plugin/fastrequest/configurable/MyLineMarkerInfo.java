@@ -10,6 +10,10 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.Function;
 import io.github.zjay.plugin.fastrequest.action.LineMarkerRightClickAction;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.BaseFunctionTooltip;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.GoFunctionTooltip;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.JavaFunctionTooltip;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.KotlinFunctionTooltip;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,8 +22,15 @@ import java.util.function.Supplier;
 
 public class MyLineMarkerInfo<T extends PsiElement> extends LineMarkerInfo<PsiElement> {
 
+  private BaseFunctionTooltip functionTooltip;
+
   public MyLineMarkerInfo(@NotNull PsiElement element, @NotNull TextRange range, @NotNull Icon icon, @Nullable Function<? super PsiElement, @NlsContexts.Tooltip String> tooltipProvider, @Nullable GutterIconNavigationHandler<PsiElement> navHandler, GutterIconRenderer.@NotNull Alignment alignment, @NotNull Supplier<@NotNull String> accessibleNameProvider) {
     super(element, range, icon, tooltipProvider, navHandler, alignment, accessibleNameProvider);
+    this.functionTooltip = (BaseFunctionTooltip) tooltipProvider;
+  }
+
+  public BaseFunctionTooltip getFunctionTooltip(){
+    return functionTooltip;
   }
 
   @Override

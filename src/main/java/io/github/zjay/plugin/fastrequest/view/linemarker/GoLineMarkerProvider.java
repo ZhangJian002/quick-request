@@ -18,24 +18,19 @@ package io.github.zjay.plugin.fastrequest.view.linemarker;
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
-import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
-import io.github.zjay.plugin.fastrequest.config.Constant;
 import io.github.zjay.plugin.fastrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.fastrequest.generator.impl.GoMethodGenerator;
-import io.github.zjay.plugin.fastrequest.service.GeneratorUrlService;
+import io.github.zjay.plugin.fastrequest.util.LanguageEnum;
 import io.github.zjay.plugin.fastrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.fastrequest.util.go.GoMethod;
+import io.github.zjay.plugin.fastrequest.view.linemarker.tooltip.GoFunctionTooltip;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
-import org.jetbrains.kotlin.psi.KtNamedFunction;
 import quickRequest.icons.PluginIcons;
 
 import java.util.Objects;
@@ -55,7 +50,7 @@ public class GoLineMarkerProvider implements LineMarkerProvider {
             if(pointElement != null && targetElement != null){
                 String method = GoMethod.getMethodType(targetElement.getText());
                 lineMarkerInfo = new MyLineMarkerInfo<>(targetElement, targetElement.getTextRange(), PluginIcons.fastRequest_editor,
-                        new GoFunctionTooltip(element),
+                        new GoFunctionTooltip(element, LanguageEnum.go),
                         (e, elt) -> {
                             Project project = elt.getProject();
                             ApplicationManager.getApplication().getService(GoMethodGenerator.class).generate(element, method, null);
