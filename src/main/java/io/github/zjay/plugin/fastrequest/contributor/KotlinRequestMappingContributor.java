@@ -18,20 +18,23 @@ package io.github.zjay.plugin.fastrequest.contributor;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.impl.java.stubs.index.JavaStubIndexKeys;
-import com.intellij.psi.impl.search.JavaSourceFilterScope;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
+import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
+import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex;
+import org.jetbrains.kotlin.psi.KtAnnotationEntry;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class JavaRequestMappingContributor extends RequestMappingByNameContributor{
+public class KotlinRequestMappingContributor extends RequestMappingByNameContributor{
 
     @Override
     List<PsiAnnotation> getAnnotationSearchers(String annotationName, Project project) {
-        //Java
-        return new ArrayList<>(StubIndex.getElements(JavaStubIndexKeys.ANNOTATIONS, annotationName, project, new JavaSourceFilterScope(GlobalSearchScope.projectScope(project)), PsiAnnotation.class));
+        //Kotlin
+        Collection<KtAnnotationEntry> ktAnnotationEntries = StubIndex.getElements(KotlinAnnotationsIndex.getInstance().getKey(), annotationName, project, GlobalSearchScope.everythingScope(project), KtAnnotationEntry.class);
+        return ktAnnotationEntries.stream().map(LightClassUtilsKt::toLightAnnotation).collect(Collectors.toList());
     }
 
 

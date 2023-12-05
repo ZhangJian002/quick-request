@@ -81,16 +81,11 @@
     </actions>
 
 
-
     <extensionPoints>
         <extensionPoint name="requestMappingContributor" interface="com.intellij.navigation.ChooseByNameContributor"
                         dynamic="true"/>
     </extensionPoints>
 
-    <extensions defaultExtensionNs="QuickRequest">
-        <requestMappingContributor
-                implementation="io.github.zjay.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
-    </extensions>
 
 <!--    <applicationListeners>-->
 <!--        <listener class="io.github.zjay.plugin.fastrequest.ui.MyProgressBarUiComponent" topic="com.intellij.ide.ui.LafManagerListener"/>-->

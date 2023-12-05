@@ -8,6 +8,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.stubs.StubIndex;
 import com.intellij.util.PsiNavigateUtil;
 import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
@@ -15,6 +16,7 @@ import io.github.zjay.plugin.fastrequest.model.ParamGroup;
 import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.idea.stubindex.KotlinFullClassNameIndex;
+import org.jetbrains.kotlin.idea.stubindex.KotlinIndexUtil;
 import org.jetbrains.kotlin.psi.KtClass;
 import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.kotlin.psi.KtDeclaration;
@@ -52,7 +54,7 @@ public final class FixPositionAction extends AnAction {
                 }
             }
         }else {
-            Collection<KtClassOrObject> ktClassOrObjects = KotlinFullClassNameIndex.getInstance().get(className, myProject, GlobalSearchScope.projectScope(myProject));
+            Collection<KtClassOrObject> ktClassOrObjects = StubIndex.getElements(KotlinFullClassNameIndex.getInstance().getKey(), className, myProject, GlobalSearchScope.projectScope(myProject), KtClassOrObject.class);
             if(CollectionUtils.isNotEmpty(ktClassOrObjects)){
                 for (KtClassOrObject ktClassOrObject : ktClassOrObjects) {
                     if(ktClassOrObject instanceof KtClass){

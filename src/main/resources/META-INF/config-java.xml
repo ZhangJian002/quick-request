@@ -35,4 +35,10 @@
             <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
         </action>
     </actions>
+
+    <extensions defaultExtensionNs="QuickRequest">
+        <requestMappingContributor
+                implementation="io.github.zjay.plugin.fastrequest.contributor.JavaRequestMappingContributor"/>
+    </extensions>
+
 </idea-plugin>

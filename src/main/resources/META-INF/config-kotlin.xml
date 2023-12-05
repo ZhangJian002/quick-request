@@ -1,4 +1,8 @@
 <idea-plugin>
+    <extensions defaultExtensionNs="QuickRequest">
+        <requestMappingContributor
+                implementation="io.github.zjay.plugin.fastrequest.contributor.KotlinRequestMappingContributor"/>
+    </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <codeInsight.lineMarkerProvider language="kotlin"
                                         implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.KotlinLineMarkerProvider"/>
