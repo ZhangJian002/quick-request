@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.12.5'
+version '2023.12.6'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 repositories {

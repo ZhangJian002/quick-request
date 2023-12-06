@@ -23,13 +23,18 @@ import io.github.zjay.plugin.fastrequest.util.LanguageEnum;
 
 public class GoFunctionTooltip extends BaseFunctionTooltip implements Function<PsiElement,String> {
 
+    String url = "";
     public GoFunctionTooltip(PsiElement element, LanguageEnum language) {
         super(element, language);
     }
 
+    public GoFunctionTooltip(PsiElement element, LanguageEnum language, String url) {
+        this(element, language);
+        this.url = url;
+    }
+
     @Override
     public String fun(PsiElement psiElement) {
-        LeafPsiElement leafPsiElement = (LeafPsiElement)getElement();
-        return msg + leafPsiElement.getText() + "(or right-click to set)";
+        return msg + url + " (or right-click to set)";
     }
 }

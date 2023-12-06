@@ -22,6 +22,7 @@ import io.github.zjay.plugin.fastrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.fastrequest.generator.NormalUrlGenerator;
 import io.github.zjay.plugin.fastrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.fastrequest.model.ParamGroup;
+import io.github.zjay.plugin.fastrequest.view.linemarker.GoLineMarkerProvider;
 import org.apache.commons.lang3.StringUtils;
 
 public class GoMethodGenerator extends NormalUrlGenerator {
@@ -29,16 +30,11 @@ public class GoMethodGenerator extends NormalUrlGenerator {
     @Override
     public String generate(PsiElement psiElement, String method, Object parameters) {
         ParamGroup paramGroup = config.getParamGroup();
-        if (!(psiElement instanceof LeafPsiElement)) {
-            return StringUtils.EMPTY;
-        }
-        //methodType
-        LeafPsiElement psiMethod = (LeafPsiElement) psiElement;
         paramGroup.getBodyParamMap().clear();
         paramGroup.setMethodType(method);
-        PsiFile containingFile = psiMethod.getContainingFile();
+        PsiFile containingFile = psiElement.getContainingFile();
         paramGroup.setClassName(containingFile.getName().split("\\.")[0]);
-        String url = psiMethod.getText().replaceAll("\"", "");
+        String url = GoLineMarkerProvider.getUrlFromPsi(psiElement);
         paramGroup.setMethod(url);
         paramGroup.setModule(psiElement.getProject().getName());
         paramGroup.setOriginUrl(url);
