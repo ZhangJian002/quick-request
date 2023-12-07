@@ -32,53 +32,53 @@
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestComponent"
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.config.FastRequestComponent"
                             order="first"/>
         <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCollectionComponent"/>
+                serviceImplementation="io.github.zjay.plugin.quickrequest.config.FastRequestCollectionComponent"/>
         <applicationService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestHistoryCollectionComponent"/>
+                serviceImplementation="io.github.zjay.plugin.quickrequest.config.FastRequestHistoryCollectionComponent"/>
         <projectService
-                serviceImplementation="io.github.zjay.plugin.fastrequest.config.FastRequestCurrentProjectConfigComponent"/>
+                serviceImplementation="io.github.zjay.plugin.quickrequest.config.FastRequestCurrentProjectConfigComponent"/>
         <toolWindow id="Quick Request" anchor="right" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow"
-                    factoryClass="io.github.zjay.plugin.fastrequest.configurable.FastRequestToolWindowFactory"
+                    factoryClass="io.github.zjay.plugin.quickrequest.configurable.FastRequestToolWindowFactory"
                     secondary="false"/>
         <applicationConfigurable id="quickRequest" displayName="Quick Request"
-                                 instance="io.github.zjay.plugin.fastrequest.configurable.CommonConfigurable">
+                                 instance="io.github.zjay.plugin.quickrequest.configurable.CommonConfigurable">
             <configurable parentId="quickRequest" key="DateTypeConfig"
-                          instance="io.github.zjay.plugin.fastrequest.configurable.DataMappingConfigurable"/>
+                          instance="io.github.zjay.plugin.quickrequest.configurable.DataMappingConfigurable"/>
             <configurable parentId="quickRequest" key="OtherConfig"
-                          instance="io.github.zjay.plugin.fastrequest.configurable.OtherConfigConfigurable"/>
+                          instance="io.github.zjay.plugin.quickrequest.configurable.OtherConfigConfigurable"/>
         </applicationConfigurable>
 
         <notificationGroup id="quickRequestWindowNotificationGroup" displayType="TOOL_WINDOW"/>
-        <postStartupActivity implementation="io.github.zjay.plugin.fastrequest.update.WhatsNewActivity"/>
-        <iw.actionProvider implementation="io.github.zjay.plugin.fastrequest.action.soft_wrap.QuickRequestToggleAction" />
+        <postStartupActivity implementation="io.github.zjay.plugin.quickrequest.update.WhatsNewActivity"/>
+        <iw.actionProvider implementation="io.github.zjay.plugin.quickrequest.action.soft_wrap.QuickRequestToggleAction" />
         <codeInsight.lineMarkerProvider language="go"
-                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.GoLineMarkerProvider"/>
+                                        implementationClass="io.github.zjay.plugin.quickrequest.view.linemarker.GoLineMarkerProvider"/>
 <!--        <codeInsight.lineMarkerProvider language="php"-->
-<!--                                        implementationClass="io.github.zjay.plugin.fastrequest.view.linemarker.GoLineMarkerProvider"/>-->
-        <applicationService serviceImplementation="io.github.zjay.plugin.fastrequest.generator.impl.GoMethodGenerator"/>
+<!--                                        implementationClass="io.github.zjay.plugin.quickrequest.view.linemarker.GoLineMarkerProvider"/>-->
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator"/>
     </extensions>
 
     <actions>
         <action id="quickRequest.sendAction"
-                class="io.github.zjay.plugin.fastrequest.action.ToolbarSendRequestAction">
+                class="io.github.zjay.plugin.quickrequest.action.ToolbarSendRequestAction">
             <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>
         </action>
         <action id="quickRequest.pressureAction"
-                class="io.github.zjay.plugin.fastrequest.action.ToolbarPressureRequestAction">
+                class="io.github.zjay.plugin.quickrequest.action.ToolbarPressureRequestAction">
             <!--                <keyboard-shortcut keymap="$default" first-keystroke="alt EQUALS"/>-->
         </action>
 
         <action id="quickRequest.sendDownloadAction"
-                class="io.github.zjay.plugin.fastrequest.action.ToolbarSendAndDownloadRequestAction">
+                class="io.github.zjay.plugin.quickrequest.action.ToolbarSendAndDownloadRequestAction">
             <keyboard-shortcut keymap="$default" first-keystroke="alt MINUS"/>
         </action>
         <group id="quickRequest.editor.floatGroup">
-            <action id="quickRequest.bodyFormat" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.BodyFormatAction" />
-            <action id="quickRequest.format" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.FormatAction" />
-            <action id="quickRequest.softWrap" class="io.github.zjay.plugin.fastrequest.action.soft_wrap.SoftWrapAction" />
+            <action id="quickRequest.bodyFormat" class="io.github.zjay.plugin.quickrequest.action.soft_wrap.BodyFormatAction" />
+            <action id="quickRequest.format" class="io.github.zjay.plugin.quickrequest.action.soft_wrap.FormatAction" />
+            <action id="quickRequest.softWrap" class="io.github.zjay.plugin.quickrequest.action.soft_wrap.SoftWrapAction" />
         </group>
     </actions>
 
@@ -90,7 +90,7 @@
 
 
 <!--    <applicationListeners>-->
-<!--        <listener class="io.github.zjay.plugin.fastrequest.ui.MyProgressBarUiComponent" topic="com.intellij.ide.ui.LafManagerListener"/>-->
+<!--        <listener class="io.github.zjay.plugin.quickrequest.ui.MyProgressBarUiComponent" topic="com.intellij.ide.ui.LafManagerListener"/>-->
 <!--    </applicationListeners>-->
 
 
