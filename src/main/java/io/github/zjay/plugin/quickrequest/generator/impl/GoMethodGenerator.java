@@ -21,7 +21,8 @@ import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.generator.NormalUrlGenerator;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
-import io.github.zjay.plugin.quickrequest.view.linemarker.GoLineMarkerProvider;
+import io.github.zjay.plugin.quickrequest.my.AnalysisUtils;
+import io.github.zjay.plugin.quickrequest.config.linemarker.GoLineMarkerProvider;
 
 import java.util.LinkedHashMap;
 
@@ -41,7 +42,7 @@ public class GoMethodGenerator extends NormalUrlGenerator {
         paramGroup.setType(1);
         paramGroup.setMethodDescription(url);
         if(parameters != null && parameters instanceof PsiElement){
-            LinkedHashMap<String, Object> paramsLinkedHashMap = GoLineMarkerProvider.analysisPsi((PsiElement) parameters);
+            LinkedHashMap<String, Object> paramsLinkedHashMap = AnalysisUtils.analysisPsi((PsiElement) parameters);
             paramGroup.setBodyParamMap(paramsLinkedHashMap);
 
         }

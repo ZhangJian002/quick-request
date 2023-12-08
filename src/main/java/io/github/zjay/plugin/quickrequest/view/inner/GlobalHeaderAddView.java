@@ -22,7 +22,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import io.github.zjay.plugin.quickrequest.config.Constant;
-import io.github.zjay.plugin.quickrequest.config.GeneralTextAutoComplete;
+import io.github.zjay.plugin.quickrequest.complete.GeneralTextAutoComplete;
 import io.github.zjay.plugin.quickrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.quickrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.quickrequest.model.DataMapping;

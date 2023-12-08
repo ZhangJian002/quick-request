@@ -23,7 +23,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.ui.content.Content;
 import com.intellij.util.messages.MessageBus;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
-import io.github.zjay.plugin.quickrequest.configurable.ConfigChangeNotifier;
+import io.github.zjay.plugin.quickrequest.config.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.quickrequest.view.FastRequestToolWindow;
