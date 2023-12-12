@@ -1,0 +1,19 @@
+getStatementList   string
+getLeftHandExprList  string
+getChildren string
+resolve string
+getGoTypeInner string
+contextlessResolve string
+getSpecType
+getType
+getFieldDeclarationList
+getFieldDefinitionList
+MAP_TYPE
+ARRAY_OR_SLICE_TYPE
+getIdentifier
+getAnonymousFieldDefinition
+getTag
+getName
+getLength
+getKeyType
+getValueType

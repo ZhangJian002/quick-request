@@ -1,7 +1,7 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
         <searchEverywhereContributor
-                implementation="io.github.zjay.plugin.quickrequest.config.contributor.FastRequestGotoContributor$Factory"/>
+                implementation="io.github.zjay.plugin.quickrequest.contributor.FastRequestGotoContributor$Factory"/>
         <!-- Add your extensions here -->
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.service.GeneratorUrlService"/>
         <applicationService
@@ -11,10 +11,10 @@
         <applicationService
                 serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.DubboMethodGenerator"/>
         <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="io.github.zjay.plugin.quickrequest.config.linemarker.JavaLineMarkerProvider"/>
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.JavaLineMarkerProvider"/>
 
         <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="io.github.zjay.plugin.quickrequest.config.linemarker.DubboLineMarkerProvider"/>
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider"/>
     </extensions>
     <actions>
         <!-- Add your actions here -->
@@ -23,7 +23,7 @@
             <group id="generateSubGroupFree"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
-            <action id="quickRequest.generatorMethod" class="io.github.zjay.plugin.quickrequest.config.action.GenerateMethodAction"
+            <action id="quickRequest.generatorMethod" class="io.github.zjay.plugin.quickrequest.action.GenerateMethodAction"
                     text="Generate Spring Method"
                     description="Generate spring method">
                 <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
@@ -31,14 +31,14 @@
         </group>
 
         <action id="quickRequest.gotoFastRequest"
-                class="io.github.zjay.plugin.quickrequest.config.action.GotoFastRequestAction">
+                class="io.github.zjay.plugin.quickrequest.action.GotoFastRequestAction">
             <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
         </action>
     </actions>
 
     <extensions defaultExtensionNs="QuickRequest">
         <requestMappingContributor
-                implementation="io.github.zjay.plugin.quickrequest.config.contributor.JavaRequestMappingContributor"/>
+                implementation="io.github.zjay.plugin.quickrequest.contributor.JavaRequestMappingContributor"/>
     </extensions>
 
 </idea-plugin>

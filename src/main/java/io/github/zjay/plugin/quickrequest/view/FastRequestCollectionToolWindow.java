@@ -69,7 +69,7 @@ import io.github.zjay.plugin.quickrequest.config.*;
 import io.github.zjay.plugin.quickrequest.deprecated.AddAnActionFunction;
 import io.github.zjay.plugin.quickrequest.view.ui.MethodFontTableCellRenderer;
 import quickRequest.icons.PluginIcons;
-import io.github.zjay.plugin.quickrequest.config.configurable.ConfigChangeNotifier;
+import io.github.zjay.plugin.quickrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.quickrequest.idea.ExportToFileUtil;
 import io.github.zjay.plugin.quickrequest.util.*;
 import io.github.zjay.plugin.quickrequest.view.component.CollectionNodeSelection;

@@ -63,14 +63,14 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
-import io.github.zjay.plugin.quickrequest.config.action.soft_wrap.BodyFormatAction;
+import io.github.zjay.plugin.quickrequest.action.soft_wrap.BodyFormatAction;
 import io.github.zjay.plugin.quickrequest.complete.GeneralTextAutoCompleteEditor;
 import io.github.zjay.plugin.quickrequest.util.http.BodyContentType;
 import io.github.zjay.plugin.quickrequest.view.ui.MethodFontListCellRenderer;
 import quickRequest.icons.PluginIcons;
-import io.github.zjay.plugin.quickrequest.config.action.*;
+import io.github.zjay.plugin.quickrequest.action.*;
 import io.github.zjay.plugin.quickrequest.config.*;
-import io.github.zjay.plugin.quickrequest.config.configurable.ConfigChangeNotifier;
+import io.github.zjay.plugin.quickrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.quickrequest.dubbo.DubboService;
 import io.github.zjay.plugin.quickrequest.jmh.JMHTest;
 import io.github.zjay.plugin.quickrequest.util.*;
@@ -1134,7 +1134,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             Map.Entry<String, List<String>> next = iterator.next();
             String headerName = next.getKey();
             List<String> value = next.getValue();
-            request.header(headerName, value.get(0));
+            if(StringUtils.isNotBlank(headerName) && StringUtils.isNotBlank(value.get(0))){
+                request.header(headerName, value.get(0));
+            }
         }
         Map<String, Object> multipartFormParam = multipartKeyValueList.stream().filter(ParamKeyValue::getEnabled)
                 .collect(HashMap::new, (m, v) -> {

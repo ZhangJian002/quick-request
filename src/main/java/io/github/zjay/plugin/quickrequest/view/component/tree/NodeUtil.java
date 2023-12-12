@@ -27,7 +27,7 @@ import io.github.zjay.plugin.quickrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.SpringMethodUrlGenerator;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.util.FrPsiUtil;
-import io.github.zjay.plugin.quickrequest.config.linemarker.DubboLineMarkerProvider;
+import io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider;
 import org.apache.commons.collections.IteratorUtils;
 import org.jetbrains.annotations.NotNull;
 

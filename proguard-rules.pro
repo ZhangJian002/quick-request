@@ -1,40 +1,26 @@
--injars /Users/wilson/develop/idea/plugin-develop/fast-request/build/libs/fast-request-2.0.0.jar
--outjars /Users/wilson/Desktop/tmp1
+#-injars E:/Projects/Idea/fast-request-idea/build/libs/quick-request-idea-2023.12.12.jar
+#-outjars E:/Projects/Idea/fast-request-idea/build/libs/temp
 
 
 
--keep class io.github.zjay.plugin.fastrequest.** {*;}
 
+-keep class io.github.zjay.plugin.quickrequest.model.* {*;}
 
--keep class cn.hutool.** {*;}
+-keep class quickRequest.icons.* {*;}
 
-# -dontwarn com.alibaba.**
--keep class com.alibaba.** {*;}
+-keep class io.github.zjay.plugin.quickrequest.util.OkHttp3Util* {*;}
 
-# -dontwarn com.google.**
--keep class com.google.** {*;}
+-obfuscationdictionary dic.txt
+-classobfuscationdictionary dic.txt
+-packageobfuscationdictionary dic.txt
 
-# -dontwarn org.apache.commons.**
--keep class org.apache.commons.** {*;}
+#-obfuscationdictionary strings.txt
 
-# -dontwarn org.apache.commons.**
--keep class org.apache.commons.** {*;}
-
-# -dontwarn com.intellij.**
--keep class com.intellij.** {*;}
-
-# -dontwarn org.jetbrains
--keep class org.jetbrains.** {*;}
-
--keepattributes *Annotation*,InnerClasses
+#-keepattributes *Annotation*,InnerClasses
 
 
 
 # Keep - Applications. Keep all application classes, along with their 'main' methods.
--keepclasseswithmembers public class * {
-    public static void main(java.lang.String[]);
-}
-
 # Also keep - Enumerations. Keep the special static methods that are required in
 # enumeration classes.
 -keepclassmembers enum  * {
@@ -45,24 +31,13 @@
 # Also keep - Database drivers. Keep all implementations of java.sql.Driver.
 -keep class * extends java.sql.Driver
 
-# Also keep - Swing UI L&F. Keep all extensions of javax.swing.plaf.ComponentUI,
-# along with the special 'createUI' method.
--keep class * extends javax.swing.plaf.ComponentUI {
-    public static javax.swing.plaf.ComponentUI createUI(javax.swing.JComponent);
-}
 
-
-
-# Keep - Native method names. Keep all native class/method names.
--keepclasseswithmembers,includedescriptorclasses,allowshrinking class * {
-    native <methods>;
-}
 
 # Remove - System method calls. Remove all invocations of System
 # methods without side effects whose return values are not used.
 -assumenosideeffects public class java.lang.System {
     public static long currentTimeMillis();
-    static java.lang.Class getCallerClass();
+#    static java.lang.Class getCallerClass();
     public static int identityHashCode(java.lang.Object);
     public static java.lang.SecurityManager getSecurityManager();
     public static java.util.Properties getProperties();
@@ -259,7 +234,7 @@
     public char charAt(int);
     public char[] toCharArray();
     public int compareToIgnoreCase(java.lang.String);
-    public int compareTo(java.lang.Object);
+#    public int compareTo(java.lang.Object);
     public int compareTo(java.lang.String);
     public int hashCode();
     public int indexOf(int);
@@ -306,16 +281,16 @@
 
 # Remove - StringBuilder method calls. Remove all invocations of StringBuilder
 # methods without side effects whose return values are not used.
--assumenosideeffects public class java.lang.StringBuilder {
-    public java.lang.String toString();
-    public char charAt(int);
-    public int capacity();
-    public int codePointAt(int);
-    public int codePointBefore(int);
-    public int indexOf(java.lang.String,int);
-    public int lastIndexOf(java.lang.String);
-    public int lastIndexOf(java.lang.String,int);
-    public int length();
-    public java.lang.String substring(int);
-    public java.lang.String substring(int,int);
-}
+#-assumenosideeffects public class java.lang.StringBuilder {
+#    public java.lang.String toString();
+#    public char charAt(int);
+#    public int capacity();
+#    public int codePointAt(int);
+#    public int codePointBefore(int);
+#    public int indexOf(java.lang.String,int);
+#    public int lastIndexOf(java.lang.String);
+#    public int lastIndexOf(java.lang.String,int);
+#    public int length();
+#    public java.lang.String substring(int);
+#    public java.lang.String substring(int,int);
+#}

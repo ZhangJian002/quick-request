@@ -22,7 +22,8 @@ import io.github.zjay.plugin.quickrequest.generator.NormalUrlGenerator;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
 import io.github.zjay.plugin.quickrequest.my.AnalysisUtils;
-import io.github.zjay.plugin.quickrequest.config.linemarker.GoLineMarkerProvider;
+import io.github.zjay.plugin.quickrequest.generator.linemarker.GoLineMarkerProvider;
+import org.apache.commons.collections.MapUtils;
 
 import java.util.LinkedHashMap;
 
@@ -31,7 +32,9 @@ public class GoMethodGenerator extends NormalUrlGenerator {
     @Override
     public String generate(PsiElement psiElement, String method, Object parameters) {
         ParamGroup paramGroup = config.getParamGroup();
-        paramGroup.getBodyParamMap().clear();
+        if(paramGroup.getBodyParamMap() != null){
+            paramGroup.getBodyParamMap().clear();
+        }
         paramGroup.setMethodType(method);
         PsiFile containingFile = psiElement.getContainingFile();
         paramGroup.setClassName(containingFile.getName().split("\\.")[0]);
@@ -43,8 +46,9 @@ public class GoMethodGenerator extends NormalUrlGenerator {
         paramGroup.setMethodDescription(url);
         if(parameters != null && parameters instanceof PsiElement){
             LinkedHashMap<String, Object> paramsLinkedHashMap = AnalysisUtils.analysisPsi((PsiElement) parameters);
-            paramGroup.setBodyParamMap(paramsLinkedHashMap);
-
+            if(MapUtils.isNotEmpty(paramsLinkedHashMap)){
+                paramGroup.setBodyParamMap(paramsLinkedHashMap);
+            }
         }
         return null;
     }

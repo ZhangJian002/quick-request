@@ -34,6 +34,8 @@ public class ParamKeyValue implements Serializable {
 
     private Boolean enabled = true;
 
+    public ParamKeyValue(){}
+
     public ParamKeyValue(String key, Object value) {
         this.key = key;
         this.value = value;
