@@ -25,12 +25,18 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import com.intellij.openapi.ui.MessageType;
+import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
+import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 public class WhatsNewActivity implements StartupActivity {
 
     @Override
     public void runActivity(@NotNull Project project) {
+        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+        if(config != null && config.getParamGroup() != null){
+            config.getParamGroup().clear();
+        }
         IdeaPluginDescriptor plugin = PluginManagerCore.getPlugin(PluginId.getId("QuickRequest"));
 //        if (plugin != null) {
 //            System.out.println("当前版本：" +plugin.getVersion());
