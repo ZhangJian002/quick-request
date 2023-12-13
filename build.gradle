@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.12.12'
+version '2023.12.13'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2023.12.12'
+    pluginVersion = '2023.12.13'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -102,7 +102,28 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
-
+    <h3>v2023.12.13</h3>
+    <p>中文</p>
+    <ul>
+        <li>bug修复</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix bugs</li>
+    </ul>
+    <h3>v2023.12.12</h3>
+    <p>中文</p>
+    <ul>
+        <li>Go语言Gin框架支持Bind、BindJSON、ShouldBind、ShouldBindJSON(&xx)四种方式的Body参数生成，暂定四种方式</li>
+        <li>Go语言Gin、echo框架的第一个参数(即：url)从此版本开始可以支持任何变量、常量，而不是必须要求是一个字符串</li>
+        <li>如有其他要求，比如新支持一个框架、一门语言，可联系我定制化开发</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>The Go language Gin framework supports body parameter generation in four ways: Bind, BindJSON, ShouldBind, and ShouldBindJSON (&xx), with four tentative methods</li>
+        <li>The first parameter (i.e. URL) of the Gin and Echo frameworks in the Go language can support any variable or constant from this version onwards, rather than requiring it to be a string</li>
+        <li>If you have any other requirements, such as new support for a framework or language, you can contact me for customized development</li>
+    </ul>
     <h3>v2023.12.4</h3>
     <p>中文</p>
     <ul>

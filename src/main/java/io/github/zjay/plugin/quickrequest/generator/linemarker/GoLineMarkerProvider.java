@@ -28,6 +28,8 @@ import io.github.zjay.plugin.quickrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
+import io.github.zjay.plugin.quickrequest.util.TwoJinZhi;
+import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
 import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.GoFunctionTooltip;
 import org.apache.commons.lang3.StringUtils;
@@ -42,15 +44,15 @@ public class GoLineMarkerProvider implements LineMarkerProvider {
         MyLineMarkerInfo<PsiElement> lineMarkerInfo = null;
         try {
             ASTNode node = element.getNode();
-            if (node instanceof CompositeElement && "CALL_EXPR".equals((node.getElementType().toString()))) {
+            if (node instanceof CompositeElement && TwoJinZhiGet.getRealStr(TwoJinZhi.CALL_EXPR).equals((node.getElementType().toString()))) {
                 PsiElement goMethod;
                 //代表是一个调用
                 if (!GoMethod.isExist((goMethod = element.getFirstChild().getLastChild()).getText())) {
                     return null;
                 }
-                Method getArgumentList = element.getClass().getMethod("getArgumentList");
+                Method getArgumentList = element.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getArgumentList));
                 PsiElement invoke1 = (PsiElement) getArgumentList.invoke(element);
-                Method getLparen = invoke1.getClass().getMethod("getLparen");
+                Method getLparen = invoke1.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getLparen));
                 PsiElement invoke2 = (PsiElement) getLparen.invoke(invoke1);
                 PsiElement needLineMarker = null;
                 PsiElement generateParams = null;
@@ -67,11 +69,11 @@ public class GoLineMarkerProvider implements LineMarkerProvider {
                         if(generateParams != null){
                             continue;
                         }
-                        if("FUNCTION_LIT".equals((tempNode.getElementType().toString()))){
+                        if(TwoJinZhiGet.getRealStr(TwoJinZhi.FUNCTION_LIT).equals((tempNode.getElementType().toString()))){
                             generateParams = generateParamsGet(temp);
-                        }else if("REFERENCE_EXPRESSION".equals((tempNode.getElementType().toString()))){
+                        }else if(TwoJinZhiGet.getRealStr(TwoJinZhi.REFERENCE_EXPRESSION).equals((tempNode.getElementType().toString()))){
                             //调用resolve，解析成方法
-                            Method resolve = temp.getClass().getMethod("resolve");
+                            Method resolve = temp.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.resolve));
                             PsiElement resolveObj = (PsiElement)resolve.invoke(temp);
                             generateParams = generateParamsGet(resolveObj);
                         }
@@ -101,7 +103,7 @@ public class GoLineMarkerProvider implements LineMarkerProvider {
     private PsiElement generateParamsGet(PsiElement temp) {
         try {
             //获取方法的代码快对象
-            Method getBlock = temp.getClass().getMethod("getBlock");
+            Method getBlock = temp.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getBlock));
             return (PsiElement)getBlock.invoke(temp);
         }catch (Exception e){
             //不是代码快
@@ -113,14 +115,14 @@ public class GoLineMarkerProvider implements LineMarkerProvider {
         String url = "";
         try {
             ASTNode tempNode = temp.getNode();
-            if ("REFERENCE_EXPRESSION".equals((tempNode.getElementType().toString()))) {
-                Method resolve = temp.getClass().getMethod("resolve");
+            if (TwoJinZhiGet.getRealStr(TwoJinZhi.REFERENCE_EXPRESSION).equals((tempNode.getElementType().toString()))) {
+                Method resolve = temp.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.resolve));
                 Object invoke3 = resolve.invoke(temp);
-                Method getConst = invoke3.getClass().getMethod("getValue");
+                Method getConst = invoke3.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getValue));
                 Object invoke4 = getConst.invoke(invoke3);
                 url = invoke4.toString();
-            } else if ("STRING_LITERAL".equals((tempNode.getElementType().toString()))) {
-                url = tempNode.getText();
+            } else if (TwoJinZhiGet.getRealStr(TwoJinZhi.STRING_LITERAL).equals((tempNode.getElementType().toString()))) {
+                url = tempNode.getText().replaceAll("\"", "");
             } else {
                 url = null;
             }

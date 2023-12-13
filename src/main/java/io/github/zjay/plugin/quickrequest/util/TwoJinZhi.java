@@ -1,10 +1,5 @@
-package io.github.zjay.plugin.quickrequest.my;
+package io.github.zjay.plugin.quickrequest.util;
 
-import org.apache.commons.lang3.CharUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class TwoJinZhi {
 
@@ -32,41 +27,11 @@ public class TwoJinZhi {
     public static String getKeyType = "1100111 1100000 1100101 1110100 1001011 1100101 1111001 1010100 1111001 1110000 1100101 1100000";
     public static String getValueType = "1100111 1100000 1100101 1110100 1010110 1100001 1101100 1110101 1100101 1010100 1111001 1110000 1100101 1100000";
 
-
-    public static String getRealStr(String target){
-        String binaryString = Integer.toBinaryString("`".getBytes()[0]);
-        String result = target.replaceAll(binaryString, " ");
-        String[] tempStr = result.split(" ");
-        List<String> tempList = new LinkedList<>();
-        for (String s : tempStr) {
-            if(!s.isBlank()){
-                tempList.add(s.trim());
-            }
-        }
-        char[] tempChar=new char[tempList.size()];
-        for(int i=0;i<tempList.size();i++) {
-            tempChar[i]=BinstrToChar(tempList.get(i));
-        }
-        return String.valueOf(tempChar);
-    }
-
-    public static char BinstrToChar(String binStr){
-        int[] temp=BinstrToIntArray(binStr);
-        int sum=0;
-        for(int i=0; i<temp.length;i++){
-            sum +=temp[temp.length-1-i]<<i;
-        }
-        return (char)sum;
-    }
-
-    public static int[] BinstrToIntArray(String binStr) {
-        char[] temp=binStr.toCharArray();
-        int[] result=new int[temp.length];
-        for(int i=0;i<temp.length;i++) {
-            result[i]=temp[i]-48;
-        }
-        return result;
-    }
-
-
+    public static String CALL_EXPR = "1000011 1100000 1000001 1100000 1001100 1001100 1011111 1000101 1011000 1010000 1010010";
+    public static String getArgumentList = "1100111 1100101 1110100 1100000 1000001 1110010 1100111 1110101 1101101 1100101 1101110 1100000 1110100 1001100 1101001 1110011 1110100";
+    public static String getLparen = "1100111 1100101 1110100 1001100 1110000 1100001 1100000 1110010 1100101 1100000 1101110";
+    public static String FUNCTION_LIT = "1000110 1010101 1001110 1000011 1010100 1001001 1100000 1001111 1001110 1011111 1001100 1001001 1100000 1010100";
+    public static String REFERENCE_EXPRESSION = "1010010 1000101 1000110 1100000 1000101 1010010 1000101 1001110 1000011 1000101 1011111 1000101 1011000 1100000 1010000 1010010 1000101 1010011 1100000 1010011 1001001 1001111 1001110";
+    public static String getBlock = "1100111 1100101 1110100 1000010 1101100 1101111 1100011 1100000 1101011 1100000";
+    public static String STRING_LITERAL = "1010011 1100000 1010100 1010010 1001001 1001110 1000111 1100000 1011111 1001100 1001001 1010100 1000101 1100000 1010010 1000001 1001100";
 }
