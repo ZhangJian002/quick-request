@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.12.13'
+version '2023.12.15'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2023.12.13'
+    pluginVersion = '2023.12.15'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11

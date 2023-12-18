@@ -1,8 +1,8 @@
-package io.github.zjay.plugin.quickrequest.my;
+package io.github.zjay.plugin.quickrequest.analysis.go;
 
 import com.alibaba.fastjson.JSONObject;
 import com.intellij.psi.PsiElement;
-import io.github.zjay.plugin.quickrequest.util.TwoJinZhi;
+import io.github.zjay.plugin.quickrequest.util.GoTwoJinZhi;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
 
 import java.lang.reflect.Method;
@@ -13,21 +13,21 @@ public class HandlerMapType {
     public static void handlerMapType(PsiElement typeChild, LinkedHashMap<String, Object> targetMap, Object fieldDefinition) {
         try {
             //map类型
-            Method getKeyType = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getKeyType));
+            Method getKeyType = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getKeyType));
             Object keyType = getKeyType.invoke(typeChild);
-            Method contextlessResolveChild = keyType.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.contextlessResolve));
+            Method contextlessResolveChild = keyType.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.contextlessResolve));
             Object contextlessResolveChildResult = contextlessResolveChild.invoke(keyType);
             LinkedHashMap<String, Object> mapKeyLinkedHashMap = AnalysisType.analysisType(contextlessResolveChildResult);
             Object key = handleMapReturn(mapKeyLinkedHashMap);
-            Method getValueType = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getValueType));
+            Method getValueType = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getValueType));
             Object valueType = getValueType.invoke(typeChild);
-            Method contextlessResolveValue = valueType.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.contextlessResolve));
+            Method contextlessResolveValue = valueType.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.contextlessResolve));
             Object contextlessResolveValueResult = contextlessResolveValue.invoke(valueType);
             LinkedHashMap<String, Object> mapValueLinkedHashMap = AnalysisType.analysisType(contextlessResolveValueResult);
             Object value = handleMapReturn(mapValueLinkedHashMap);
             LinkedHashMap<String, Object> tempMap = new LinkedHashMap<>();
             tempMap.put(JSONObject.toJSONString(key), value);
-            Method getName = fieldDefinition.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getName));
+            Method getName = fieldDefinition.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getName));
             targetMap.put(getName.invoke(fieldDefinition).toString(), tempMap);
         }catch (Exception e){
 

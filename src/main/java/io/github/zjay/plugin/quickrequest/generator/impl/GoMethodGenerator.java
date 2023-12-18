@@ -21,7 +21,7 @@ import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.generator.NormalUrlGenerator;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
-import io.github.zjay.plugin.quickrequest.my.AnalysisPsi;
+import io.github.zjay.plugin.quickrequest.analysis.go.AnalysisPsi;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.GoLineMarkerProvider;
 import org.apache.commons.collections.MapUtils;
 

@@ -5,10 +5,6 @@ import java.util.List;
 
 public class TwoJinZhiGet {
 
-    public static void main(String[] args) {
-        System.out.println(getRealStr(TwoJinZhi.getBlock));
-    }
-
 
     public static String getRealStr(String target){
         String binaryString = Integer.toBinaryString("`".getBytes()[0]);

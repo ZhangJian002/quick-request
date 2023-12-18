@@ -56,7 +56,10 @@
         <iw.actionProvider implementation="io.github.zjay.plugin.quickrequest.action.soft_wrap.QuickRequestToggleAction" />
         <codeInsight.lineMarkerProvider language="go"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GoLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="Python"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator"/>
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PyMethodGenerator"/>
     </extensions>
 
     <actions>

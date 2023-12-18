@@ -1,7 +1,7 @@
-package io.github.zjay.plugin.quickrequest.my;
+package io.github.zjay.plugin.quickrequest.analysis.go;
 
 import com.intellij.psi.PsiElement;
-import io.github.zjay.plugin.quickrequest.util.TwoJinZhi;
+import io.github.zjay.plugin.quickrequest.util.GoTwoJinZhi;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
 
 import java.lang.reflect.Method;
@@ -13,14 +13,14 @@ public class HandlerArrayType {
 
     public static void handlerArrayType(PsiElement typeChild, LinkedHashMap<String, Object> targetMap, Object fieldDefinition) {
         try {
-            Method getLength = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getLength));
+            Method getLength = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getLength));
             Object length = getLength.invoke(typeChild);
 
-            Method getArrType = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getType));
+            Method getArrType = typeChild.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getType));
             Object arrType = getArrType.invoke(typeChild);
-            Method contextlessResolveValue = arrType.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.contextlessResolve));
+            Method contextlessResolveValue = arrType.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.contextlessResolve));
             Object contextlessResolveValueResult = contextlessResolveValue.invoke(arrType);
-            Method getName = fieldDefinition.getClass().getMethod(TwoJinZhiGet.getRealStr(TwoJinZhi.getName));
+            Method getName = fieldDefinition.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getName));
 
             LinkedHashMap<String, Object> stringObjectLinkedHashMap = AnalysisType.analysisType(contextlessResolveValueResult);
             Object value = HandlerMapType.handleMapReturn(stringObjectLinkedHashMap);
