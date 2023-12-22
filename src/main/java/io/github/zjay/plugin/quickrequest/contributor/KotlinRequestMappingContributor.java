@@ -25,8 +25,11 @@ import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
 import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex;
 import org.jetbrains.kotlin.psi.KtAnnotationEntry;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,20 +37,26 @@ import java.util.stream.Collectors;
 
 public class KotlinRequestMappingContributor extends RequestMappingByNameContributor{
 
+    private static KotlinAnnotationsIndex kotlinAnnotationsIndex;
+
+    static {
+        try {
+            Constructor<KotlinAnnotationsIndex> declaredConstructor = KotlinAnnotationsIndex.class.getDeclaredConstructor();
+            declaredConstructor.setAccessible(true);
+            kotlinAnnotationsIndex = declaredConstructor.newInstance();
+        } catch (Exception e) {
+
+        }
+    }
+
     @Override
     List<PsiAnnotation> getAnnotationSearchers(String annotationName, Project project) {
         //Kotlin
-        try {
-            Class<?> clazz = KotlinAnnotationsIndex.class;
-            Field field = clazz.getDeclaredField("KEY");
-            field.setAccessible(true);
-            StubIndexKey<String, KtAnnotationEntry> key = (StubIndexKey<String, KtAnnotationEntry>)field.get(null);
-            Collection<KtAnnotationEntry> ktAnnotationEntries = StubIndex.getElements(key, annotationName, project, GlobalSearchScope.everythingScope(project), KtAnnotationEntry.class);
-            return ktAnnotationEntries.stream().map(LightClassUtilsKt::toLightAnnotation).collect(Collectors.toList());
-        }catch (Exception e){
-
+        if(kotlinAnnotationsIndex == null){
+            return new ArrayList<>();
         }
-        return new LinkedList<>();
+        Collection<KtAnnotationEntry> ktAnnotationEntries = StubIndex.getElements(kotlinAnnotationsIndex.getKey(), annotationName, project, GlobalSearchScope.everythingScope(project), KtAnnotationEntry.class);
+        return ktAnnotationEntries.stream().map(LightClassUtilsKt::toLightAnnotation).collect(Collectors.toList());
     }
 
 

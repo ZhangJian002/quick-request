@@ -21,12 +21,25 @@ import org.jetbrains.kotlin.idea.stubindex.KotlinFullClassNameIndex;
 import org.jetbrains.kotlin.psi.*;
 import quickRequest.icons.PluginIcons;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 public final class FixPositionAction extends AnAction {
+
+    private static KotlinFullClassNameIndex kotlinFullClassNameIndex;
+
+    static {
+        try {
+            Constructor<KotlinFullClassNameIndex> declaredConstructor = KotlinFullClassNameIndex.class.getDeclaredConstructor();
+            declaredConstructor.setAccessible(true);
+            kotlinFullClassNameIndex = declaredConstructor.newInstance();
+        } catch (Exception e) {
+
+        }
+    }
 
     private Project myProject;
 
@@ -53,31 +66,26 @@ public final class FixPositionAction extends AnAction {
                 }
             }
         }else {
-
-            try {
-                Class<?> clazz = KotlinFullClassNameIndex.class;
-                Field field = clazz.getDeclaredField("KEY");
-                field.setAccessible(true);
-                StubIndexKey<String, KtClassOrObject> key = (StubIndexKey<String, KtClassOrObject>)field.get(null);
-                Collection<KtClassOrObject> ktClassOrObjects = StubIndex.getElements(key, className, myProject, GlobalSearchScope.projectScope(myProject), KtClassOrObject.class);
-                if(CollectionUtils.isNotEmpty(ktClassOrObjects)){
-                    for (KtClassOrObject ktClassOrObject : ktClassOrObjects) {
-                        if(ktClassOrObject instanceof KtClass){
-                            KtClass ktClass = (KtClass) ktClassOrObject;
-                            List<KtDeclaration> declarations = ktClass.getDeclarations();
-                            for (KtDeclaration declaration : declarations) {
-                                if(declaration instanceof KtNamedFunction && Objects.equals(methodName, declaration.getName())){
-                                    PsiNavigateUtil.navigate(declaration);
-                                    return;
-                                }
+            if(kotlinFullClassNameIndex == null){
+                return;
+            }
+            Collection<KtClassOrObject> ktClassOrObjects = StubIndex.getElements(kotlinFullClassNameIndex.getKey(), className, myProject, GlobalSearchScope.projectScope(myProject), KtClassOrObject.class);
+            if(CollectionUtils.isNotEmpty(ktClassOrObjects)){
+                for (KtClassOrObject ktClassOrObject : ktClassOrObjects) {
+                    if(ktClassOrObject instanceof KtClass){
+                        KtClass ktClass = (KtClass) ktClassOrObject;
+                        List<KtDeclaration> declarations = ktClass.getDeclarations();
+                        for (KtDeclaration declaration : declarations) {
+                            if(declaration instanceof KtNamedFunction && Objects.equals(methodName, declaration.getName())){
+                                PsiNavigateUtil.navigate(declaration);
+                                return;
                             }
-                            break;
                         }
+                        break;
                     }
                 }
-            }catch (Exception e1){
-
             }
+
         }
     }
 }
