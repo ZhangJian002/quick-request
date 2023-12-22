@@ -20,11 +20,15 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
+import com.intellij.psi.stubs.StubIndexKey;
 import org.jetbrains.kotlin.asJava.LightClassUtilsKt;
 import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex;
 import org.jetbrains.kotlin.psi.KtAnnotationEntry;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,8 +37,17 @@ public class KotlinRequestMappingContributor extends RequestMappingByNameContrib
     @Override
     List<PsiAnnotation> getAnnotationSearchers(String annotationName, Project project) {
         //Kotlin
-        Collection<KtAnnotationEntry> ktAnnotationEntries = StubIndex.getElements(KotlinAnnotationsIndex.getInstance().getKey(), annotationName, project, GlobalSearchScope.everythingScope(project), KtAnnotationEntry.class);
-        return ktAnnotationEntries.stream().map(LightClassUtilsKt::toLightAnnotation).collect(Collectors.toList());
+        try {
+            Class<?> clazz = KotlinAnnotationsIndex.class;
+            Field field = clazz.getDeclaredField("KEY");
+            field.setAccessible(true);
+            StubIndexKey<String, KtAnnotationEntry> key = (StubIndexKey<String, KtAnnotationEntry>)field.get(null);
+            Collection<KtAnnotationEntry> ktAnnotationEntries = StubIndex.getElements(key, annotationName, project, GlobalSearchScope.everythingScope(project), KtAnnotationEntry.class);
+            return ktAnnotationEntries.stream().map(LightClassUtilsKt::toLightAnnotation).collect(Collectors.toList());
+        }catch (Exception e){
+
+        }
+        return new LinkedList<>();
     }
 
 
