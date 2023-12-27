@@ -56,6 +56,8 @@ public class MyLanguageTextField extends LanguageTextField {
 
     private int type;
 
+    private EditorEx editor;
+
     public MyLanguageTextField(Project myProject, Language language, FileType fileType, boolean isViewer, boolean needPretty, int type) {
         super(language, myProject, "", false);
         this.myProject = myProject;
@@ -72,6 +74,7 @@ public class MyLanguageTextField extends LanguageTextField {
         setUpEditor(editor);
         editor.putUserData(Constant.KEY_QUICKREQUEST, type);
         editor.setViewer(isViewer);
+        this.editor = editor;
         return editor;
     }
 
@@ -99,6 +102,9 @@ public class MyLanguageTextField extends LanguageTextField {
                     myProject,
                     () -> {
                         CodeStyleManager.getInstance(getProject()).reformat(psiFile);
+                        if (editor != null) {
+                            editor.getScrollingModel().scroll(0, 0);
+                        }
                     }
             );
         });
