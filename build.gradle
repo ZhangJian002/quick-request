@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2023.12.22'
+version '2023.12.29'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2023.12.22'
+    pluginVersion = '2023.12.29'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -102,6 +102,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2023.12.29</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复response显示问题</li>
+        <li>下个版本将支持php的Laravel框架，敬请期待</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix response display issue</li>
+        <li>The next version will support the Laravel framework for PHP, please stay tuned</li>
+    </ul>
     <h3>v2023.12.22</h3>
     <p>中文</p>
     <ul>
