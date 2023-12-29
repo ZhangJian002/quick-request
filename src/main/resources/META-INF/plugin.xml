@@ -15,9 +15,10 @@
             <li>2、Support requests for dubbo frameworks,support @Service, @DubboService, @Method</li>
             <li>3、Supports requests for the gin and echo framework of Go language</li>
             <li>4、Supports requests for the flask framework of Python language</li>
-            <li>5、Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
-            <li>6、Support for save requests and history queries</li>
-            <li>7、Support pressure testing</li>
+            <li>5、Supports requests for the Laravel framework of PHP language</li>
+            <li>6、Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
+            <li>7、Support for save requests and history queries</li>
+            <li>8、Support pressure testing</li>
         </ul>
         <h2>Links</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a>
