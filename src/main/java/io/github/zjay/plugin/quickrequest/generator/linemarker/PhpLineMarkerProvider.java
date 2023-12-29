@@ -26,8 +26,7 @@ import com.intellij.psi.PsiElement;
 import io.github.zjay.plugin.quickrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.quickrequest.generator.impl.PhpMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.PhpFunctionTooltip;
-import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
-import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
+import io.github.zjay.plugin.quickrequest.util.*;
 import org.jetbrains.annotations.NotNull;
 import quickRequest.icons.PluginIcons;
 
@@ -40,14 +39,14 @@ public class PhpLineMarkerProvider implements LineMarkerProvider {
     public LineMarkerInfo<PsiElement> getLineMarkerInfo(@NotNull PsiElement element) {
         LineMarkerInfo<PsiElement> lineMarkerInfo = null;
         try {
-            if(Objects.equals(element.getClass().getCanonicalName(), "com.jetbrains.php.lang.psi.elements.impl.MethodReferenceImpl")){
-                Method getClassReference = element.getClass().getMethod("getClassReference");
+            if(Objects.equals(element.getClass().getCanonicalName(), TwoJinZhiGet.getRealStr(PhpTwoJinZhi.MethodReferenceImpl))){
+                Method getClassReference = element.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getClassReference));
                 Object classReference = getClassReference.invoke(element);
-                Method getName = classReference.getClass().getMethod("getName");
+                Method getName = classReference.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getName));
                 Object name = getName.invoke(classReference);
-                if(Objects.equals(name, "Route")){
+                if(Objects.equals(name, TwoJinZhiGet.getRealStr(PhpTwoJinZhi.Route))){
                     //请求方式
-                    Method getParameters = element.getClass().getMethod("getParameters");
+                    Method getParameters = element.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getParameters));
                     Object[] parameters = (Object[])getParameters.invoke(element);
                     String url = getString((PsiElement) parameters[0]);
                     return new MyLineMarkerInfo<>(element, element.getTextRange(), PluginIcons.fastRequest_editor,
@@ -71,14 +70,14 @@ public class PhpLineMarkerProvider implements LineMarkerProvider {
         String url = "";
         try {
             String canonicalName = parameter.getClass().getCanonicalName();
-            if(Objects.equals(canonicalName, "com.jetbrains.php.lang.psi.elements.impl.StringLiteralExpressionImpl")){
-                Method getContents = parameter.getClass().getMethod("getContents");
+            if(Objects.equals(canonicalName, TwoJinZhiGet.getRealStr(PhpTwoJinZhi.StringLiteralExpressionImpl))){
+                Method getContents = parameter.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getContents));
                 url = getContents.invoke(parameter).toString();
-            }else if(Objects.equals(canonicalName, "com.jetbrains.php.lang.psi.elements.impl.ConstantReferenceImpl")){
-                Method resolve = parameter.getClass().getMethod("resolve");
+            }else if(Objects.equals(canonicalName, TwoJinZhiGet.getRealStr(PhpTwoJinZhi.ConstantReferenceImpl))){
+                Method resolve = parameter.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.resolve));
                 Object resolveResult = resolve.invoke(parameter);
-                if(Objects.equals(resolveResult.getClass().getCanonicalName(), "com.jetbrains.php.lang.psi.elements.impl.ConstantImpl")){
-                    Method getValue = resolveResult.getClass().getMethod("getValue");
+                if(Objects.equals(resolveResult.getClass().getCanonicalName(), TwoJinZhiGet.getRealStr(PhpTwoJinZhi.ConstantImpl))){
+                    Method getValue = resolveResult.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getValue));
                     PsiElement value = (PsiElement)getValue.invoke(resolveResult);
                     url = value.getText().replaceAll("\"", "").replaceAll("'", "");
                 }
