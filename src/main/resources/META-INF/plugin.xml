@@ -59,8 +59,11 @@
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GoLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="Python"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="PHP"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PhpLineMarkerProvider"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PyMethodGenerator"/>
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PhpMethodGenerator"/>
     </extensions>
 
     <actions>

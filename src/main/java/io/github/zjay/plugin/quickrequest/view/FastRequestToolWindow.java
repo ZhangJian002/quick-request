@@ -101,6 +101,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -1391,12 +1392,15 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             statusDis = "<html><span style=\"color: #FB1A00;\">" + statusDis + "</span></html>";
         }
         responseInfoParamsKeyValueList = Lists.newArrayList(
-//                new ParamKeyValue("Url", response.request().url().toString(), 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue("Status", statusDis),
+//                new ParamKeyValue("Response Size", getResponseSize(length), 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue("Time", duration + " ms", 2, TypeUtil.Type.String.name()),
                 new ParamKeyValue(Header.DATE.getValue(), response.header(Header.DATE.getValue())),
                 new ParamKeyValue(Header.CONTENT_TYPE.getValue(), response.header(Header.CONTENT_TYPE.getValue()), 2, TypeUtil.Type.String.name())
         );
+        if(StringUtils.isNotBlank(response.header(Header.HOST.getValue()))){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue(Header.HOST.getValue(), response.header(Header.HOST.getValue()), 2, TypeUtil.Type.String.name()));
+        }
         if(StringUtils.isNotBlank(response.header(Header.CONTENT_LENGTH.getValue()))){
             responseInfoParamsKeyValueList.add(new ParamKeyValue(Header.CONTENT_LENGTH.getValue(), response.header(Header.CONTENT_LENGTH.getValue()), 2, TypeUtil.Type.String.name()));
         }
@@ -1409,6 +1413,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         if(StringUtils.isNotBlank(response.header(Header.CONTENT_ENCODING.getValue()))){
             responseInfoParamsKeyValueList.add(new ParamKeyValue(Header.CONTENT_ENCODING.getValue(), response.header(Header.CONTENT_ENCODING.getValue()), 2, TypeUtil.Type.String.name()));
         }
+        if(StringUtils.isNotBlank(response.header("X-Powered-By"))){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue("X-Powered-By", response.header("X-Powered-By"), 2, TypeUtil.Type.String.name()));
+        }
+        if(StringUtils.isNotBlank(response.header(Header.SET_COOKIE.getValue()))){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue(Header.SET_COOKIE.getValue(), response.header(Header.SET_COOKIE.getValue()), 2, TypeUtil.Type.String.name()));
+        }
+
 
         //refreshTable(responseInfoTable);
         responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Key", "Value")), responseInfoParamsKeyValueList));
@@ -1416,6 +1427,20 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
 //                        responseStatusComboBox.setSelectedItem(status);
 //                        responseStatusComboBox.setBackground((status >= 200 && status < 300) ? MyColor.green : MyColor.red);
+    }
+
+    private String getResponseSize(long length) {
+        String result = length + " B";
+        if(length > 1024  * 1024){
+            //M
+            BigDecimal size = BigDecimal.valueOf(length).divide(new BigDecimal("1024 * 1024"), 2, RoundingMode.HALF_UP);
+            result = size + " MB";
+        }else if(length > 1024){
+            //KB
+            BigDecimal size = BigDecimal.valueOf(length).divide(new BigDecimal("1024"), 2, RoundingMode.HALF_UP);
+            result = size + " KB";
+        }
+        return result;
     }
 
     private void responseDubboPageHandler(String message, String duration) {
@@ -1703,7 +1728,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String methodType = paramGroup.getMethodType();
 
 //        methodTypeComboBox.setFont(Font.BOLD);
-        methodTypeComboBox.setForeground(JBColor.BLUE);
+//        methodTypeComboBox.setForeground(JBColor.BLUE);
 
         //method
         methodTypeComboBox.setSelectedItem(methodType);
