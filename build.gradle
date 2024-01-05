@@ -102,6 +102,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.1.5</h3>
+    <p>中文</p>
+    <ul>
+        <li>支持JSON5</li>
+        <li>修复无Kotlin插件时的问题</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>support JSON5</li>
+        <li>Fix bugs without Kotlin plugin</li>
+    </ul>
     <h3>v2024.1.1</h3>
     <p>中文</p>
     <ul>
