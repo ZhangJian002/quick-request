@@ -19,8 +19,8 @@ package io.github.zjay.plugin.quickrequest.view.inner;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.intellij.json.JsonFileType;
-import com.intellij.json.JsonLanguage;
+import com.intellij.json.json5.Json5FileType;
+import com.intellij.json.json5.Json5Language;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.project.Project;
@@ -68,7 +68,7 @@ public class HeaderGroupView extends DialogWrapper {
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
-        MyLanguageTextField languageTextField = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true, 2);
+        MyLanguageTextField languageTextField = new MyLanguageTextField(myProject, Json5Language.INSTANCE, Json5FileType.INSTANCE, false, true, 2);
         languageTextField.setMinimumSize(new Dimension(-1, 120));
         languageTextField.setPreferredSize(new Dimension(-1, 120));
         languageTextField.setMaximumSize(new Dimension(-1, 1000));

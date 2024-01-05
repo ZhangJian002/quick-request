@@ -28,8 +28,8 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
-import com.intellij.json.JsonFileType;
-import com.intellij.json.JsonLanguage;
+import com.intellij.json.json5.Json5FileType;
+import com.intellij.json.json5.Json5Language;
 import com.intellij.lang.Language;
 import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
@@ -440,10 +440,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
         managerConfigLink.setExternalLinkIcon();
         manageConfigButton = managerConfigLink;
-        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true, true, 1);
+        prettyJsonEditorPanel = new MyLanguageTextField(myProject, Json5Language.INSTANCE, Json5FileType.INSTANCE, true, true, 1);
         responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false, 1);
 
-        rowParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true, 1);
+        rowParamsTextArea = new MyLanguageTextField(myProject, Json5Language.INSTANCE, Json5FileType.INSTANCE, false, true, 1);
 
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
@@ -488,7 +488,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
         group.add(new OpenConfigAction());
         group.addSeparator("  |  ");
-        if(ToolUtils.isSupportAction()){
+        if(ToolUtils.isSupportAction() && ToolUtils.isSupportKotlin()){
             group.add(new FixPositionAction(myProject));
         }
         group.add(new SaveRequestAction());
@@ -4539,8 +4539,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         FileType fileType;
         switch (bodyContentType){
             case JSON:
-                language = JsonLanguage.INSTANCE;
-                fileType = JsonFileType.INSTANCE;
+                language = Json5Language.INSTANCE;
+                fileType = Json5FileType.INSTANCE;
                 break;
             case XML:
                 language = XMLLanguage.INSTANCE;
