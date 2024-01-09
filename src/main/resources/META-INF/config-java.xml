@@ -1,7 +1,5 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <searchEverywhereContributor
-                implementation="io.github.zjay.plugin.quickrequest.contributor.FastRequestGotoContributor$Factory"/>
         <!-- Add your extensions here -->
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.service.GeneratorUrlService"/>
         <applicationService
@@ -30,10 +28,6 @@
             </action>
         </group>
 
-        <action id="quickRequest.gotoFastRequest"
-                class="io.github.zjay.plugin.quickrequest.action.GotoFastRequestAction">
-            <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
-        </action>
     </actions>
 
     <extensions defaultExtensionNs="QuickRequest">

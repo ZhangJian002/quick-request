@@ -1,0 +1,11 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PhpMethodGenerator"/>
+        <codeInsight.lineMarkerProvider language="PHP"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PhpLineMarkerProvider"/>
+    </extensions>
+    <extensions defaultExtensionNs="QuickRequest">
+        <requestMappingContributor
+                implementation="io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor"/>
+    </extensions>
+</idea-plugin>

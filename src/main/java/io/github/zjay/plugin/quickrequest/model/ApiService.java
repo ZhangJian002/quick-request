@@ -16,6 +16,7 @@
 
 package io.github.zjay.plugin.quickrequest.model;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 
 import java.util.List;
@@ -37,13 +38,13 @@ public class ApiService {
     }
 
     public static class ApiMethod {
-        private PsiMethod psiMethod;
+        private PsiElement psiMethod;
         private String url;
         private String description;
         private String name;
         private String methodType;
 
-        public ApiMethod(PsiMethod psiMethod, String url, String description, String name, String methodType) {
+        public ApiMethod(PsiElement psiMethod, String url, String description, String name, String methodType) {
             this.psiMethod = psiMethod;
             this.url = url;
             this.description = description;
@@ -51,7 +52,7 @@ public class ApiService {
             this.methodType = methodType;
         }
 
-        public PsiMethod getPsiMethod() {
+        public PsiElement getPsiMethod() {
             return psiMethod;
         }
 

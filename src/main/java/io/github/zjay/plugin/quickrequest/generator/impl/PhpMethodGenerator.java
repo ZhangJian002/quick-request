@@ -16,6 +16,8 @@
 
 package io.github.zjay.plugin.quickrequest.generator.impl;
 
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
@@ -38,14 +40,19 @@ public class PhpMethodGenerator extends NormalUrlGenerator {
             Method getMethodName = psiElement.getClass().getMethod("getName");
             String methodName = getMethodName.invoke(psiElement).toString();
             paramGroup.setMethodType(LaravelMethods.getMethodType(methodName));
-            paramGroup.setMethod(url);
+            paramGroup.setMethod(methodName);
         }catch (Exception e){
 
         }
         PsiFile containingFile = psiElement.getContainingFile();
         paramGroup.setClassName(containingFile.getName());
-        paramGroup.setModule(psiElement.getProject().getName());
+        Module moduleForFile = ModuleUtil.findModuleForPsiElement(psiElement);
+        if (moduleForFile != null) {
+            String name = moduleForFile.getName();
+            paramGroup.setModule(name);
+        }
         paramGroup.setOriginUrl(url);
+        paramGroup.setType(3);
         return null;
     }
 }

@@ -30,10 +30,13 @@
     <depends optional="true" config-file="config-java.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="config-php.xml">com.jetbrains.php</depends>
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
+        <searchEverywhereContributor
+                implementation="io.github.zjay.plugin.quickrequest.contributor.FastRequestGotoContributor$Factory"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.config.FastRequestComponent"
                             order="first"/>
         <applicationService
@@ -60,11 +63,8 @@
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GoLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="Python"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider"/>
-        <codeInsight.lineMarkerProvider language="PHP"
-                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PhpLineMarkerProvider"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PyMethodGenerator"/>
-        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PhpMethodGenerator"/>
     </extensions>
 
     <actions>
@@ -86,6 +86,10 @@
             <action id="quickRequest.format" class="io.github.zjay.plugin.quickrequest.action.soft_wrap.FormatAction" />
             <action id="quickRequest.softWrap" class="io.github.zjay.plugin.quickrequest.action.soft_wrap.SoftWrapAction" />
         </group>
+        <action id="quickRequest.gotoFastRequest"
+                class="io.github.zjay.plugin.quickrequest.action.GotoFastRequestAction">
+            <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
+        </action>
     </actions>
 
 

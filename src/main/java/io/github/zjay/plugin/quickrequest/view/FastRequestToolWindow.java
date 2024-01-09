@@ -483,14 +483,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         DefaultActionGroup group = new DefaultActionGroup();
         GotoFastRequestAction gotoFastRequestAction = (GotoFastRequestAction) ActionManager.getInstance().getAction("quickRequest.gotoFastRequest");
-        if(gotoFastRequestAction != null){
-            group.add(gotoFastRequestAction);
-        }
+        group.add(gotoFastRequestAction);
         group.add(new OpenConfigAction());
         group.addSeparator("  |  ");
-        if(ToolUtils.isSupportAction() && ToolUtils.isSupportKotlin()){
-            group.add(new FixPositionAction(myProject));
-        }
+        group.add(new FixPositionAction(myProject));
         group.add(new SaveRequestAction());
         if(ToolUtils.isSupportAction()){
             group.add(new RetryAction());

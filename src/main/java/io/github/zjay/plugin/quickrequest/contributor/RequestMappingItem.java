@@ -24,6 +24,7 @@ import io.github.zjay.plugin.quickrequest.util.FrIconUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.Objects;
 
 
 public  class RequestMappingItem extends FakePsiElement {
@@ -106,9 +107,12 @@ public  class RequestMappingItem extends FakePsiElement {
       @NotNull
       public String getLocationString() {
          String location = null;
-         if (psiElement instanceof PsiMethod) {
-            PsiMethod psiMethod = ((PsiMethod) psiElement);;
+         if (Objects.equals(psiElement.getClass().getCanonicalName(), "com.intellij.psi.PsiMethod")) {
+            PsiMethod psiMethod = ((PsiMethod) psiElement);
             location = psiMethod.getContainingClass().getName().concat(".").concat(psiMethod.getName());
+         }else {
+            location = psiElement.getContainingFile().getName();
+//            location = psiElement.getContainingFile().getVirtualFile().getPresentableUrl();
          }
          return "(" + location + ")";
       }
@@ -118,8 +122,12 @@ public  class RequestMappingItem extends FakePsiElement {
       public Icon getIcon(boolean b) {
          PsiElement psiElement = RequestMappingItem.this.getPsiElement();
          PsiFile psiFile = psiElement.getContainingFile();
-         PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
-         return FrIconUtil.getIconByMethodAndClassType(requestMethod, psiJavaFile.getClasses()[0].isInterface());
+         if(Objects.equals("com.intellij.psi.PsiJavaFile", psiFile.getClass().getCanonicalName())){
+            PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
+            return FrIconUtil.getIconByMethodAndClassType(requestMethod, psiJavaFile.getClasses()[0].isInterface());
+         }else {
+            return FrIconUtil.getIconByMethodType(requestMethod);
+         }
       }
    }
 

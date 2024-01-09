@@ -25,6 +25,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileSystemItem;
 import com.intellij.psi.PsiJavaFile;
 import io.github.zjay.plugin.quickrequest.util.FrIconUtil;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.Objects;
 
 public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     private Project myProject;
@@ -96,8 +98,14 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     }
 
     private Icon getMethodIcon(RequestMappingItem requestMappingItem) {
-        PsiJavaFile psiJavaFile = (PsiJavaFile) requestMappingItem.getPsiElement().getContainingFile();
-        return FrIconUtil.getIconByMethodAndClassType(requestMappingItem.getRequestMethod(), psiJavaFile.getClasses()[0].isInterface());
+        PsiFile containingFile = requestMappingItem.getPsiElement().getContainingFile();
+        if(Objects.equals("com.intellij.psi.PsiJavaFile", containingFile.getClass().getCanonicalName())){
+            PsiJavaFile psiJavaFile = (PsiJavaFile) containingFile;
+            return FrIconUtil.getIconByMethodAndClassType(requestMappingItem.getRequestMethod(), psiJavaFile.getClasses()[0].isInterface());
+        }else {
+            return FrIconUtil.getIconByMethodType(requestMappingItem.getRequestMethod());
+        }
+
     }
 
     static class Factory implements SearchEverywhereContributorFactory<Object>{

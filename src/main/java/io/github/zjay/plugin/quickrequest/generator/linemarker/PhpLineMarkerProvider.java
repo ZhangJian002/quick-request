@@ -27,6 +27,7 @@ import io.github.zjay.plugin.quickrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.quickrequest.generator.impl.PhpMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.PhpFunctionTooltip;
 import io.github.zjay.plugin.quickrequest.util.*;
+import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
 import org.jetbrains.annotations.NotNull;
 import quickRequest.icons.PluginIcons;
 
@@ -49,6 +50,11 @@ public class PhpLineMarkerProvider implements LineMarkerProvider {
                     Method getParameters = element.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getParameters));
                     Object[] parameters = (Object[])getParameters.invoke(element);
                     String url = getString((PsiElement) parameters[0]);
+                    Method getMethodName = element.getClass().getMethod("getName");
+                    String methodName = getMethodName.invoke(element).toString();
+                    if(!LaravelMethods.isExist(methodName)){
+                        return null;
+                    }
                     return new MyLineMarkerInfo<>(element, element.getTextRange(), PluginIcons.fastRequest_editor,
                             new PhpFunctionTooltip(element, LanguageEnum.php, url, null),
                             (e, elt) -> {
@@ -66,7 +72,7 @@ public class PhpLineMarkerProvider implements LineMarkerProvider {
         return lineMarkerInfo;
     }
 
-    private String getString(PsiElement parameter) {
+    public static String getString(PsiElement parameter) {
         String url = "";
         try {
             String canonicalName = parameter.getClass().getCanonicalName();

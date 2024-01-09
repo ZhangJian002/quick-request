@@ -87,7 +87,7 @@ public class SpringMethodUrlGenerator extends FastUrlGenerator {
         paramGroup.setMethodDescription(StringUtils.isBlank(methodDescription) ? psiMethod.getName() : methodDescription);
         if(psiElement instanceof PsiMethodImpl){
             paramGroup.setClassName(((PsiMethodImpl) psiElement).getContainingClass().getQualifiedName());
-            paramGroup.setType(1);
+            paramGroup.setType(0);
         } else if(psiElement instanceof KtLightMethod){
             paramGroup.setClassName(((KtLightMethod) psiElement).getContainingClass().getQualifiedName());
             paramGroup.setType(2);

@@ -30,6 +30,8 @@ import java.util.Objects;
 public class Constant {
     public static final String I18N_PATH = "io/github/zjay/fastrequest/18n/fr";
 
+    public static final String ROUTE = "route";
+
     public enum FrameworkType {
         DUBBO,
         SPRING,
@@ -286,6 +288,10 @@ public class Constant {
             "Service","DubboService"
     );
 
+    public static List<String> SUPPORTED_METHODS = Lists.newArrayList(
+            "get", "post", "put", "delete", "patch"
+    );
+
     public static List<MethodType> METHOD_TYPE_LIST = Lists.newArrayList(
             new MethodType("GET", PluginIcons.ICON_GET),
             new MethodType("POST", PluginIcons.ICON_POST),
@@ -301,7 +307,10 @@ public class Constant {
     }
 
     public enum JetBrainsProductName{
-        IntelliJ_IDEA("IntelliJ IDEA"),Aqua("Aqua"),Android_Studio("Android Studio"),Go_Land("GoLand");
+        IntelliJ_IDEA("IntelliJ IDEA"),Aqua("Aqua"),
+        Android_Studio("Android Studio"),Go_Land("GoLand"),
+        PhpStorm("PhpStorm")
+        ;
 
          final String value;
 
@@ -319,7 +328,8 @@ public class Constant {
         }
 
         public static boolean isButtonSupport(@NotNull String name){
-            if(name.startsWith(IntelliJ_IDEA.value) || name.startsWith(Aqua.value) || name.startsWith(Android_Studio.value)){
+            if(name.startsWith(IntelliJ_IDEA.value) || name.startsWith(Aqua.value) || name.startsWith(Android_Studio.value)
+                    || name.startsWith(PhpStorm.value)){
                 return true;
             }
             return false;
