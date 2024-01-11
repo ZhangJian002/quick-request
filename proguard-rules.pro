@@ -8,6 +8,10 @@
 
 -keep class quickRequest.icons.* {*;}
 
+-keep class io.github.zjay.plugin.quickrequest.jmh.JMHTest* { *; }
+
+-keep class io.github.zjay.plugin.quickrequest.jmh.jmh_generated.* {*;}
+
 -keep class io.github.zjay.plugin.quickrequest.util.OkHttp3Util* {*;}
 
 -obfuscationdictionary dic.txt

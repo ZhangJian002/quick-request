@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.1.11'
+version '2024.1.11.1'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.1.11'
+    pluginVersion = '2024.1.11.1'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -66,7 +66,6 @@ task proguard(type: ProGuardTask, dependsOn: jar) {
 
     keepattributes("Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod")
     keep("class * implements com.intellij.openapi.components.PersistentStateComponent {*;}")
-    keep("class com.intellij.util.* {*;}")
     keepclassmembers("class * {public static ** INSTANCE;}")
 
     // jdk 依赖，区分jdk8 前后版本
@@ -109,6 +108,15 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.1.11.1</h3>
+    <p>中文</p>
+    <ul>
+        <li>bug修复</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix bugs</li>
+    </ul>
     <h3>v2024.1.11</h3>
     <p>中文</p>
     <ul>
@@ -433,7 +441,7 @@ test {
     useJUnitPlatform()
 }
 runIde {
-    jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED'
+    jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED', "-Xmx4096m","-Xms128m"
     jbrVersion 'jbrsdk-11_0_10-osx-x64-b1314.58'
     autoReloadPlugins true
 }

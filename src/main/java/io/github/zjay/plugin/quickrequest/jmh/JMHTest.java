@@ -56,9 +56,8 @@ public class JMHTest {
 
     @Benchmark
     public int sendRequest() {
-
         try {
-            Response response = OkHttp3Util.getClientInstance().newCall(httpRequest).execute();
+            Response response = OkHttp3Util.getSingleClientInstance().newCall(httpRequest).execute();
             response.close();
             if (response.code() != 200) {
                 throw new RuntimeException("请求失败：" + response.body().string());
@@ -73,7 +72,6 @@ public class JMHTest {
     public static Collection<RunResult> jmhTest() {
         exceptions.clear();
         //初始话客户端
-        OkHttp3Util.getClientInstance();
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
         final Options opts = new
@@ -91,13 +89,7 @@ public class JMHTest {
                 .warmupIterations(0)
                 .build();
         try {
-            Collection<RunResult> result = new Runner(opts).run();
-            //释放
-            if(OkHttp3Util.clientInstance != null){
-                OkHttp3Util.clientInstance.connectionPool().evictAll();
-                OkHttp3Util.clientInstance = null;
-            }
-            return result;
+            return new Runner(opts).run();
         } catch (RunnerException e) {
 
 
