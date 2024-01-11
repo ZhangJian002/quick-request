@@ -24,12 +24,15 @@ import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public abstract class OtherRequestMappingByNameContributor implements ChooseByNameContributor {
-    abstract List<OtherRequestEntity> getPsiElementSearchers(String methodName, Project project);
+    abstract List<OtherRequestEntity> getPsiElementSearchers(Project project);
     private List<RequestMappingItem> navigationItems = new ArrayList<>();
     @Override
     public String @NotNull [] getNames(Project project, boolean includeNonProjectItems) {
@@ -47,7 +50,7 @@ public abstract class OtherRequestMappingByNameContributor implements ChooseByNa
     }
 
     private List<RequestMappingItem> findRequestMappingItems(Project project) {
-        List<OtherRequestEntity> psiSearchers = getPsiElementSearchers(Constant.ROUTE, project);
+        List<OtherRequestEntity> psiSearchers = getPsiElementSearchers(project);
         List<RequestMappingItem> resultList = new LinkedList<>();
         for (OtherRequestEntity psiSearcher : psiSearchers) {
             resultList.add(new RequestMappingItem(psiSearcher.getElement(),psiSearcher.getUrlPath(),psiSearcher.getMethod()));

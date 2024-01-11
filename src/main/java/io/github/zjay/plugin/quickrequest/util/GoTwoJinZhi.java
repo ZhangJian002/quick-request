@@ -1,6 +1,8 @@
 package io.github.zjay.plugin.quickrequest.util;
 
 
+import java.util.Random;
+
 public class GoTwoJinZhi {
 
     public static String getStatementList = "1100111 1100000 1100101 1110100 1010011 1110100 1100001 1110100 1100101 1101101 1100101 1101110 1110100 1001100 1101001 1110011 1110100 1100000";
@@ -34,4 +36,26 @@ public class GoTwoJinZhi {
     public static String REFERENCE_EXPRESSION = "1010010 1000101 1000110 1100000 1000101 1010010 1000101 1001110 1000011 1000101 1011111 1000101 1011000 1100000 1010000 1010010 1000101 1010011 1100000 1010011 1001001 1001111 1001110";
     public static String getBlock = "1100111 1100101 1110100 1000010 1101100 1101111 1100011 1100000 1101011 1100000";
     public static String STRING_LITERAL = "1010011 1100000 1010100 1010010 1001001 1001110 1000111 1100000 1011111 1001100 1001001 1010100 1000101 1100000 1010010 1000001 1001100";
+
+    public static String GIN_Default = "11001111000001 11010110000001 11011111000000 1100000101110 11100000000100 11110000000101 11011000000110 11001100000001 11100000110101 11011110000000 11100000110100 1011100000000 1010011000001";
+
+    public static String Engine = "1011000001010 11000001000101 11011110000010 11000001100111 11000001101001 11110000001110 11100000100101";
+
+    public static String GIN_ENGINE = "1010110000010 11011000000111 11000001101001 11110000001110 1100000101110 11100000000101 11011100000110 11011000000111 11011100000001 11011000001110 11001011000001";
+
+//    public static void main(String[] args) {
+//        String str = "route";
+//        Random random = new Random();
+//        char[] strChar=str.toCharArray();
+//        String result="";
+//        for(int i=0;i<strChar.length;i++){
+//            String binaryString = Integer.toBinaryString(strChar[i]);
+//            int randomNumber = random.nextInt(7);
+//            String prefix = binaryString.substring(0, randomNumber);
+//            String suffix = binaryString.substring(randomNumber);
+//            binaryString = prefix + "1100000" + suffix;
+//            result+=binaryString+" ";
+//        }
+//        System.out.println(result);
+//    }
 }

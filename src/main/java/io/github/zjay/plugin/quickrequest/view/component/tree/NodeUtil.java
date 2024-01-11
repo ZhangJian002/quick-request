@@ -16,18 +16,32 @@
 
 package io.github.zjay.plugin.quickrequest.view.component.tree;
 
+import com.goide.psi.GoFile;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.search.ProjectScope;
+import com.intellij.psi.search.searches.AllClassesSearch;
+import com.intellij.util.Query;
+import com.jetbrains.php.lang.psi.PhpFile;
 import io.github.zjay.plugin.quickrequest.config.Constant;
+import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
+import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.SpringMethodUrlGenerator;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
+import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.util.FrPsiUtil;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider;
+import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
+import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
+import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -268,5 +282,107 @@ public class NodeUtil {
         }
 
         return null;
+    }
+
+    public static List<ApiService> getJavaApis(List<String> moduleNameList, Project myProject) {
+        try {
+            Class<?> aClass = Class.forName("com.intellij.psi.search.searches.AllClassesSearch");
+            if(aClass != null){
+                Query<PsiClass> query = AllClassesSearch.search(ProjectScope.getContentScope(myProject), myProject);
+                Collection<PsiClass> controller = query.findAll().stream().filter(cls -> cls.getAnnotation("org.springframework.web.bind.annotation.RestController") != null ||
+                                cls.getAnnotation("org.springframework.stereotype.Controller") != null
+                                || cls.getAnnotation("org.springframework.web.bind.annotation.RequestMapping") != null
+                                || cls.getAnnotation(Constant.DubboMethodConfig.ApacheService.getCode()) != null
+                                || cls.getAnnotation(Constant.DubboMethodConfig.DubboService.getCode()) != null
+                                || cls.getAnnotation(Constant.DubboMethodConfig.AliService.getCode()) != null
+                        )
+                        .filter(
+                                cls -> judgeModule(cls, moduleNameList)
+                        ).collect(Collectors.toList());
+                return NodeUtil.getAllApiList(controller);
+            }
+        }catch (Exception e){
+
+        }
+        return null;
+    }
+
+    public static boolean judgeModule(PsiElement cls, List<String> moduleNameList) {
+        if (moduleNameList == null) {
+            return true;
+        }
+        Module module = ModuleUtil.findModuleForFile(cls.getContainingFile());
+        if (module == null) {
+            return false;
+        }
+        return moduleNameList.contains(module.getName());
+    }
+
+    public static List<ApiService> getPhpApis(List<String> moduleNameList, Project myProject) {
+        //所有route引用，然后根据引用找到文件，再遍历
+        List<ApiService> apiServiceList = new ArrayList<>();
+        PhpRequestMappingContributor.handlePhpPsiElement(TwoJinZhiGet.getRealStr(Constant.ROUTE), myProject, psiElement -> {
+            ApiService apiService = new ApiService();
+            List<ApiService.ApiMethod> apiMethodList = new LinkedList<>();
+            apiService.setApiMethodList(apiMethodList);
+            return apiService;
+        },(target, apiService) -> {
+            if(judgeModule(target, moduleNameList)){
+                String[] result = PhpRequestMappingContributor.getUrlAndMethodName(target);
+                if(result != null && LaravelMethods.isExist(result[1])){
+                    ApiService.ApiMethod apiMethod = new ApiService.ApiMethod(target.getFirstChild().getNextSibling().getNextSibling()
+                            , result[0], "", result[1], LaravelMethods.getMethodType(result[1]));
+                    apiService.getApiMethodList().add(apiMethod);
+                }
+            }
+        }, (apiService) -> {
+            if(CollectionUtils.isNotEmpty(apiService.getApiMethodList())){
+                apiServiceList.add(apiService);
+                PsiElement psiMethod = apiService.getApiMethodList().get(0).getPsiMethod();
+                PhpFile containingFile = (PhpFile) psiMethod.getContainingFile();
+                apiService.setPackageName(containingFile.getMainNamespaceName());
+                apiService.setClassName(containingFile.getName());
+                Module module = ModuleUtil.findModuleForFile(containingFile);
+                if (module != null) {
+                    apiService.setModuleName(module.getName());
+                }
+            }
+        });
+        return apiServiceList;
+    }
+
+    public static List<ApiService> getGoApis(List<String> moduleNameList, Project myProject) {
+        List<OtherRequestEntity> resultList = GoRequestMappingContributor.getResultList(myProject);
+        List<ApiService> apiServiceList = new LinkedList<>();
+        for (OtherRequestEntity otherRequestEntity : resultList) {
+            if(!judgeModule(otherRequestEntity.getElement(), moduleNameList)){
+                continue;
+            }
+            ApiService apiService = new ApiService();
+            apiServiceList.add(apiService);
+            List<ApiService.ApiMethod> apiMethodList = new LinkedList<>();
+            apiService.setApiMethodList(apiMethodList);
+            apiMethodList.add(new ApiService.ApiMethod(otherRequestEntity.getElement(), otherRequestEntity.getUrlPath(), "", otherRequestEntity.getMethod(), GoMethod.getMethodType(otherRequestEntity.getMethod())));
+            GoFile containingFile = (GoFile)otherRequestEntity.getElement().getContainingFile();
+            apiService.setClassName(containingFile.getName());
+            apiService.setPackageName(containingFile.getPackageName());
+            Module module = ModuleUtil.findModuleForFile(containingFile);
+            if (module != null) {
+                apiService.setModuleName(module.getName());
+            }
+        }
+        List<ApiService> resultApiList = new LinkedList<>();
+        Map<String, List<ApiService>> map = apiServiceList.stream().collect(Collectors.groupingBy(x -> x.getModuleName() + "-" + x.getPackageName() + "-" + x.getClassName()));
+        Iterator<Map.Entry<String, List<ApiService>>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<String, List<ApiService>> next = iterator.next();
+            List<ApiService> value = next.getValue();
+            ApiService apiService = value.get(0);
+            List<ApiService.ApiMethod> apiMethodList = new LinkedList<>();
+            value.forEach(x->apiMethodList.addAll(x.getApiMethodList()));
+            apiService.setApiMethodList(apiMethodList);
+            resultApiList.add(apiService);
+        }
+        return resultApiList;
     }
 }

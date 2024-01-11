@@ -1,55 +1,35 @@
 package io.github.zjay.plugin.quickrequest.action;
 
+import com.goide.psi.GoFile;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.FileIndex;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
-import com.intellij.psi.stubs.StubIndexKey;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PsiNavigateUtil;
-import com.jetbrains.php.PhpIndex;
-import com.jetbrains.php.lang.psi.PhpFile;
-import com.jetbrains.php.lang.psi.stubs.indexes.PhpClassIndex;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
+import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.PhpLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
-import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
-import io.github.zjay.plugin.quickrequest.util.PhpTwoJinZhi;
+import io.github.zjay.plugin.quickrequest.util.GoTwoJinZhi;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
-import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
+import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex;
 import org.jetbrains.kotlin.idea.stubindex.KotlinFullClassNameIndex;
 import org.jetbrains.kotlin.psi.*;
 import quickRequest.icons.PluginIcons;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 public final class FixPositionAction extends AnAction {
-
-    private static KotlinFullClassNameIndex kotlinFullClassNameIndex;
-
-    static {
-        try {
-            Constructor<KotlinFullClassNameIndex> declaredConstructor = KotlinFullClassNameIndex.class.getDeclaredConstructor();
-            declaredConstructor.setAccessible(true);
-            kotlinFullClassNameIndex = declaredConstructor.newInstance();
-        } catch (Exception e) {
-
-        }
-    }
 
     private Project myProject;
 
@@ -75,12 +55,27 @@ public final class FixPositionAction extends AnAction {
                     PsiNavigateUtil.navigate(psiMethod);
                 }
             }
-        }else if(type == 2){
+        } else if (type == 1) {
+            PsiFile[] filesByName = FilenameIndex.getFilesByName(myProject, className + ".go", GlobalSearchScope.everythingScope(myProject));
+            for (PsiFile psiFile : filesByName) {
+                GoFile goFile = (GoFile) psiFile;
+                PsiElement[] psiElements = PsiTreeUtil.collectElements(goFile, dd -> true);
+                for (PsiElement psiElement : psiElements) {
+                    if (TwoJinZhiGet.getRealStr(GoTwoJinZhi.CALL_EXPR).equals((psiElement.getNode().getElementType().toString()))) {
+                        if (GoMethod.isExist(( psiElement.getFirstChild().getLastChild()).getText()) && Objects.equals(GoRequestMappingContributor.getUrl(psiElement), paramGroup.getOriginUrl())) {
+                            //找到了
+                            PsiNavigateUtil.navigate(psiElement.getFirstChild().getLastChild());
+                            return;
+                        }
+                    }
+                }
+            }
+        } else if(type == 2){
             try {
                 Class.forName("org.jetbrains.kotlin.idea.stubindex.KotlinFullClassNameIndex");
-                if(kotlinFullClassNameIndex == null){
-                    return;
-                }
+                Constructor<KotlinFullClassNameIndex> declaredConstructor = KotlinFullClassNameIndex.class.getDeclaredConstructor();
+                declaredConstructor.setAccessible(true);
+                KotlinFullClassNameIndex kotlinFullClassNameIndex = declaredConstructor.newInstance();
                 Collection<KtClassOrObject> ktClassOrObjects = StubIndex.getElements(kotlinFullClassNameIndex.getKey(), className, myProject, GlobalSearchScope.projectScope(myProject), KtClassOrObject.class);
                 if(CollectionUtils.isNotEmpty(ktClassOrObjects)){
                     for (KtClassOrObject ktClassOrObject : ktClassOrObjects) {

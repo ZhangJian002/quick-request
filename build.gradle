@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.1.1'
+version '2024.1.11'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.1.1'
+    pluginVersion = '2024.1.11'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -93,12 +93,19 @@ prepareSandbox.dependsOn("proguard")
 prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
+//intellij {
+//    plugins = ['java','Kotlin']
+//    version '2021.3'//2021.3、2021.1、2020.3.4
+//    updateSinceUntilBuild false
+//    downloadSources true
+////    type = "IU"
+//}
 intellij {
-    plugins = ['java','Kotlin']
+    type = "IU"
+    plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin','org.jetbrains.plugins.go:213.5744.223']
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
-    downloadSources true
-//    type = "IU"
+    downloadSources false
 }
 patchPluginXml {
     changeNotes """

@@ -30,6 +30,7 @@
     <depends optional="true" config-file="config-java.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="config-go.xml">org.jetbrains.plugins.go</depends>
     <depends optional="true" config-file="config-php.xml">com.jetbrains.php</depends>
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
@@ -59,11 +60,8 @@
         <notificationGroup id="quickRequestWindowNotificationGroup" displayType="TOOL_WINDOW"/>
         <postStartupActivity implementation="io.github.zjay.plugin.quickrequest.update.WhatsNewActivity"/>
         <iw.actionProvider implementation="io.github.zjay.plugin.quickrequest.action.soft_wrap.QuickRequestToggleAction" />
-        <codeInsight.lineMarkerProvider language="go"
-                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GoLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="Python"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider"/>
-        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PyMethodGenerator"/>
     </extensions>
 

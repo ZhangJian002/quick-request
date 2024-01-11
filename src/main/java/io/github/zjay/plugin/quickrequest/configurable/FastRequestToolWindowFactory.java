@@ -63,15 +63,16 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         contentCollection.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
         toolWindow.getContentManager().addContent(contentCollection);
 
-        if(ToolUtils.isSupportAction()){
-            AllApisNavToolWindow allApisNavToolWindow = new AllApisNavToolWindow(project, toolWindow);
-            allApisNavToolWindowMap.put(project.getName(), allApisNavToolWindow);
-            allApisNavToolWindow.getComponent().add(allApisNavToolWindow.getContent());
-            Content allApis = contentFactory.createContent(allApisNavToolWindow, "Navigate", true);
-            allApis.setIcon(AllIcons.Ide.LocalScopeAction);
-            allApis.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
-            toolWindow.getContentManager().addContent(allApis);
-        }
+        AllApisNavToolWindow allApisNavToolWindow = new AllApisNavToolWindow(project, toolWindow);
+        allApisNavToolWindowMap.put(project.getName(), allApisNavToolWindow);
+        allApisNavToolWindow.getComponent().add(allApisNavToolWindow.getContent());
+        Content allApis = contentFactory.createContent(allApisNavToolWindow, "Navigate", true);
+        allApis.setIcon(AllIcons.Ide.LocalScopeAction);
+        allApis.putUserData(ToolWindow.SHOW_CONTENT_ICON, Boolean.TRUE);
+        toolWindow.getContentManager().addContent(allApis);
+//        if(ToolUtils.isSupportAction()){
+//
+//        }
         //隐藏标题
         toolWindow.getComponent().putClientProperty("HideIdLabel", "true");
 

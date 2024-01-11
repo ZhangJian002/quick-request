@@ -22,6 +22,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import com.intellij.psi.util.PsiTreeUtil;
+import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.PhpLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
@@ -40,9 +41,9 @@ public class PhpRequestMappingContributor extends OtherRequestMappingByNameContr
 
 
     @Override
-    List<OtherRequestEntity> getPsiElementSearchers(String referenceName, Project project) {
+    List<OtherRequestEntity> getPsiElementSearchers(Project project) {
         List<OtherRequestEntity> resultList = new LinkedList<>();
-        handlePhpPsiElement(referenceName, project, null, (target, apiService) -> {
+        handlePhpPsiElement(TwoJinZhiGet.getRealStr(Constant.ROUTE), project, null, (target, apiService) -> {
             String[] result = getUrlAndMethodName(target);
             if(result != null && LaravelMethods.isExist(result[1])){
                 resultList.add(new OtherRequestEntity(target.getFirstChild().getNextSibling().getNextSibling(), result[0], LaravelMethods.getMethodType(result[1])));
@@ -74,13 +75,13 @@ public class PhpRequestMappingContributor extends OtherRequestMappingByNameContr
 
     public static boolean isRealRoute(PsiElement element) {
         try {
-            Method getTargetReference = element.getClass().getMethod("getTargetReference");
+            Method getTargetReference = element.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getTargetReference));
             getTargetReference.setAccessible(true);
             Object targetReference = getTargetReference.invoke(element);
-            Method getFQN = targetReference.getClass().getMethod("getFQN");
+            Method getFQN = targetReference.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getFQN));
             getFQN.setAccessible(true);
             Object fqn = getFQN.invoke(targetReference);
-            if(Objects.equals("\\Illuminate\\Support\\Facades\\Route",  fqn)){
+            if(Objects.equals(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.ROUTE),  fqn)){
                 return true;
             }
         }catch (Exception e){
@@ -91,11 +92,11 @@ public class PhpRequestMappingContributor extends OtherRequestMappingByNameContr
 
     public static Collection<PsiElement> getPhpReferencePsiElement(String referenceName, Project project) {
         try {
-            Class<?> aClass = Class.forName("com.jetbrains.php.lang.psi.stubs.indexes.PhpUseReferenceNameIndex");
+            Class<?> aClass = Class.forName(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.PhpUseReferenceNameIndex));
             Constructor<?> declaredConstructor = aClass.getDeclaredConstructor();
             declaredConstructor.setAccessible(true);
             Object target = declaredConstructor.newInstance();
-            Method getKey = aClass.getMethod("getKey");
+            Method getKey = aClass.getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getKey));
             getKey.setAccessible(true);
             StubIndexKey<String, PsiElement> key = (StubIndexKey<String, PsiElement>)getKey.invoke(target);
             return StubIndex.getElements(key, referenceName, project, GlobalSearchScope.projectScope(project), PsiElement.class);
@@ -111,7 +112,7 @@ public class PhpRequestMappingContributor extends OtherRequestMappingByNameContr
             Method getParameters = psiElement.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getParameters));
             Object[] parameters = (Object[])getParameters.invoke(psiElement);
             String url = PhpLineMarkerProvider.getString((PsiElement) parameters[0]);
-            Method getMethodName = psiElement.getClass().getMethod("getName");
+            Method getMethodName = psiElement.getClass().getMethod(TwoJinZhiGet.getRealStr(PhpTwoJinZhi.getName));
             String methodName = getMethodName.invoke(psiElement).toString();
             return new String[]{url, methodName};
         }catch (Exception e){

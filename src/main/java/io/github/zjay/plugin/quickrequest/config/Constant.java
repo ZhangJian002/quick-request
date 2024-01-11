@@ -30,7 +30,9 @@ import java.util.Objects;
 public class Constant {
     public static final String I18N_PATH = "io/github/zjay/fastrequest/18n/fr";
 
-    public static final String ROUTE = "route";
+    public static final String ROUTE = "11110000010010 11110000001111 11101011000001 11110000010100 11100000100101";
+
+    public static final String MAIN = "11011011000001 11000011000001 11011100000001 11000001101110";
 
     public enum FrameworkType {
         DUBBO,
@@ -309,7 +311,7 @@ public class Constant {
     public enum JetBrainsProductName{
         IntelliJ_IDEA("IntelliJ IDEA"),Aqua("Aqua"),
         Android_Studio("Android Studio"),Go_Land("GoLand"),
-        PhpStorm("PhpStorm")
+//        PhpStorm("PhpStorm")
         ;
 
          final String value;
@@ -328,8 +330,7 @@ public class Constant {
         }
 
         public static boolean isButtonSupport(@NotNull String name){
-            if(name.startsWith(IntelliJ_IDEA.value) || name.startsWith(Aqua.value) || name.startsWith(Android_Studio.value)
-                    || name.startsWith(PhpStorm.value)){
+            if(name.startsWith(IntelliJ_IDEA.value) || name.startsWith(Aqua.value) || name.startsWith(Android_Studio.value)){
                 return true;
             }
             return false;

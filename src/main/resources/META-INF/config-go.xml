@@ -1,0 +1,11 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator"/>
+        <codeInsight.lineMarkerProvider language="go"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GoLineMarkerProvider"/>
+    </extensions>
+    <extensions defaultExtensionNs="QuickRequest">
+        <requestMappingContributor
+                implementation="io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor"/>
+    </extensions>
+</idea-plugin>

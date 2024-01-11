@@ -26,7 +26,6 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -37,28 +36,17 @@ import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.search.ProjectScope;
-import com.intellij.psi.search.searches.AllClassesSearch;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.speedSearch.SpeedSearchUtil;
 import com.intellij.util.BooleanFunction;
 import com.intellij.util.PsiNavigateUtil;
-import com.intellij.util.Query;
 import com.intellij.util.ui.StatusText;
-import com.jetbrains.php.lang.psi.PhpFile;
 import io.github.zjay.plugin.quickrequest.action.CheckBoxFilterAction;
 import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.configurable.FastRequestSearchEverywhereConfiguration;
-import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.model.MethodType;
-import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
-import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
 import io.github.zjay.plugin.quickrequest.view.component.tree.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -198,8 +186,10 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
         };
 
         NodeUtil.convertToRoot(root, NodeUtil.convertToMap(allApiFilterList), selectMethodType);
-        apiTree.setModel(new DefaultTreeModel(root));
-        apiTree.expandAll();
+        ApplicationManager.getApplication().invokeLater(() -> {
+            apiTree.setModel(new DefaultTreeModel(root));
+            apiTree.expandAll();
+        });
     }
 
     private void navigateToMethod() {
@@ -287,6 +277,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                 ApplicationManager.getApplication().runReadAction(() -> {
                     addJavaApis(moduleNameList);
                     addPhpApis(moduleNameList);
+                    addGoApis(moduleNameList);
                     indicator.setText("Rendering");
                     if(StringUtils.isNotBlank(searchPanel.getText())){
                         filterRequest();
@@ -299,7 +290,9 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                         NodeUtil.convertToRoot(root, NodeUtil.convertToMap(
                                 allApiList.stream().filter(q->CollectionUtils.isNotEmpty(q.getApiMethodList())).collect(Collectors.toList())
                         ), methodTypeFilter.getSelectedElementList());
-                        apiTree.setModel(new DefaultTreeModel(root));
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            apiTree.setModel(new DefaultTreeModel(root));
+                        });
                     }
                     NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
                             .notify(myProject);
@@ -310,66 +303,22 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
     }
 
     private void addJavaApis(List<String> moduleNameList) {
-        try {
-            Class.forName("com.intellij.psi.search.searches.AllClassesSearch");
-            Query<PsiClass> query = AllClassesSearch.search(ProjectScope.getContentScope(myProject), myProject);
-            Collection<PsiClass> controller = query.findAll().stream().filter(cls -> cls.getAnnotation("org.springframework.web.bind.annotation.RestController") != null ||
-                            cls.getAnnotation("org.springframework.stereotype.Controller") != null
-                            || cls.getAnnotation("org.springframework.web.bind.annotation.RequestMapping") != null
-                            || cls.getAnnotation(Constant.DubboMethodConfig.ApacheService.getCode()) != null
-                            || cls.getAnnotation(Constant.DubboMethodConfig.DubboService.getCode()) != null
-                            || cls.getAnnotation(Constant.DubboMethodConfig.AliService.getCode()) != null
-                    )
-                    .filter(
-                            cls -> judgeModule(cls, moduleNameList)
-                    ).collect(Collectors.toList());
-            allApiList = NodeUtil.getAllApiList(controller);
-        }catch (Exception e){
+        allApiList = NodeUtil.getJavaApis(moduleNameList, myProject);
 
-        }
-    }
 
-    private boolean judgeModule(PsiElement cls, List<String> moduleNameList) {
-        if (moduleNameList == null) {
-            return true;
-        }
-        Module module = ModuleUtil.findModuleForFile(cls.getContainingFile());
-        if (module == null) {
-            return false;
-        }
-        return moduleNameList.contains(module.getName());
     }
 
     private void addPhpApis(List<String> moduleNameList) {
-        //所有route引用，然后根据引用找到文件，再遍历
-        List<ApiService> apiServiceList = new ArrayList<>();
-        PhpRequestMappingContributor.handlePhpPsiElement(Constant.ROUTE, myProject, psiElement -> {
-            ApiService apiService = new ApiService();
-            List<ApiService.ApiMethod> apiMethodList = new LinkedList<>();
-            apiService.setApiMethodList(apiMethodList);
-            return apiService;
-        },(target, apiService) -> {
-            if(judgeModule(target, moduleNameList)){
-                String[] result = PhpRequestMappingContributor.getUrlAndMethodName(target);
-                if(result != null && LaravelMethods.isExist(result[1])){
-                    ApiService.ApiMethod apiMethod = new ApiService.ApiMethod(target.getFirstChild().getNextSibling().getNextSibling()
-                            , result[0], "", result[1], LaravelMethods.getMethodType(result[1]));
-                    apiService.getApiMethodList().add(apiMethod);
-                }
-            }
-        }, (apiService) -> {
-            if(CollectionUtils.isNotEmpty(apiService.getApiMethodList())){
-                apiServiceList.add(apiService);
-                PsiElement psiMethod = apiService.getApiMethodList().get(0).getPsiMethod();
-                PhpFile containingFile = (PhpFile) psiMethod.getContainingFile();
-                apiService.setPackageName(containingFile.getMainNamespaceName());
-                apiService.setClassName(containingFile.getName());
-                Module module = ModuleUtil.findModuleForFile(containingFile);
-                if (module != null) {
-                    apiService.setModuleName(module.getName());
-                }
-            }
-        });
+        List<ApiService> apiServiceList = NodeUtil.getPhpApis(moduleNameList, myProject);
+        judgeAndSet(apiServiceList);
+    }
+
+    private void addGoApis(List<String> moduleNameList) {
+        List<ApiService> apiServiceList = NodeUtil.getGoApis(moduleNameList, myProject);
+        judgeAndSet(apiServiceList);
+    }
+
+    private void judgeAndSet(List<ApiService> apiServiceList) {
         if(CollectionUtils.isNotEmpty(allApiList)){
             allApiList.addAll(apiServiceList);
         }else {
