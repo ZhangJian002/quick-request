@@ -1,4 +1,4 @@
-package io.github.zjay.plugin.quickrequest.ui;
+package io.github.zjay.plugin.quickrequest.util.php;
 
 
 import com.intellij.psi.PsiElement;

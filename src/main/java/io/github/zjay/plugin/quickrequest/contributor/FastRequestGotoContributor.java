@@ -45,8 +45,21 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     protected FastRequestGotoContributor(@NotNull AnActionEvent event) {
         super(event);
         myProject = event.getProject();
-        myModelForRenderer = new GotoFileModel(myProject);
+        myModelForRenderer = new MyGotoFileModel(myProject);
         requestMappingModel = new RequestMappingModel(myProject, ExtensionPointName.<ChooseByNameContributor>create("QuickRequest.requestMappingContributor").getExtensionList());
+    }
+
+    private class MyGotoFileModel extends GotoFileModel{
+
+        public MyGotoFileModel(@NotNull Project project) {
+            super(project);
+        }
+
+        @Override
+        public @NotNull String getNotFoundMessage() {
+            return "Not Found";
+        }
+
     }
 
 
@@ -90,7 +103,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
     }
 
     public boolean showInFindResults() {
-        return false;
+        return true;
     }
 
     public int getElementPriority(@NotNull Object element, @NotNull String searchPattern) {
