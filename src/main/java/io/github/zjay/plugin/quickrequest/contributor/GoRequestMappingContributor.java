@@ -35,6 +35,7 @@ import java.util.*;
 public class GoRequestMappingContributor extends OtherRequestMappingByNameContributor{
 
 
+    private static Set<GoFunctionDeclaration> goFunctionDeclarations = new HashSet<>();
     @Override
     List<OtherRequestEntity> getPsiElementSearchers(Project project) {
         return getResultList(project);
@@ -46,6 +47,7 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
             Class.forName("com.goide.stubs.index.GoFunctionIndex");
             Collection<GoFunctionDeclaration> collection = StubIndex.getElements(GoFunctionIndex.KEY, TwoJinZhiGet.getRealStr(Constant.MAIN), project, GlobalSearchScope.projectScope(project), GoFunctionDeclaration.class);
             analyzeFunc(collection, resultList);
+            goFunctionDeclarations.clear();
         }catch (Exception e){
 
         }
@@ -53,6 +55,7 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
     }
 
     private static void analyzeFunc(Collection<GoFunctionDeclaration> collection, List<OtherRequestEntity> resultList) {
+        goFunctionDeclarations.addAll(collection);
         for (GoFunctionDeclaration element : collection) {
             GoBlock block = element.getBlock();
             List<GoStatement> statementList = block.getStatementList();
@@ -90,7 +93,12 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
                 //是否需要再加 .getFirstChild() 取决于有没有 xx.调用
                 GoReferenceExpressionImpl firstChild1 = (GoReferenceExpressionImpl)firstChild.getFirstChild();
                 GoFunctionDeclarationImpl resolve = (GoFunctionDeclarationImpl)firstChild1.resolve();
-                analyzeFunc(Arrays.asList(resolve), resultList);
+                if(resolve == null){
+                    return;
+                }
+                if(!goFunctionDeclarations.contains(resolve)){
+                    analyzeFunc(Arrays.asList(resolve), resultList);
+                }
             }
         }else if(firstChild instanceof GoVarDefinition){
             GoVarDefinition resolve = (GoVarDefinition)firstChild;

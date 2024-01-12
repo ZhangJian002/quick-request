@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.1.11.1'
+version '2024.1.19'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.1.11.1'
+    pluginVersion = '2024.1.19'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -108,6 +108,15 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.1.19</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复gin框架下，由于递归带来的apis加载问题</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix apis loading issue caused by recursion in the gin framework</li>
+    </ul>
     <h3>v2024.1.11.1</h3>
     <p>中文</p>
     <ul>
