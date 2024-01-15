@@ -68,7 +68,9 @@ public class PhpRequestMappingContributor extends OtherRequestMappingByNameContr
                         phpFunction.doIt(psiElement, apiService);
                     }
                 }
-                phpLastFunction.doIt(apiService);
+                if(phpLastFunction != null){
+                    phpLastFunction.doIt(apiService);
+                }
             }
         }
     }

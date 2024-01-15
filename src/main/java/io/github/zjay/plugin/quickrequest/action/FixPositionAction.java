@@ -1,21 +1,19 @@
 package io.github.zjay.plugin.quickrequest.action;
 
-import com.goide.psi.GoFile;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PsiNavigateUtil;
+import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
+import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
-import io.github.zjay.plugin.quickrequest.util.GoTwoJinZhi;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
 import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import org.apache.commons.collections.CollectionUtils;
@@ -56,17 +54,13 @@ public final class FixPositionAction extends AnAction {
                 }
             }
         } else if (type == 1) {
-            PsiFile[] filesByName = FilenameIndex.getFilesByName(myProject, className + ".go", GlobalSearchScope.everythingScope(myProject));
-            for (PsiFile psiFile : filesByName) {
-                GoFile goFile = (GoFile) psiFile;
-                PsiElement[] psiElements = PsiTreeUtil.collectElements(goFile, dd -> true);
-                for (PsiElement psiElement : psiElements) {
-                    if (TwoJinZhiGet.getRealStr(GoTwoJinZhi.CALL_EXPR).equals((psiElement.getNode().getElementType().toString()))) {
-                        if (GoMethod.isExist(( psiElement.getFirstChild().getLastChild()).getText()) && Objects.equals(GoRequestMappingContributor.getUrl(psiElement), paramGroup.getOriginUrl())) {
-                            //找到了
-                            PsiNavigateUtil.navigate(psiElement.getFirstChild().getLastChild());
-                            return;
-                        }
+            for (OtherRequestEntity otherRequestEntity : GoRequestMappingContributor.getResultList(myProject)) {
+                PsiElement element = otherRequestEntity.getElement();
+                if(Objects.equals(element.getContainingFile().getName(), className + ".go")){
+                    if (GoMethod.isExist(otherRequestEntity.getMethod()) && Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl())) {
+                        //找到了
+                        PsiNavigateUtil.navigate(element);
+                        return;
                     }
                 }
             }
@@ -96,22 +90,15 @@ public final class FixPositionAction extends AnAction {
 
             }
         }else if(type == 3){
-            PsiFile[] filesByName = FilenameIndex.getFilesByName(myProject, className, GlobalSearchScope.everythingScope(myProject));
-            for (PsiFile psiFile : filesByName) {
-                PsiElement[] psiElements = PsiTreeUtil.collectElements(psiFile, dd -> true);
-                for (PsiElement psiElement : psiElements) {
-                    if(PhpRequestMappingContributor.judge(psiElement)){
-                        String[] urlAndMethodName = PhpRequestMappingContributor.getUrlAndMethodName(psiElement);
-                        if(urlAndMethodName != null){
-                            if(Objects.equals(urlAndMethodName[1], methodName) && Objects.equals(urlAndMethodName[0], paramGroup.getOriginUrl())){
-                                //找到了
-                                PsiNavigateUtil.navigate(psiElement.getFirstChild().getNextSibling().getNextSibling());
-                                return;
-                            }
-                        }
+            PhpRequestMappingContributor.handlePhpPsiElement(TwoJinZhiGet.getRealStr(Constant.ROUTE), myProject, null, (psiElement, apiService) -> {
+                String[] urlAndMethodName = PhpRequestMappingContributor.getUrlAndMethodName(psiElement);
+                if(urlAndMethodName != null && Objects.equals(psiElement.getContainingFile().getName(), className)){
+                    if(Objects.equals(urlAndMethodName[1], methodName) && Objects.equals(urlAndMethodName[0], paramGroup.getOriginUrl())){
+                        //找到了
+                        PsiNavigateUtil.navigate(psiElement.getFirstChild().getNextSibling().getNextSibling());
                     }
                 }
-            }
+            }, null);
         }
     }
 }
