@@ -40,6 +40,7 @@ public class PyMethodGenerator extends NormalUrlGenerator {
         paramGroup.setClassName(containingFile.getName());
         paramGroup.setModule(psiElement.getProject().getName());
         paramGroup.setOriginUrl(url);
+        paramGroup.setType(4);
         return null;
     }
 }
