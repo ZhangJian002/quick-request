@@ -52,17 +52,8 @@ public class PyLineMarkerProvider implements LineMarkerProvider {
                         Method getArguments = argumentList.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.getArguments));
                         PsiElement[] arguments = (PsiElement[])getArguments.invoke(argumentList);
                         for (PsiElement argument : arguments) {
-                            if(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.Py_REFERENCE_EXPRESSION).equals(argument.getNode().getElementType().toString())){
-                                Method getReference = argument.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.getReference));
-                                Object reference = getReference.invoke(argument);
-                                Method resolve = reference.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.resolve));
-                                Object resolveValue = resolve.invoke(reference);
-                                Method getReference1 = resolveValue.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.findAssignedValue));
-                                argument = (PsiElement) getReference1.invoke(resolveValue);
-                            }
-                            if(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.Py_STRING_LITERAL_EXPRESSION).equals(argument.getNode().getElementType().toString())){
-                                Method getStringValue = argument.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.getStringValue));
-                                String url = (String)getStringValue.invoke(argument);
+                            String url = getUrlFromDecorator(argument);
+                            if(url != null){
                                 return new MyLineMarkerInfo<>(element, element.getTextRange(), PluginIcons.fastRequest_editor,
                                         new PythonFunctionTooltip(element, LanguageEnum.Python, url, null),
                                         (e, elt) -> {
@@ -81,6 +72,27 @@ public class PyLineMarkerProvider implements LineMarkerProvider {
 
         }
         return lineMarkerInfo;
+    }
+
+    public static String getUrlFromDecorator(PsiElement argument) {
+        String url = null;
+        try {
+            if(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.Py_REFERENCE_EXPRESSION).equals(argument.getNode().getElementType().toString())){
+                Method getReference = argument.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.getReference));
+                Object reference = getReference.invoke(argument);
+                Method resolve = reference.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.resolve));
+                Object resolveValue = resolve.invoke(reference);
+                Method getReference1 = resolveValue.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.findAssignedValue));
+                argument = (PsiElement) getReference1.invoke(resolveValue);
+            }
+            if(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.Py_STRING_LITERAL_EXPRESSION).equals(argument.getNode().getElementType().toString())){
+                Method getStringValue = argument.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.getStringValue));
+                url = (String)getStringValue.invoke(argument);
+            }
+        }catch (Exception e){
+
+        }
+        return url;
     }
 
     public static String[] getMethodType(PsiElement element){

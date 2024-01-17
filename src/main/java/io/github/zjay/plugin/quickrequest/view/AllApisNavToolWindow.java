@@ -65,6 +65,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Disposable {
@@ -77,7 +78,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
     private ToolWindow toolWindow;
     private List<ApiService> allApiList;
 
-    private List<String> mySelectModule;
+    private AtomicBoolean refresh = new AtomicBoolean(true);
     //    PersistentSearchEverywhereContributorFilter<String> methodTypeFilter = createMethodTypeFilter();
     private CheckBoxFilterAction.Filter<String> moduleFilter;
     private CheckBoxFilterAction.Filter<String> methodTypeFilter;
@@ -257,6 +258,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
     }
 
     private void renderData(Project project) {
+        refresh.set(false);
         DumbService.getInstance(project).smartInvokeLater(() -> rendingTree(null));
     }
 
@@ -275,37 +277,43 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(false);
                 ApplicationManager.getApplication().runReadAction(() -> {
-                    addJavaApis(moduleNameList);
-                    addPhpApis(moduleNameList);
-                    addGoApis(moduleNameList);
-                    indicator.setText("Rendering");
-                    if(StringUtils.isNotBlank(searchPanel.getText())){
-                        filterRequest();
-                    }else {
-                        List<String> selectMethodType = methodTypeFilter.getSelectedElementList();
-                        List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
-                        allApiList.stream().map(ApiService::getApiMethodList).forEach(filterMethodList::addAll);
-                        long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
-                        RootNode root = new RootNode(count + " apis");
-                        NodeUtil.convertToRoot(root, NodeUtil.convertToMap(
-                                allApiList.stream().filter(q->CollectionUtils.isNotEmpty(q.getApiMethodList())).collect(Collectors.toList())
-                        ), methodTypeFilter.getSelectedElementList());
-                        ApplicationManager.getApplication().invokeLater(() -> {
-                            apiTree.setModel(new DefaultTreeModel(root));
-                        });
+                    try {
+                        addAllApis(moduleNameList);
+                        indicator.setText("Rendering");
+                        if(StringUtils.isNotBlank(searchPanel.getText())){
+                            filterRequest();
+                        }else {
+                            List<String> selectMethodType = methodTypeFilter.getSelectedElementList();
+                            List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
+                            allApiList.stream().map(ApiService::getApiMethodList).forEach(filterMethodList::addAll);
+                            long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
+                            RootNode root = new RootNode(count + " apis");
+                            NodeUtil.convertToRoot(root, NodeUtil.convertToMap(
+                                    allApiList.stream().filter(q->CollectionUtils.isNotEmpty(q.getApiMethodList())).collect(Collectors.toList())
+                            ), methodTypeFilter.getSelectedElementList());
+                            ApplicationManager.getApplication().invokeLater(() -> apiTree.setModel(new DefaultTreeModel(root)));
+                        }
+                        NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
+                                .notify(myProject);
+
+                    }finally {
+                        refresh.set(true);
                     }
-                    NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
-                            .notify(myProject);
                 });
             }
         };
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, new BackgroundableProcessIndicator(task));
     }
 
+    private void addAllApis(List<String> moduleNameList) {
+        addJavaApis(moduleNameList);
+        addPhpApis(moduleNameList);
+        addGoApis(moduleNameList);
+        addPythonApis(moduleNameList);
+    }
+
     private void addJavaApis(List<String> moduleNameList) {
         allApiList = NodeUtil.getJavaApis(moduleNameList, myProject);
-
-
     }
 
     private void addPhpApis(List<String> moduleNameList) {
@@ -315,6 +323,11 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
 
     private void addGoApis(List<String> moduleNameList) {
         List<ApiService> apiServiceList = NodeUtil.getGoApis(moduleNameList, myProject);
+        judgeAndSet(apiServiceList);
+    }
+
+    private void addPythonApis(List<String> moduleNameList) {
+        List<ApiService> apiServiceList = NodeUtil.getPythonApis(moduleNameList, myProject);
         judgeAndSet(apiServiceList);
     }
 
@@ -367,6 +380,11 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
         @Override
         public void actionPerformed(@NotNull AnActionEvent e) {
             renderData(myProject);
+        }
+
+        @Override
+        public void update(@NotNull AnActionEvent e) {
+            e.getPresentation().setEnabled(refresh.get());
         }
     }
 

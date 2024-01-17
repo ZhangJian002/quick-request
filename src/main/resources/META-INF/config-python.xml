@@ -1,0 +1,11 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PyMethodGenerator"/>
+        <codeInsight.lineMarkerProvider language="Python"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider"/>
+    </extensions>
+    <extensions defaultExtensionNs="QuickRequest">
+        <requestMappingContributor
+                implementation="io.github.zjay.plugin.quickrequest.contributor.PythonRequestMappingContributor"/>
+    </extensions>
+</idea-plugin>

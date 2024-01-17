@@ -88,8 +88,8 @@ task proguard(type: ProGuardTask, dependsOn: jar) {
 
 }
 
-//prepareSandbox.dependsOn("proguard")
-//prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
+prepareSandbox.dependsOn("proguard")
+prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 //intellij {
@@ -101,7 +101,7 @@ task proguard(type: ProGuardTask, dependsOn: jar) {
 //}
 intellij {
     type = "IU"
-    plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin','org.jetbrains.plugins.go:213.5744.223']
+    plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin','org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223']
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
     downloadSources false
@@ -112,10 +112,14 @@ patchPluginXml {
     <p>中文</p>
     <ul>
         <li>修复gin框架下，由于递归带来的apis加载问题</li>
+        <li>修复Navigate下包名类名同级显示问题</li>
+        <li>兼容性修改</li>
     </ul>
     <p>English</p>
     <ul>
         <li>Fix apis loading issue caused by recursion in the gin framework</li>
+        <li>Compatibility modification</li>
+        <li>Fix the issue of displaying the same level of package name and class name in Navigator</li>
     </ul>
     <h3>v2024.1.11.1</h3>
     <p>中文</p>

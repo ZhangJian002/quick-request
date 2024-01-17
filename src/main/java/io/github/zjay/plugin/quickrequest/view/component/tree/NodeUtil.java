@@ -23,14 +23,17 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.search.searches.AllClassesSearch;
 import com.intellij.util.Query;
 import com.jetbrains.php.lang.psi.PhpFile;
+import com.jetbrains.python.psi.PyFile;
 import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
+import io.github.zjay.plugin.quickrequest.contributor.PythonRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.SpringMethodUrlGenerator;
@@ -41,6 +44,8 @@ import io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerPr
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
 import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
+import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.GoApis;
+import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.PyApis;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.jetbrains.annotations.NotNull;
@@ -135,17 +140,20 @@ public class NodeUtil {
         return dataMap;
     }
 
-    private static List<PackageNode> findChildren(@NotNull PackageNode node) {
+    private static PackageNode findChildren(@NotNull PackageNode node) {
         List<PackageNode> children = new ArrayList<>();
+        List<ClassNode> classChildren = new ArrayList<>();
         Enumeration<TreeNode> enumeration = node.children();
         while (enumeration.hasMoreElements()) {
             TreeNode ele = enumeration.nextElement();
             if (ele instanceof PackageNode) {
                 sortChildNode((BaseNode) ele);
                 children.add((PackageNode) ele);
+            }else if(ele instanceof ClassNode){
+                classChildren.add((ClassNode) ele);
             }
         }
-        return children;
+        return CollectionUtils.isNotEmpty(classChildren) || children.size() > 1 ? null : children.get(0);
     }
 
     public static void convertToRoot(DefaultMutableTreeNode root, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, List<ApiService>>>> dataMap, List<String> selectMethodType) {
@@ -175,14 +183,13 @@ public class NodeUtil {
                     return;
                 }
                 while (true) {
-                    List<PackageNode> list = findChildren(rootNode);
-                    if (list.size() == 1) {
-                        PackageNode newEle = list.get(0);
-                        rootNode.remove(newEle);
-                        String value = rootNode.getSource() + "." + newEle.getSource();
-                        newEle.setSource(value);
-                        newEle.setUserObject(value);
-                        rootNode = newEle;
+                    PackageNode packageNode = findChildren(rootNode);
+                    if (packageNode != null) {
+                        rootNode.remove(packageNode);
+                        String value = rootNode.getSource() + "." + packageNode.getSource();
+                        packageNode.setSource(value);
+                        packageNode.setUserObject(value);
+                        rootNode = packageNode;
                     } else {
                         break;
                     }
@@ -231,14 +238,7 @@ public class NodeUtil {
 
     private static PackageNode customPending(@NotNull Map<String, PackageNode> data, @NotNull String packageName) {
         String[] names = packageName.split("\\.");
-
-        PackageNode node = data.computeIfAbsent(names[0], PackageNode::new);
-
-        if (names.length == 1) {
-            return node;
-        }
-
-        PackageNode curr = node;
+        PackageNode curr = data.computeIfAbsent(names[0], PackageNode::new);
         int fex = 1;
         while (fex < names.length) {
             String name = names[fex++];
@@ -307,17 +307,6 @@ public class NodeUtil {
         return null;
     }
 
-    public static boolean judgeModule(PsiElement cls, List<String> moduleNameList) {
-        if (moduleNameList == null) {
-            return true;
-        }
-        Module module = ModuleUtil.findModuleForFile(cls.getContainingFile());
-        if (module == null) {
-            return false;
-        }
-        return moduleNameList.contains(module.getName());
-    }
-
     public static List<ApiService> getPhpApis(List<String> moduleNameList, Project myProject) {
         //所有route引用，然后根据引用找到文件，再遍历
         List<ApiService> apiServiceList = new ArrayList<>();
@@ -351,38 +340,34 @@ public class NodeUtil {
         return apiServiceList;
     }
 
+    /**
+     * 解析的api，如果没有特殊情况，都直接继承BaseApis实现其方法即可
+     * @param moduleNameList
+     * @param myProject
+     * @return
+     */
     public static List<ApiService> getGoApis(List<String> moduleNameList, Project myProject) {
-        List<OtherRequestEntity> resultList = GoRequestMappingContributor.getResultList(myProject);
-        List<ApiService> apiServiceList = new LinkedList<>();
-        for (OtherRequestEntity otherRequestEntity : resultList) {
-            if(!judgeModule(otherRequestEntity.getElement(), moduleNameList)){
-                continue;
-            }
-            ApiService apiService = new ApiService();
-            apiServiceList.add(apiService);
-            List<ApiService.ApiMethod> apiMethodList = new LinkedList<>();
-            apiService.setApiMethodList(apiMethodList);
-            apiMethodList.add(new ApiService.ApiMethod(otherRequestEntity.getElement(), otherRequestEntity.getUrlPath(), "", otherRequestEntity.getMethod(), GoMethod.getMethodType(otherRequestEntity.getMethod())));
-            GoFile containingFile = (GoFile)otherRequestEntity.getElement().getContainingFile();
-            apiService.setClassName(containingFile.getName());
-            apiService.setPackageName(containingFile.getPackageName());
-            Module module = ModuleUtil.findModuleForFile(containingFile);
-            if (module != null) {
-                apiService.setModuleName(module.getName());
-            }
+        return new GoApis().getApis(moduleNameList, myProject);
+    }
+
+    /**
+     * 解析的api，如果没有特殊情况，都直接继承BaseApis实现其方法即可
+     * @param moduleNameList
+     * @param myProject
+     * @return
+     */
+    public static List<ApiService> getPythonApis(List<String> moduleNameList, Project myProject) {
+        return new PyApis().getApis(moduleNameList, myProject);
+    }
+
+    public static boolean judgeModule(PsiElement cls, List<String> moduleNameList) {
+        if (moduleNameList == null) {
+            return true;
         }
-        List<ApiService> resultApiList = new LinkedList<>();
-        Map<String, List<ApiService>> map = apiServiceList.stream().collect(Collectors.groupingBy(x -> x.getModuleName() + "-" + x.getPackageName() + "-" + x.getClassName()));
-        Iterator<Map.Entry<String, List<ApiService>>> iterator = map.entrySet().iterator();
-        while (iterator.hasNext()){
-            Map.Entry<String, List<ApiService>> next = iterator.next();
-            List<ApiService> value = next.getValue();
-            ApiService apiService = value.get(0);
-            List<ApiService.ApiMethod> apiMethodList = new LinkedList<>();
-            value.forEach(x->apiMethodList.addAll(x.getApiMethodList()));
-            apiService.setApiMethodList(apiMethodList);
-            resultApiList.add(apiService);
+        Module module = ModuleUtil.findModuleForFile(cls.getContainingFile());
+        if (module == null) {
+            return false;
         }
-        return resultApiList;
+        return moduleNameList.contains(module.getName());
     }
 }
