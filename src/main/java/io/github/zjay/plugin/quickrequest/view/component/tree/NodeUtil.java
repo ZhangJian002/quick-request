@@ -41,6 +41,7 @@ import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.util.FrPsiUtil;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider;
+import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
 import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
@@ -122,14 +123,14 @@ public class NodeUtil {
                 packageName = "";
             }
 
-            ApiService apiService = new ApiService(moduleName, packageName, className, apiMethodList);
+            ApiService apiService = new ApiService(LanguageEnum.java, moduleName, packageName, className, apiMethodList);
             apiServiceList.add(apiService);
         }
         return apiServiceList;
     }
 
     public static LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, List<ApiService>>>> convertToMap(List<ApiService> apiServiceList) {
-        LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, List<ApiService>>>> dataMap = apiServiceList.stream().collect(Collectors.groupingBy(ApiService::getModuleName,
+        LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, List<ApiService>>>> dataMap = apiServiceList.stream().filter(x->x.getModuleName() != null).collect(Collectors.groupingBy(ApiService::getModuleName,
                 LinkedHashMap::new,
                 Collectors.groupingBy(ApiService::getPackageName,
                         LinkedHashMap::new,
@@ -168,7 +169,7 @@ public class NodeUtil {
                 LinkedHashMap<String, List<ApiService>> classMap = packageEntry.getValue();
                 for (Map.Entry<String, List<ApiService>> classEntry : classMap.entrySet()) {
                     String className = classEntry.getKey();
-                    ClassNode classNode = new ClassNode(className);
+                    ClassNode classNode = new ClassNode(className, classEntry.getValue().get(0).getLanguage());
                     for (ApiService apiService : classEntry.getValue()) {
                         List<ApiService.ApiMethod> apiMethodList = apiService.getApiMethodList();
                         List<ApiService.ApiMethod> filterMethodList = apiMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).collect(Collectors.toList());
@@ -327,6 +328,7 @@ public class NodeUtil {
         }, (apiService) -> {
             if(CollectionUtils.isNotEmpty(apiService.getApiMethodList())){
                 apiServiceList.add(apiService);
+                apiService.setLanguage(LanguageEnum.php);
                 PsiElement psiMethod = apiService.getApiMethodList().get(0).getPsiMethod();
                 PhpFile containingFile = (PhpFile) psiMethod.getContainingFile();
                 apiService.setPackageName(containingFile.getMainNamespaceName());

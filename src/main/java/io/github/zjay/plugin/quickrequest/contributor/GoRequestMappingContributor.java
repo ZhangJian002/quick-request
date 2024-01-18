@@ -36,6 +36,41 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
 
 
     private static Set<GoFunctionDeclaration> goFunctionDeclarations = new HashSet<>();
+
+    private static Map<String, Method> map = new HashMap<>();
+
+    private static Map<String, Statement> mapStatement = new HashMap<>();
+
+    static class Statement{
+
+        public Statement(String name, Integer count){
+            this.name = name;
+            this.count = count;
+        }
+        String name;
+
+        Integer count;
+
+        public String toString(){
+            return "语句行：" + name + "; 次数：" + count;
+        }
+    }
+
+    static class Method{
+
+        public Method(String name, Integer count){
+            this.name = name;
+            this.count = count;
+        }
+        String name;
+
+        Integer count;
+
+        public String toString(){
+            return "方法名：" + name + "; 次数：" + count;
+        }
+    }
+
     @Override
     List<OtherRequestEntity> getPsiElementSearchers(Project project) {
         return getResultList(project);
@@ -55,8 +90,12 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
     }
 
     private static void analyzeFunc(Collection<GoFunctionDeclaration> collection, List<OtherRequestEntity> resultList) {
-        goFunctionDeclarations.addAll(collection);
         for (GoFunctionDeclaration element : collection) {
+            String text = element.getText();
+            if (!text.contains("gin.Default()") && !text.contains("gin.Engine")) {
+                continue;
+            }
+            goFunctionDeclarations.add(element);
             GoBlock block = element.getBlock();
             List<GoStatement> statementList = block.getStatementList();
             for (GoStatement goStatement : statementList) {

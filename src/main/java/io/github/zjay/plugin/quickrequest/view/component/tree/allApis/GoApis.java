@@ -6,6 +6,7 @@ import com.intellij.psi.PsiFile;
 import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
+import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 
 import java.util.List;
 
@@ -20,5 +21,6 @@ public class GoApis extends BaseApis{
         GoFile containingFile = (GoFile)psiFile;
         apiService.setClassName(containingFile.getName());
         apiService.setPackageName(containingFile.getPackageName());
+        apiService.setLanguage(LanguageEnum.go);
     }
 }

@@ -91,7 +91,7 @@ public class PythonRequestMappingContributor extends OtherRequestMappingByNameCo
     }
 
     private static boolean isFlaskAppFile(VirtualFile child) {
-        if (!child.isDirectory() && child.getFileType() instanceof PythonFileType) {
+        if (!child.isDirectory()) {
             CharSequence text = LoadTextUtil.loadText(child);
             if (text.toString().contains("Flask(__name__)")) {
                 return true;

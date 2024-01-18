@@ -8,6 +8,7 @@ import com.jetbrains.python.psi.impl.PyFileImpl;
 import io.github.zjay.plugin.quickrequest.contributor.PythonRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
+import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class PyApis extends BaseApis{
     @Override
     public void setBaseName(ApiService apiService, PsiFile psiFile) {
         PyFileImpl containingFile = (PyFileImpl)psiFile;
+        apiService.setLanguage(LanguageEnum.Python);
         apiService.setClassName(containingFile.getName());
         ItemPresentation presentation = containingFile.getPresentation();
         if(presentation != null && StringUtils.isNotBlank(presentation.getLocationString())){

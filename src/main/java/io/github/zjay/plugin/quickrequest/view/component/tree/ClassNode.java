@@ -16,18 +16,38 @@
 
 package io.github.zjay.plugin.quickrequest.view.component.tree;
 
+import com.goide.GoIcons;
 import com.intellij.icons.AllIcons;
+import icons.PhpIcons;
+import icons.PythonIcons;
+import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.kotlin.idea.KotlinIcons;
 
 import javax.swing.*;
 
 public class ClassNode extends BaseNode<String> {
-    public ClassNode(String className) {
+
+    LanguageEnum languageEnum;
+
+    public ClassNode(String className, LanguageEnum languageEnum) {
         super(className);
+        this.languageEnum = languageEnum;
     }
 
     @Override
     public @Nullable Icon getIcon(boolean selected) {
+        switch (languageEnum){
+            case go:
+                return GoIcons.ICON;
+            case php:
+                return PhpIcons.PhpIcon;
+            case Python:
+                return PythonIcons.Python.Python;
+            case Kotlin:
+                return KotlinIcons.CLASS;
+        }
+        //默认返回class
         return AllIcons.Nodes.Class;
     }
 }

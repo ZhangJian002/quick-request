@@ -18,6 +18,7 @@ package io.github.zjay.plugin.quickrequest.model;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
+import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 
 import java.util.List;
 
@@ -25,12 +26,16 @@ public class ApiService {
     private String moduleName;
     private String packageName;
     private String className;
+
+    private LanguageEnum language;
+
     private List<ApiMethod> apiMethodList;
 
     public ApiService() {
     }
 
-    public ApiService(String moduleName, String packageName, String className, List<ApiMethod> apiMethodList) {
+    public ApiService(LanguageEnum language, String moduleName, String packageName, String className, List<ApiMethod> apiMethodList) {
+        this.language = language;
         this.moduleName = moduleName;
         this.packageName = packageName;
         this.className = className;
@@ -128,5 +133,13 @@ public class ApiService {
 
     public void setApiMethodList(List<ApiMethod> apiMethodList) {
         this.apiMethodList = apiMethodList;
+    }
+
+    public LanguageEnum getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(LanguageEnum language) {
+        this.language = language;
     }
 }

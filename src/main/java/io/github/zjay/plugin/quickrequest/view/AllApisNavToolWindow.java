@@ -174,6 +174,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                 return;
             }
             ApiService item = new ApiService();
+            item.setLanguage(apiService.getLanguage());
             item.setClassName(apiService.getClassName());
             item.setModuleName(apiService.getModuleName());
             item.setPackageName(apiService.getPackageName());
