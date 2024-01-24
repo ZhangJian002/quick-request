@@ -20,6 +20,7 @@ import com.goide.GoIcons;
 import com.intellij.icons.AllIcons;
 import icons.PhpIcons;
 import icons.PythonIcons;
+import icons.RubyIcons;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.idea.KotlinIcons;
@@ -46,6 +47,8 @@ public class ClassNode extends BaseNode<String> {
                 return PythonIcons.Python.Python;
             case Kotlin:
                 return KotlinIcons.CLASS;
+            case Ruby:
+                return RubyIcons.Ruby.Ruby_file;
         }
         //默认返回class
         return AllIcons.Nodes.Class;

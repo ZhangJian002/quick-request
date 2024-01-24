@@ -51,6 +51,7 @@
     <depends optional="true" config-file="config-go.xml">org.jetbrains.plugins.go</depends>
     <depends optional="true" config-file="config-php.xml">com.jetbrains.php</depends>
     <depends optional="true" config-file="config-python.xml">Pythonid</depends>
+    <depends optional="true" config-file="config-ruby.xml">org.jetbrains.plugins.ruby</depends>
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 

@@ -47,6 +47,7 @@ import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
 import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.GoApis;
 import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.PyApis;
+import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.RubyApis;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.jetbrains.annotations.NotNull;
@@ -360,6 +361,16 @@ public class NodeUtil {
      */
     public static List<ApiService> getPythonApis(List<String> moduleNameList, Project myProject) {
         return new PyApis().getApis(moduleNameList, myProject);
+    }
+
+    /**
+     * 解析的api，如果没有特殊情况，都直接继承BaseApis实现其方法即可
+     * @param moduleNameList
+     * @param myProject
+     * @return
+     */
+    public static List<ApiService> getRubyApis(List<String> moduleNameList, Project myProject) {
+        return new RubyApis().getApis(moduleNameList, myProject);
     }
 
     public static boolean judgeModule(PsiElement cls, List<String> moduleNameList) {

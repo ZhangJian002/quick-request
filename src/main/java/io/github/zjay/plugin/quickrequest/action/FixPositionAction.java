@@ -13,7 +13,10 @@ import com.intellij.util.PsiNavigateUtil;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
+import io.github.zjay.plugin.quickrequest.contributor.PythonRequestMappingContributor;
+import io.github.zjay.plugin.quickrequest.contributor.RubyRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
+import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
 import io.github.zjay.plugin.quickrequest.util.GoTwoJinZhi;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
@@ -119,6 +122,23 @@ public final class FixPositionAction extends AnAction {
                             }
                         }
                     }
+                }
+            }
+        }
+        else if(type == 4){
+            List<OtherRequestEntity> resultList = PythonRequestMappingContributor.getResultList(myProject);
+            for (OtherRequestEntity otherRequestEntity : resultList) {
+                if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl()) && Objects.equals(otherRequestEntity.getMethod().toLowerCase(), paramGroup.getMethod())){
+                    PsiNavigateUtil.navigate(otherRequestEntity.getElement());
+                    return;
+                }
+            }
+        }else if(type == 5){
+            List<OtherRequestEntity> resultList = RubyRequestMappingContributor.getResultList(myProject);
+            for (OtherRequestEntity otherRequestEntity : resultList) {
+                if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl()) && Objects.equals(otherRequestEntity.getMethod().toLowerCase(), paramGroup.getMethod())){
+                    PsiNavigateUtil.navigate(otherRequestEntity.getElement());
+                    return;
                 }
             }
         }

@@ -18,13 +18,11 @@ import com.intellij.psi.PsiElement;
 import io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.PhpMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.PyMethodGenerator;
+import io.github.zjay.plugin.quickrequest.generator.impl.RubyMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.PhpFunctionTooltip;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.PythonFunctionTooltip;
+import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.*;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.BaseFunctionTooltip;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.GoFunctionTooltip;
 import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.quickrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.quickrequest.service.GeneratorUrlService;
@@ -71,6 +69,11 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
                     break;
                 case php:
                     ApplicationManager.getApplication().getService(PhpMethodGenerator.class).generate(functionTooltip.getElement(), ((PhpFunctionTooltip)functionTooltip).getUrl(), null);
+                    ToolWindowUtil.openToolWindow(myProject);
+                    ToolWindowUtil.sendRequest(myProject, true);
+                    break;
+                case Ruby:
+                    ApplicationManager.getApplication().getService(RubyMethodGenerator.class).generate(functionTooltip.getElement(), ((RubyFunctionTooltip)functionTooltip).getUrl(), null);
                     ToolWindowUtil.openToolWindow(myProject);
                     ToolWindowUtil.sendRequest(myProject, true);
                     break;

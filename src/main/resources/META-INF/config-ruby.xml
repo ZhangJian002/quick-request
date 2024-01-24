@@ -1,0 +1,11 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.RubyMethodGenerator"/>
+        <codeInsight.lineMarkerProvider language="ruby"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RubyLineMarkerProvider"/>
+    </extensions>
+    <extensions defaultExtensionNs="QuickRequest">
+        <requestMappingContributor
+                implementation="io.github.zjay.plugin.quickrequest.contributor.RubyRequestMappingContributor"/>
+    </extensions>
+</idea-plugin>

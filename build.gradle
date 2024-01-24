@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.1.19'
+version '2024.1.26'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.1.19'
+    pluginVersion = '2024.1.26'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -101,13 +101,27 @@ prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property
 //}
 intellij {
     type = "IU"
-    plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin','org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223']
+    plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin',
+               'org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223', 'org.jetbrains.plugins.ruby:213.5744.223']
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
     downloadSources false
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.1.26</h3>
+    <p>中文</p>
+    <ul>
+        <li>支持rails(Ruby)框架</li>
+        <li>修复Navigate下包名类名同级显示问题</li>
+        <li>兼容性修改</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix apis loading issue caused by recursion in the gin framework</li>
+        <li>Compatibility modification</li>
+        <li>Fix the issue of displaying the same level of package name and class name in Navigator</li>
+    </ul>
     <h3>v2024.1.19</h3>
     <p>中文</p>
     <ul>
