@@ -48,7 +48,7 @@ public class ClassNode extends BaseNode<String> {
             case Kotlin:
                 return KotlinIcons.CLASS;
             case Ruby:
-                return RubyIcons.Ruby.Ruby_file;
+                return RubyIcons.Ruby.Ruby;
         }
         //默认返回class
         return AllIcons.Nodes.Class;
