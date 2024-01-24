@@ -1,6 +1,8 @@
 package io.github.zjay.plugin.quickrequest.util.file;
 
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import io.github.zjay.plugin.quickrequest.util.CharPool;
 import io.github.zjay.plugin.quickrequest.util.URLEncoder;
 import io.github.zjay.plugin.quickrequest.util.http.HttpUtil;
@@ -19,6 +21,10 @@ import java.util.List;
 public class FileUtil {
 
     public static final URLEncoder QUERY = createQuery();
+
+    public static boolean isProjectFile(Project project, VirtualFile file){
+        return project.getBasePath() != null && file.getPath().startsWith(project.getBasePath());
+    }
 
     public static File completeFileNameFromHeader(File destFile, Response response) {
         if (!destFile.isDirectory()) {

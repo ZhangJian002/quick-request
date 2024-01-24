@@ -1,6 +1,5 @@
 package io.github.zjay.plugin.quickrequest.view.component.tree.allApis;
 
-import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import io.github.zjay.plugin.quickrequest.contributor.RubyRequestMappingContributor;

@@ -296,7 +296,6 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                         }
                         NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
                                 .notify(myProject);
-
                     }finally {
                         refresh.set(true);
                     }

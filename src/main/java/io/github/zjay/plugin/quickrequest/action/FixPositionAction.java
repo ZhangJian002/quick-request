@@ -128,7 +128,7 @@ public final class FixPositionAction extends AnAction {
         else if(type == 4){
             List<OtherRequestEntity> resultList = PythonRequestMappingContributor.getResultList(myProject);
             for (OtherRequestEntity otherRequestEntity : resultList) {
-                if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl()) && Objects.equals(otherRequestEntity.getMethod().toLowerCase(), paramGroup.getMethod())){
+                if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl()) && Objects.equals(otherRequestEntity.getMethod(), paramGroup.getMethodType())){
                     PsiNavigateUtil.navigate(otherRequestEntity.getElement());
                     return;
                 }
@@ -136,7 +136,7 @@ public final class FixPositionAction extends AnAction {
         }else if(type == 5){
             List<OtherRequestEntity> resultList = RubyRequestMappingContributor.getResultList(myProject);
             for (OtherRequestEntity otherRequestEntity : resultList) {
-                if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl()) && Objects.equals(otherRequestEntity.getMethod().toLowerCase(), paramGroup.getMethod())){
+                if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl()) && Objects.equals(otherRequestEntity.getMethod(), paramGroup.getMethodType())){
                     PsiNavigateUtil.navigate(otherRequestEntity.getElement());
                     return;
                 }

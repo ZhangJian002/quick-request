@@ -19,7 +19,9 @@ package io.github.zjay.plugin.quickrequest.contributor;
 import com.goide.psi.*;
 import com.goide.psi.impl.*;
 import com.goide.stubs.index.*;
+import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.ResolveState;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -28,48 +30,15 @@ import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.util.GoTwoJinZhi;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
+import io.github.zjay.plugin.quickrequest.util.file.FileUtil;
 import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 
 import java.util.*;
 
 public class GoRequestMappingContributor extends OtherRequestMappingByNameContributor{
 
-
     private static Set<GoFunctionDeclaration> goFunctionDeclarations = new HashSet<>();
 
-    private static Map<String, Method> map = new HashMap<>();
-
-    private static Map<String, Statement> mapStatement = new HashMap<>();
-
-    static class Statement{
-
-        public Statement(String name, Integer count){
-            this.name = name;
-            this.count = count;
-        }
-        String name;
-
-        Integer count;
-
-        public String toString(){
-            return "语句行：" + name + "; 次数：" + count;
-        }
-    }
-
-    static class Method{
-
-        public Method(String name, Integer count){
-            this.name = name;
-            this.count = count;
-        }
-        String name;
-
-        Integer count;
-
-        public String toString(){
-            return "方法名：" + name + "; 次数：" + count;
-        }
-    }
 
     @Override
     List<OtherRequestEntity> getPsiElementSearchers(Project project) {
@@ -81,7 +50,7 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
         try {
             Class.forName("com.goide.stubs.index.GoFunctionIndex");
             Collection<GoFunctionDeclaration> collection = StubIndex.getElements(GoFunctionIndex.KEY, TwoJinZhiGet.getRealStr(Constant.MAIN), project, GlobalSearchScope.projectScope(project), GoFunctionDeclaration.class);
-            analyzeFunc(collection, resultList);
+            analyzeFunc(collection, resultList, project);
             goFunctionDeclarations.clear();
         }catch (Exception e){
 
@@ -89,8 +58,13 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
         return resultList;
     }
 
-    private static void analyzeFunc(Collection<GoFunctionDeclaration> collection, List<OtherRequestEntity> resultList) {
+    private static void analyzeFunc(Collection<GoFunctionDeclaration> collection, List<OtherRequestEntity> resultList, Project project) {
         for (GoFunctionDeclaration element : collection) {
+            VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
+            if(!FileUtil.isProjectFile(project, virtualFile)){
+                continue;
+            }
+
             String text = element.getText();
             if (!text.contains("gin.Default()") && !text.contains("gin.Engine")) {
                 continue;
@@ -101,7 +75,7 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
             for (GoStatement goStatement : statementList) {
                 try {
                     PsiElement firstChild = goStatement.getFirstChild().getFirstChild();
-                    judgeCallExpr(firstChild, goStatement, resultList);
+                    judgeCallExpr(firstChild, goStatement, resultList, project);
                 }catch (Exception e){
 
                 }
@@ -109,7 +83,7 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
         }
     }
 
-    private static void judgeCallExpr(PsiElement firstChild, GoStatement goStatement, List<OtherRequestEntity> resultList) {
+    private static void judgeCallExpr(PsiElement firstChild, GoStatement goStatement, List<OtherRequestEntity> resultList, Project project) {
         if (TwoJinZhiGet.getRealStr(GoTwoJinZhi.CALL_EXPR).equals((firstChild.getNode().getElementType().toString()))) {
             if (GoMethod.isExist(( firstChild.getFirstChild().getLastChild()).getText())) {
                 GoReferenceExpressionImpl firstChild1 = (GoReferenceExpressionImpl)firstChild.getFirstChild().getFirstChild();
@@ -136,7 +110,7 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
                     return;
                 }
                 if(!goFunctionDeclarations.contains(resolve)){
-                    analyzeFunc(Arrays.asList(resolve), resultList);
+                    analyzeFunc(Arrays.asList(resolve), resultList, project);
                 }
             }
         }else if(firstChild instanceof GoVarDefinition){
@@ -145,7 +119,7 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
                 //就是
                 PsiElement lastChild = goStatement.getFirstChild().getLastChild();
                 if (!Objects.equals(TwoJinZhiGet.getRealStr(GoTwoJinZhi.GIN_Default), lastChild.getText())) {
-                    judgeCallExpr(lastChild, goStatement, resultList);
+                    judgeCallExpr(lastChild, goStatement, resultList, project);
                 }
             }
         }
