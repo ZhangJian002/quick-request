@@ -113,14 +113,14 @@ patchPluginXml {
     <p>中文</p>
     <ul>
         <li>支持rails(Ruby)框架</li>
-        <li>修复Navigate下包名类名同级显示问题</li>
+        <li>修复bug</li>
         <li>兼容性修改</li>
     </ul>
     <p>English</p>
     <ul>
-        <li>Fix apis loading issue caused by recursion in the gin framework</li>
+        <li>Support for rails (Ruby) framework</li>
+        <li>Fix bugs</li>
         <li>Compatibility modification</li>
-        <li>Fix the issue of displaying the same level of package name and class name in Navigator</li>
     </ul>
     <h3>v2024.1.19</h3>
     <p>中文</p>

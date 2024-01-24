@@ -17,6 +17,7 @@
             <li>Supports requests for the gin and echo framework of Go language</li>
             <li>Supports requests for the flask framework of Python language</li>
             <li>Supports requests for the Laravel framework of PHP language</li>
+            <li>Support requests for the rails framework of Ruby language</li>
             <li>Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
             <li>Support for save requests and history queries</li>
             <li>Support pressure testing</li>
@@ -32,6 +33,7 @@
             <li>支持Go语言的gin框架请求生成</li>
             <li>支持Python的flask框架的请求生成</li>
             <li>支持Php的Laravel框架的请求生成</li>
+            <li>支持Ruby的rails框架的请求生成</li>
             <li>在Spring Mvc中, 你可以通过填写个表单来自动生成方法, 快捷键(alt + '\')</li>
             <li>支持保存请求和请求历史记录</li>
             <li>简单支持压测，参考为主</li>
