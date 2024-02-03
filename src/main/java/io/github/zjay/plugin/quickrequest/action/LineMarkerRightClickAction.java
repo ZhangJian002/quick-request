@@ -15,10 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.psi.PsiElement;
-import io.github.zjay.plugin.quickrequest.generator.impl.GoMethodGenerator;
-import io.github.zjay.plugin.quickrequest.generator.impl.PhpMethodGenerator;
-import io.github.zjay.plugin.quickrequest.generator.impl.PyMethodGenerator;
-import io.github.zjay.plugin.quickrequest.generator.impl.RubyMethodGenerator;
+import io.github.zjay.plugin.quickrequest.generator.impl.*;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.*;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
@@ -74,6 +71,11 @@ public class LineMarkerRightClickAction extends AnAction implements DumbAware {
                     break;
                 case Ruby:
                     ApplicationManager.getApplication().getService(RubyMethodGenerator.class).generate(functionTooltip.getElement(), ((RubyFunctionTooltip)functionTooltip).getUrl(), null);
+                    ToolWindowUtil.openToolWindow(myProject);
+                    ToolWindowUtil.sendRequest(myProject, true);
+                    break;
+                case Rust:
+                    ApplicationManager.getApplication().getService(RustMethodGenerator.class).generate(functionTooltip.getElement(), ((RustFunctionTooltip)functionTooltip).getMethod(), null);
                     ToolWindowUtil.openToolWindow(myProject);
                     ToolWindowUtil.sendRequest(myProject, true);
                     break;

@@ -1486,7 +1486,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     ((MyLanguageTextField) responseTextAreaPanel).setText(body);
                     refreshResponseTable(body);
                 } else {
-                    responseTabbedPanel.setSelectedIndex(2);
+                    if(bodyLength <= 0){
+                        responseTabbedPanel.setSelectedIndex(3);
+                    }else {
+                        responseTabbedPanel.setSelectedIndex(2);
+                    }
 //                    String subBody = body.substring(0, Math.min(body.length(), 32768));
 //                    if (body.length() > 32768) {
 //                        subBody += "\n\ntext too large only show 32768 characters\n.............";

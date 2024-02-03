@@ -48,6 +48,7 @@ import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
 import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.GoApis;
 import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.PyApis;
 import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.RubyApis;
+import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.RustApis;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.jetbrains.annotations.NotNull;
@@ -373,6 +374,10 @@ public class NodeUtil {
         return new RubyApis().getApis(moduleNameList, myProject);
     }
 
+    public static List<ApiService> getRustApis(List<String> moduleNameList, Project myProject) {
+        return new RustApis().getApis(moduleNameList, myProject);
+    }
+
     public static boolean judgeModule(PsiElement cls, List<String> moduleNameList) {
         if (moduleNameList == null) {
             return true;
@@ -383,4 +388,5 @@ public class NodeUtil {
         }
         return moduleNameList.contains(module.getName());
     }
+
 }

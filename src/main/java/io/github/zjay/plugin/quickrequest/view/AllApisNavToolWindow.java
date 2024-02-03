@@ -311,6 +311,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
         addGoApis(moduleNameList);
         addPythonApis(moduleNameList);
         addRubyApis(moduleNameList);
+        addRustApis(moduleNameList);
     }
 
     private void addJavaApis(List<String> moduleNameList) {
@@ -334,6 +335,11 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
 
     private void addRubyApis(List<String> moduleNameList) {
         List<ApiService> apiServiceList = NodeUtil.getRubyApis(moduleNameList, myProject);
+        judgeAndSet(apiServiceList);
+    }
+
+    private void addRustApis(List<String> moduleNameList) {
+        List<ApiService> apiServiceList = NodeUtil.getRustApis(moduleNameList, myProject);
         judgeAndSet(apiServiceList);
     }
 

@@ -22,10 +22,13 @@ import icons.PhpIcons;
 import icons.PythonIcons;
 import icons.RubyIcons;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
+import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.idea.KotlinIcons;
+import quickRequest.icons.PluginIcons;
 
 import javax.swing.*;
+import java.lang.reflect.Constructor;
 
 public class ClassNode extends BaseNode<String> {
 
@@ -44,11 +47,17 @@ public class ClassNode extends BaseNode<String> {
             case php:
                 return PhpIcons.PhpIcon;
             case Python:
-                return PythonIcons.Python.Python;
+                return PluginIcons.ICON_PYTHON;
             case Kotlin:
                 return KotlinIcons.CLASS;
             case Ruby:
                 return RubyIcons.Ruby.Ruby;
+            case Rust:
+                Object instance = ReflectUtils.getInstance("org.rust.ide.icons.RsIcons");
+                Object rustIcon = ReflectUtils.invokeMethod(instance, "getRUST");
+                if(rustIcon instanceof Icon){
+                    return (Icon)rustIcon;
+                }
         }
         //默认返回class
         return AllIcons.Nodes.Class;

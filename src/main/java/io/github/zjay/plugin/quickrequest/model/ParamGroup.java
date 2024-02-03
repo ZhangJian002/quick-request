@@ -35,7 +35,7 @@ public class ParamGroup implements Serializable {
     private String module;
 
     /**
-     * 类型：1java、2Kotlin、3Php、4Python、5Ruby
+     * 类型：1java、2Kotlin、3Php、4Python、5Ruby、6Rust
      */
     private Integer type;
 

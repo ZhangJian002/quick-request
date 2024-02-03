@@ -79,6 +79,10 @@
                           instance="io.github.zjay.plugin.quickrequest.configurable.OtherConfigConfigurable"/>
         </applicationConfigurable>
 
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.RustMethodGenerator"/>
+
+        <codeInsight.lineMarkerProvider language="Rust"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>
         <notificationGroup id="quickRequestWindowNotificationGroup" displayType="TOOL_WINDOW"/>
         <postStartupActivity implementation="io.github.zjay.plugin.quickrequest.update.WhatsNewActivity"/>
         <iw.actionProvider implementation="io.github.zjay.plugin.quickrequest.action.soft_wrap.QuickRequestToggleAction" />
@@ -114,6 +118,11 @@
         <extensionPoint name="requestMappingContributor" interface="com.intellij.navigation.ChooseByNameContributor"
                         dynamic="true"/>
     </extensionPoints>
+
+    <extensions defaultExtensionNs="QuickRequest">
+        <requestMappingContributor
+                implementation="io.github.zjay.plugin.quickrequest.contributor.RustRequestMappingContributor"/>
+    </extensions>
 
 
 <!--    <applicationListeners>-->
