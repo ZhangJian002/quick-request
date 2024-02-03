@@ -12,12 +12,14 @@
         </p>
         <h1>English</h1>
         <ul>
-            <li>Support requests for spring mvc frameworks,support GET PUT DELETE POST PATCH</li>
-            <li>Support requests for dubbo frameworks,support @Service, @DubboService, @Method</li>
-            <li>Supports requests for the gin and echo framework of Go language</li>
+            <li>Support requests for Spring MVC and JAX-RS frameworks of Java language</li>
+            <li>Support requests for Spring MVC framework of Kotlin language</li>
+            <li>Support requests for Dubbo framework of Java language</li>
+            <li>Supports requests for the gin and echo frameworks of Go language</li>
             <li>Supports requests for the flask framework of Python language</li>
             <li>Supports requests for the Laravel framework of PHP language</li>
-            <li>Support requests for the rails framework of Ruby language</li>
+            <li>Support requests for the Rails framework of Ruby language</li>
+            <li>Support requests for the actix-web and Rocket framework of Rust language</li>
             <li>Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
             <li>Support for save requests and history queries</li>
             <li>Support pressure testing</li>
@@ -28,12 +30,14 @@
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a></p>
         <h1>中文</h1>
         <ul>
-            <li>支持Spring Mvc系列的请求生成</li>
-            <li>支持Dubbo框架请求生成, 只支持注解 @Service, @DubboService, @Method</li>
-            <li>支持Go语言的gin框架请求生成</li>
+            <li>支持Java语言Spring MVC和JAX-RS框架的请求生成</li>
+            <li>支持Kotlin语言Spring MVC框架的请求生成</li>
+            <li>支持Java语言Dubbo框架请求生成</li>
+            <li>支持Go语言的gin和echo框架请求生成</li>
             <li>支持Python的flask框架的请求生成</li>
             <li>支持Php的Laravel框架的请求生成</li>
-            <li>支持Ruby的rails框架的请求生成</li>
+            <li>支持Ruby的Rails框架的请求生成</li>
+            <li>支持Rust的actix-web和Rocket框架的请求生成</li>
             <li>在Spring Mvc中, 你可以通过填写个表单来自动生成方法, 快捷键(alt + '\')</li>
             <li>支持保存请求和请求历史记录</li>
             <li>简单支持压测，参考为主</li>

@@ -109,10 +109,21 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.2.3</h3>
+    <p>中文</p>
+    <ul>
+        <li>支持actix-web(Rust)、Rocket(Rust)框架</li>
+        <li>兼容性修改</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Supports actix-web(Rust) and Rocket(Rust) frameworks</li>
+        <li>Compatibility modification</li>
+    </ul>
     <h3>v2024.1.26</h3>
     <p>中文</p>
     <ul>
-        <li>支持rails(Ruby)框架</li>
+        <li>支持Rails(Ruby)框架</li>
         <li>修复bug</li>
         <li>兼容性修改</li>
     </ul>
