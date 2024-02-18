@@ -57,7 +57,7 @@ public class PythonRequestMappingContributor extends OtherRequestMappingByNameCo
                         if(psiElement instanceof PyDecoratorList){
                             PyDecoratorList pyDecorators = (PyDecoratorList) psiElement;
                             for (PyDecorator pyDecorator : pyDecorators.getDecorators()) {
-                                if(FlaskMethods.isExist(pyDecorator.getName())){
+                                if(FlaskMethods.isExist(pyDecorator.getQualifiedName().getLastComponent())){
                                     PyArgumentList argumentList = pyDecorator.getArgumentList();
                                     if(argumentList == null){
                                         continue;
