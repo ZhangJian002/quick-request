@@ -115,4 +115,7 @@ public interface PluginIcons {
 
     Icon ICON_PYTHON = IconLoader.getIcon("/quickRequest.icon/language/python.svg", PluginIcons.class);
 
+    Icon ICON_RUST = IconLoader.getIcon("/quickRequest.icon/language/rust.svg", PluginIcons.class);
+
+
 }

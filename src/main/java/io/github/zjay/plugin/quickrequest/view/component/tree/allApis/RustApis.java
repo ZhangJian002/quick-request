@@ -2,7 +2,6 @@ package io.github.zjay.plugin.quickrequest.view.component.tree.allApis;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import io.github.zjay.plugin.quickrequest.contributor.RubyRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.contributor.RustRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;

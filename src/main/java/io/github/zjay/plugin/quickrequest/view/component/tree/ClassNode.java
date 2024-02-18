@@ -53,11 +53,7 @@ public class ClassNode extends BaseNode<String> {
             case Ruby:
                 return RubyIcons.Ruby.Ruby;
             case Rust:
-                Object instance = ReflectUtils.getInstance("org.rust.ide.icons.RsIcons");
-                Object rustIcon = ReflectUtils.invokeMethod(instance, "getRUST");
-                if(rustIcon instanceof Icon){
-                    return (Icon)rustIcon;
-                }
+                return PluginIcons.ICON_RUST;
         }
         //默认返回class
         return AllIcons.Nodes.Class;
