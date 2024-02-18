@@ -16,6 +16,9 @@
 
 package io.github.zjay.plugin.quickrequest.generator.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
@@ -39,6 +42,7 @@ public class RustMethodGenerator extends NormalUrlGenerator {
         paramGroup.setClassName(containingFile.getName().replaceFirst(".rs", ""));
         paramGroup.setModule(psiElement.getProject().getName());
         paramGroup.setOriginUrl(methodType[0]);
+        paramGroup.setUrl(methodType[0]);
         paramGroup.setType(6);
         return null;
     }

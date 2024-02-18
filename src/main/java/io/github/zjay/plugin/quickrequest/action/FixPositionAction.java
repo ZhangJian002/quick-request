@@ -1,8 +1,11 @@
 package io.github.zjay.plugin.quickrequest.action;
 
+import com.alibaba.fastjson.JSON;
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
@@ -11,10 +14,7 @@ import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PsiNavigateUtil;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
-import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
-import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
-import io.github.zjay.plugin.quickrequest.contributor.PythonRequestMappingContributor;
-import io.github.zjay.plugin.quickrequest.contributor.RubyRequestMappingContributor;
+import io.github.zjay.plugin.quickrequest.contributor.*;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
@@ -137,6 +137,15 @@ public final class FixPositionAction extends AnAction {
             List<OtherRequestEntity> resultList = RubyRequestMappingContributor.getResultList(myProject);
             for (OtherRequestEntity otherRequestEntity : resultList) {
                 if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getOriginUrl()) && Objects.equals(otherRequestEntity.getMethod(), paramGroup.getMethodType())){
+                    PsiNavigateUtil.navigate(otherRequestEntity.getElement());
+                    return;
+                }
+            }
+        }
+        else if(type == 6){
+            List<OtherRequestEntity> resultList = RustRequestMappingContributor.getResultList(myProject);
+            for (OtherRequestEntity otherRequestEntity : resultList) {
+                if(Objects.equals(otherRequestEntity.getUrlPath(), paramGroup.getUrl()) && Objects.equals(otherRequestEntity.getMethod(), paramGroup.getMethodType())){
                     PsiNavigateUtil.navigate(otherRequestEntity.getElement());
                     return;
                 }

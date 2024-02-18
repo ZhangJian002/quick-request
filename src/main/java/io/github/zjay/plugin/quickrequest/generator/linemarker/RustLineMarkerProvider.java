@@ -16,11 +16,14 @@
 
 package io.github.zjay.plugin.quickrequest.generator.linemarker;
 
+import com.alibaba.fastjson.JSON;
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiElement;
 import io.github.zjay.plugin.quickrequest.configurable.MyLineMarkerInfo;
 import io.github.zjay.plugin.quickrequest.generator.impl.RustMethodGenerator;
@@ -33,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import quickRequest.icons.PluginIcons;
 
-import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -77,17 +79,7 @@ public class RustLineMarkerProvider implements LineMarkerProvider {
                 List litExprList = (List)ReflectUtils.invokeMethod(metaItemArgs, "getLitExprList");
                 PsiElement stringLiteral = (PsiElement)ReflectUtils.invokeMethod(litExprList.get(0), "getStringLiteral");
                 String url = stringLiteral.getText().replaceAll("'", "").replaceAll("\"", "");
-                List<String> finalList = new LinkedList<>();
-                for (String s : url.split("/")) {
-                    if(s.startsWith("{") && s.endsWith("}") || s.startsWith("<") && s.endsWith(">")){
-                        Random random = new Random();
-                        int randomNumber = random.nextInt(100) + 1; // 生成 1 到 100 之间的随机整数
-                        s = randomNumber + "";
-                    }
-                    finalList.add(s);
-                }
-                String finalUrl = StringUtils.join(finalList, "/");
-                return new String[]{finalUrl, RustMethods.getMethodType(identifier.getText()), url.replaceAll("<", "&lt;").replaceAll(">", "&gt;"), identifier.getText()};
+                return new String[]{url, RustMethods.getMethodType(identifier.getText()), url, identifier.getText()};
             }
         }catch (Exception e){
 

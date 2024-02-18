@@ -16,12 +16,16 @@
 
 package io.github.zjay.plugin.quickrequest.contributor;
 
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
@@ -39,9 +43,8 @@ public class RustRequestMappingContributor extends OtherRequestMappingByNameCont
     public static List<OtherRequestEntity> getResultList(Project project){
         List<OtherRequestEntity> resultList = new LinkedList<>();
         try {
-            Class.forName("org.rust.lang.core.psi.impl.RsOuterAttrImpl");
             PsiManager psiManager = PsiManager.getInstance(project);
-            Collection<VirtualFile> virtualFiles = FilenameIndex.getAllFilesByExt(project, "rs");
+            Collection<VirtualFile> virtualFiles = FilenameIndex.getAllFilesByExt(project, "rs", GlobalSearchScope.projectScope(project));
             try {
                 virtualFiles.forEach(virtualFile -> {
                     PsiFile file = psiManager.findFile(virtualFile);

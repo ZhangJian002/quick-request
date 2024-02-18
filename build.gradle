@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.2.3'
+version '2024.2.20'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.2.3'
+    pluginVersion = '2024.2.20'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -88,8 +88,8 @@ task proguard(type: ProGuardTask, dependsOn: jar) {
 
 }
 
-prepareSandbox.dependsOn("proguard")
-prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
+//prepareSandbox.dependsOn("proguard")
+//prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 //intellij {
@@ -109,6 +109,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.2.20</h3>
+    <p>中文</p>
+    <ul>
+        <li>Rust框架支持API搜索</li>
+        <li>兼容性修改</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>The Rust frameworks support API search</li>
+        <li>Compatibility modification</li>
+    </ul>
     <h3>v2024.2.3</h3>
     <p>中文</p>
     <ul>
