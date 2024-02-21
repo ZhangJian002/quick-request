@@ -44,7 +44,7 @@ public class PyLineMarkerProvider implements LineMarkerProvider {
                 Method getDecorators = decoratorList.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.getDecorators));
                 Object[] decorators = (Object[]) getDecorators.invoke(decoratorList);
                 for (Object decorator : decorators) {
-                    Object name = ReflectUtils.invokeMethod(ReflectUtils.invokeMethod(decorator, "getQualifiedName"), "getLastComponent");
+                    Object name = ReflectUtils.invokeMethod(decorator, TwoJinZhiGet.getRealStr(GoTwoJinZhi.getName));
                     if(FlaskMethods.isExist((String) name)){
                         Method getArgumentList = decorator.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getArgumentList));
                         Object argumentList = getArgumentList.invoke(decorator);
@@ -101,7 +101,7 @@ public class PyLineMarkerProvider implements LineMarkerProvider {
             Method getDecorators = decoratorList.getClass().getMethod(TwoJinZhiGet.getRealStr(PythonTwoJinZhi.getDecorators));
             Object[] decorators = (Object[]) getDecorators.invoke(decoratorList);
             for (Object decorator : decorators) {
-                Object name = ReflectUtils.invokeMethod(ReflectUtils.invokeMethod(decorator, "getQualifiedName"), "getLastComponent");
+                Object name = ReflectUtils.invokeMethod(decorator, TwoJinZhiGet.getRealStr(GoTwoJinZhi.getName));
                 if(FlaskMethods.isExist((String) name)){
                     Method getMethodName = element.getClass().getMethod(TwoJinZhiGet.getRealStr(GoTwoJinZhi.getName));
                     String methodName = (String)getMethodName.invoke(element);
