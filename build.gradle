@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.2.20'
+version '2024.3.1'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.2.20'
+    pluginVersion = '2024.3.1'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -109,6 +109,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.3.1</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复bug</li>
+        <li>兼容性修改</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fix bugs</li>
+        <li>Compatibility modification</li>
+    </ul>
     <h3>v2024.2.20</h3>
     <p>中文</p>
     <ul>

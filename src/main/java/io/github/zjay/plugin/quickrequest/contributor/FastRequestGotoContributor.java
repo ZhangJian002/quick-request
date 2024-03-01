@@ -57,7 +57,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
 
         @Override
         public @NotNull String getNotFoundMessage() {
-            return "Not Found";
+            return "Not found";
         }
 
     }
@@ -112,7 +112,7 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
 
     private Icon getMethodIcon(RequestMappingItem requestMappingItem) {
         PsiFile containingFile = requestMappingItem.getPsiElement().getContainingFile();
-        if(Objects.equals("com.intellij.psi.PsiJavaFile", containingFile.getClass().getCanonicalName())){
+        if(Objects.equals("com.intellij.psi.impl.source.PsiJavaFileImpl", containingFile.getClass().getCanonicalName())){
             PsiJavaFile psiJavaFile = (PsiJavaFile) containingFile;
             return FrIconUtil.getIconByMethodAndClassType(requestMappingItem.getRequestMethod(), psiJavaFile.getClasses()[0].isInterface());
         }else {
