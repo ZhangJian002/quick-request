@@ -37,8 +37,8 @@ dependencies {
     }
 }
 // idea 依赖所在目录
-def ideaPath = "C:\\Users\\Administrator\\.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3"
-def kotlinPath = "C:\\Users\\Administrator\\.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3\\plugins\\Kotlin"
+def ideaPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3"
+def kotlinPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3\\plugins\\Kotlin"
 task proguard(type: ProGuardTask, dependsOn: jar) {
     // 输出混淆前->混淆后的映射
 //    printmapping "$buildDir/dic.txt"
@@ -100,7 +100,7 @@ prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property
 ////    type = "IU"
 //}
 intellij {
-    type = "IU"
+    type = "IC"
     plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin',
                'org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223', 'org.jetbrains.plugins.ruby:213.5744.223']
     version '2021.3'//2021.3、2021.1、2020.3.4
