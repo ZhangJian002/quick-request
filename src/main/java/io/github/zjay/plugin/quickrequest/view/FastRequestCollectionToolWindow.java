@@ -724,7 +724,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
      */
     public static class MyActionGroup extends ActionGroup {
 
-        List<AnAction> allActions = new LinkedList<>();
+        List<ParentAction> allActions = new LinkedList<>();
 
         public MyActionGroup() {
 
@@ -734,7 +734,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             add(anActionFunction.initAnAction());
         }
 
-        public void add(AnAction anAction) {
+        public void add(ParentAction anAction) {
             allActions.add(anAction);
         }
 
@@ -744,7 +744,11 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         @Override
         public ParentAction @NotNull [] getChildren(@Nullable AnActionEvent e) {
-            return allActions.toArray(new ParentAction[allActions.size()]);
+            ParentAction[] parentActions = new ParentAction[allActions.size()];
+            for (int i = 0; i < allActions.size(); i++) {
+                parentActions[i] = allActions.get(i);
+            }
+            return parentActions;
         }
     }
 

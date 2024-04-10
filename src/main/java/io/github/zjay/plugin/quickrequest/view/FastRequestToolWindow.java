@@ -4564,8 +4564,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 break;
         }
         String text = myLanguageTextField.getText();
-        myLanguageTextField.updateFileLanguage(fileType, text);
         myLanguageTextField.setLanguage(language);
+        myLanguageTextField.updateFileLanguage(fileType, text);
+
 
     }
 }

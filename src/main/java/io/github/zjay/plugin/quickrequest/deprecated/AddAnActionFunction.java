@@ -1,10 +1,10 @@
 package io.github.zjay.plugin.quickrequest.deprecated;
 
 
-import com.intellij.openapi.actionSystem.AnAction;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 
 @FunctionalInterface
 public interface AddAnActionFunction {
 
-    AnAction initAnAction();
+    ParentAction initAnAction();
 }

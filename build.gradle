@@ -89,8 +89,8 @@ task proguard(type: ProGuardTask, dependsOn: jar) {
 
 }
 
-prepareSandbox.dependsOn("proguard")
-prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
+//prepareSandbox.dependsOn("proguard")
+//prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 //intellij {

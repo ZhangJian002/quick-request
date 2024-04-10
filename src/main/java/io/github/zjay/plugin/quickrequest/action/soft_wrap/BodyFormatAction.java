@@ -64,7 +64,7 @@ public class BodyFormatAction extends ParentAction {
             return;
         }
         for (BodyContentType bodyContentType : BodyContentType.values()) {
-            myActionGroup.add(new AnAction(bodyContentType.getName()) {
+            myActionGroup.add(new ParentAction(bodyContentType.getName()) {
                 @Override
                 public void actionPerformed(@NotNull AnActionEvent e) {
                     DefaultActionGroup actionGroup = (DefaultActionGroup)ActionManager.getInstance().getAction("quickRequest.editor.floatGroup");
@@ -77,7 +77,9 @@ public class BodyFormatAction extends ParentAction {
                     }
                     chooseBodyType = bodyContentType.getName();
                     FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(project);
-                    fastRequestToolWindow.setBodyFormat(bodyContentType);
+                    if (fastRequestToolWindow != null) {
+                        fastRequestToolWindow.setBodyFormat(bodyContentType);
+                    }
                 }
             });
         }
