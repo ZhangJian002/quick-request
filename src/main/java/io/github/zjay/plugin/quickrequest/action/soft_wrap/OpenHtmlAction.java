@@ -1,7 +1,6 @@
 package io.github.zjay.plugin.quickrequest.action.soft_wrap;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
@@ -10,10 +9,11 @@ import com.intellij.openapi.fileEditor.impl.HTMLEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-public class OpenHtmlAction extends AnAction {
+public class OpenHtmlAction extends ParentAction {
 
     public OpenHtmlAction(){
         super("Open as Html", "Open as html", AllIcons.Xml.Browsers.Chrome);

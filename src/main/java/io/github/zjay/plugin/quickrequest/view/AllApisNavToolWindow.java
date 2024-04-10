@@ -43,6 +43,7 @@ import com.intellij.util.BooleanFunction;
 import com.intellij.util.PsiNavigateUtil;
 import com.intellij.util.ui.StatusText;
 import io.github.zjay.plugin.quickrequest.action.CheckBoxFilterAction;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.configurable.FastRequestSearchEverywhereConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
@@ -52,8 +53,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -170,7 +171,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                             || x.getUrl().toLowerCase().contains(searchPanel.getText().toLowerCase()))
                             && selectMethodType.contains(x.getMethodType())
             ).collect(Collectors.toList());
-            if(methods.isEmpty()){
+            if (methods.isEmpty()) {
                 return;
             }
             ApiService item = new ApiService();
@@ -216,9 +217,9 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                         if (allApiList == null) {
                             return;
                         }
-                        if(StringUtils.isNotBlank(searchPanel.getText())){
+                        if (StringUtils.isNotBlank(searchPanel.getText())) {
                             filterRequest();
-                        }else {
+                        } else {
                             List<ApiService> filterList = allApiList.stream().filter(q -> selectModule.contains(q.getModuleName())).collect(Collectors.toList());
                             indicator.setText("Rendering");
                             List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
@@ -281,22 +282,22 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
                     try {
                         addAllApis(moduleNameList);
                         indicator.setText("Rendering");
-                        if(StringUtils.isNotBlank(searchPanel.getText())){
+                        if (StringUtils.isNotBlank(searchPanel.getText())) {
                             filterRequest();
-                        }else {
+                        } else {
                             List<String> selectMethodType = methodTypeFilter.getSelectedElementList();
                             List<ApiService.ApiMethod> filterMethodList = new ArrayList<>();
                             allApiList.stream().map(ApiService::getApiMethodList).forEach(filterMethodList::addAll);
                             long count = filterMethodList.stream().filter(q -> selectMethodType.contains(q.getMethodType())).count();
                             RootNode root = new RootNode(count + " apis");
                             NodeUtil.convertToRoot(root, NodeUtil.convertToMap(
-                                    allApiList.stream().filter(q->CollectionUtils.isNotEmpty(q.getApiMethodList())).collect(Collectors.toList())
+                                    allApiList.stream().filter(q -> CollectionUtils.isNotEmpty(q.getApiMethodList())).collect(Collectors.toList())
                             ), methodTypeFilter.getSelectedElementList());
                             ApplicationManager.getApplication().invokeLater(() -> apiTree.setModel(new DefaultTreeModel(root)));
                         }
                         NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Reload apis complete", MessageType.INFO)
                                 .notify(myProject);
-                    }finally {
+                    } finally {
                         refresh.set(true);
                     }
                 });
@@ -344,9 +345,9 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
     }
 
     private void judgeAndSet(List<ApiService> apiServiceList) {
-        if(CollectionUtils.isNotEmpty(allApiList)){
+        if (CollectionUtils.isNotEmpty(allApiList)) {
             allApiList.addAll(apiServiceList);
-        }else {
+        } else {
             allApiList = apiServiceList;
         }
     }
@@ -384,7 +385,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
     }
 
 
-    private final class RefreshApiAction extends AnAction {
+    private final class RefreshApiAction extends ParentAction {
         public RefreshApiAction() {
             super("Refresh", "Refresh", AllIcons.Actions.Refresh);
         }

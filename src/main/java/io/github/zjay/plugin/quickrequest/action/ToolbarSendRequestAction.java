@@ -18,16 +18,14 @@ package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.NlsActions;
-import quickRequest.icons.PluginIcons;
+import io.github.zjay.plugin.quickrequest.base.ParentDumbAction;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.quickrequest.view.FastRequestToolWindow;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import quickRequest.icons.PluginIcons;
 
-public class ToolbarSendRequestAction extends DumbAwareAction {
+public class ToolbarSendRequestAction extends ParentDumbAction {
 
     public ToolbarSendRequestAction() {
         super(() -> "Send", PluginIcons.ICON_SEND);

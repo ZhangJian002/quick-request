@@ -18,7 +18,6 @@ package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.execution.runners.ExecutionUtil;
 import com.intellij.ide.util.gotoByName.ChooseByNameFilterConfiguration;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Toggleable;
 import com.intellij.openapi.ui.popup.JBPopup;
@@ -28,6 +27,7 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.ui.JBUI;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.util.MyResourceBundleUtil;
 
 import javax.swing.*;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class CheckBoxFilterAction<T> extends AnAction {
+public class CheckBoxFilterAction<T> extends ParentAction {
     private JBPopup myPopup;
     private List<JCheckBox> checkBoxList;
     private final Filter<T> filter;

@@ -1,7 +1,6 @@
 package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
@@ -15,20 +14,20 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.psi.PsiElement;
-import io.github.zjay.plugin.quickrequest.generator.impl.*;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.*;
-import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
-import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
-import quickRequest.icons.PluginIcons;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.configurable.MyLineMarkerInfo;
+import io.github.zjay.plugin.quickrequest.generator.impl.*;
+import io.github.zjay.plugin.quickrequest.generator.linemarker.tooltip.*;
 import io.github.zjay.plugin.quickrequest.service.GeneratorUrlService;
+import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
+import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import org.jetbrains.annotations.NotNull;
+import quickRequest.icons.PluginIcons;
 
 import java.awt.*;
 
-public class LineMarkerRightClickAction extends AnAction implements DumbAware {
+public class LineMarkerRightClickAction extends ParentAction implements DumbAware {
 
     private final GutterIconRenderer myRenderer;
     private final MyLineMarkerInfo myPoint;

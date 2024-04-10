@@ -1,7 +1,6 @@
 package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.notification.NotificationGroupManager;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -12,6 +11,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.PsiNavigateUtil;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import quickRequest.icons.PluginIcons;
 
-public class RetryAction extends AnAction {
+public class RetryAction extends ParentAction {
 
     private Project myProject;
     public RetryAction() {

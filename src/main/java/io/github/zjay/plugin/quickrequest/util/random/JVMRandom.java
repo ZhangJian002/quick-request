@@ -37,10 +37,10 @@ public final class JVMRandom extends Random {
     }
 
     public long nextLong() {
-        return nextLong(Long.MAX_VALUE);
+        return nextLong1(Long.MAX_VALUE);
     }
 
-    public static long nextLong(long n) {
+    public static long nextLong1(long n) {
         if (n <= 0L) {
             throw new IllegalArgumentException("Upper bound for nextInt must be positive");
         } else {

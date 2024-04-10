@@ -65,25 +65,28 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.StatusText;
-import io.github.zjay.plugin.quickrequest.config.*;
-import io.github.zjay.plugin.quickrequest.deprecated.AddAnActionFunction;
-import io.github.zjay.plugin.quickrequest.view.ui.MethodFontTableCellRenderer;
-import quickRequest.icons.PluginIcons;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
+import io.github.zjay.plugin.quickrequest.config.FastRequestCollectionComponent;
+import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
+import io.github.zjay.plugin.quickrequest.config.FastRequestHistoryCollectionComponent;
 import io.github.zjay.plugin.quickrequest.configurable.ConfigChangeNotifier;
+import io.github.zjay.plugin.quickrequest.deprecated.AddAnActionFunction;
 import io.github.zjay.plugin.quickrequest.idea.ExportToFileUtil;
+import io.github.zjay.plugin.quickrequest.model.*;
 import io.github.zjay.plugin.quickrequest.util.*;
 import io.github.zjay.plugin.quickrequest.view.component.CollectionNodeSelection;
 import io.github.zjay.plugin.quickrequest.view.model.CollectionCustomNode;
-import io.github.zjay.plugin.quickrequest.model.*;
+import io.github.zjay.plugin.quickrequest.view.ui.MethodFontTableCellRenderer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import quickRequest.icons.PluginIcons;
 
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
@@ -98,8 +101,8 @@ import java.awt.dnd.DnDConstants;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -159,7 +162,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         myInstalledSearchGroup2 = new DefaultActionGroup();
         for (SearchTypeEnum option : SearchTypeEnum.values()) {
-            if(option == SearchTypeEnum.name || option == SearchTypeEnum.url || option == SearchTypeEnum.separator_Method){
+            if (option == SearchTypeEnum.name || option == SearchTypeEnum.url || option == SearchTypeEnum.separator_Method) {
                 continue;
             }
             myInstalledSearchGroup2.add(new SearchOption2Action(option));
@@ -229,9 +232,9 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         private final Timer timer;
 
         public DelayedDocumentListener(Integer type) {
-            if(type == 1){
+            if (type == 1) {
                 timer = new Timer(10, e -> filterRequest());
-            }else {
+            } else {
                 timer = new Timer(10, e -> filterRequest2());
             }
             timer.setRepeats(false);
@@ -297,7 +300,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         assert historyTable != null;
         List<HistoryTableData> list = historyTable.getList();
         historyTableDataList = list;
-        ListTableModel model = (ListTableModel)collectionTable2.getModel();
+        ListTableModel model = (ListTableModel) collectionTable2.getModel();
         model.setItems(list);
     }
 
@@ -362,13 +365,13 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     private void filterRequest2() {
         String search = ((SearchTextField) searchPanel2).getText();
-        TableRowSorter<TableModel> rowSorter = (TableRowSorter)collectionTable2.getRowSorter();
+        TableRowSorter<TableModel> rowSorter = (TableRowSorter) collectionTable2.getRowSorter();
         rowSorter.setRowFilter(new RowFilter<>() {
             @Override
             public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
                 int rowIndex = entry.getIdentifier();
                 HistoryTableData historyTableData = (HistoryTableData) entry.getModel().getValueAt(rowIndex, 0);
-                if(StringUtils.isNotBlank(search) && !historyTableData.getUrl().toLowerCase().contains(search.toLowerCase())){
+                if (StringUtils.isNotBlank(search) && !historyTableData.getUrl().toLowerCase().contains(search.toLowerCase())) {
                     return false;
                 }
                 return true;
@@ -388,12 +391,12 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             JLabel jLabel = (JLabel) component;
             int width = table.getColumnModel().getColumn(column).getWidth();
             String realValue = cellValue;
-            if(cellValue.length() * 7.5 > width){
-                realValue = realValue.substring(0, (int)(width/7.5)) + "...";
+            if (cellValue.length() * 7.5 > width) {
+                realValue = realValue.substring(0, (int) (width / 7.5)) + "...";
             }
             jLabel.setToolTipText(cellValue);
-            if(cellValue.toLowerCase().contains(searchKeyword.toLowerCase())){
-                jLabel.setText("<html>" + realValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>")  + "</html>");
+            if (cellValue.toLowerCase().contains(searchKeyword.toLowerCase())) {
+                jLabel.setText("<html>" + realValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>") + "</html>");
             }
             return component;
         }
@@ -522,7 +525,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         });
         toolbarDecorator.setAddActionName("Add Group").setAddAction(e -> {
             int selectedRow = collectionTable.getSelectedRow();
-            if(selectedRow <= 0){
+            if (selectedRow <= 0) {
                 return;
             }
             String id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
@@ -567,9 +570,9 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 CollectionCustomNode node = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
                 CollectionCustomNode parent = (CollectionCustomNode) node.getParent();
                 parent.remove(node);
-                if(selectedRow > 1){
+                if (selectedRow > 1) {
                     collectionTable.setRowSelectionInterval(selectedRow - 1, selectedRow - 1);
-                }else {
+                } else {
                     collectionTable.setRowSelectionInterval(0, 0);
                 }
                 refreshTable();
@@ -579,60 +582,58 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         });
 
         /**
-        toolbarDecorator.addExtraActions(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.addModuleGroup"), AllIcons.Nodes.ModuleGroup) {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent e) {
-                CollectionCustomNode root = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(0);
-                ArrayList<CollectionCustomNode> nodeList = (ArrayList<CollectionCustomNode>) IteratorUtils.toList(root.children().asIterator());
-                List<String> existList = nodeList.stream().map(CollectionCustomNode::getName).collect(Collectors.toList());
-                ListAndSelectModule dialog = new ListAndSelectModule(myProject, existList);
-                if (dialog.showAndGet()) {
-                    String moduleName = dialog.getValue();
-                    String id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
-                    CollectionCustomNode addNode = new CollectionCustomNode(id, moduleName, 1);
-                    CollectionConfiguration.CollectionDetail detail = new CollectionConfiguration.CollectionDetail(id, moduleName, 1);
-                    root.insert(addNode, 1);
-                    rootDetail.getChildList().add(detail);
-                    refreshTable();
-                }
-            }
+         toolbarDecorator.addExtraActions(new ToolbarDecorator.ElementActionButton(MyResourceBundleUtil.getKey("button.addModuleGroup"), AllIcons.Nodes.ModuleGroup) {
+        @Override public void actionPerformed(@NotNull AnActionEvent e) {
+        CollectionCustomNode root = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(0);
+        ArrayList<CollectionCustomNode> nodeList = (ArrayList<CollectionCustomNode>) IteratorUtils.toList(root.children().asIterator());
+        List<String> existList = nodeList.stream().map(CollectionCustomNode::getName).collect(Collectors.toList());
+        ListAndSelectModule dialog = new ListAndSelectModule(myProject, existList);
+        if (dialog.showAndGet()) {
+        String moduleName = dialog.getValue();
+        String id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+        CollectionCustomNode addNode = new CollectionCustomNode(id, moduleName, 1);
+        CollectionConfiguration.CollectionDetail detail = new CollectionConfiguration.CollectionDetail(id, moduleName, 1);
+        root.insert(addNode, 1);
+        rootDetail.getChildList().add(detail);
+        refreshTable();
+        }
+        }
 
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
+        @Override public boolean isEnabled() {
+        return true;
+        }
         });
          */
-        toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Expand All", "", AllIcons.Actions.Expandall) {
+        toolbarDecorator.setActionGroup(new MyActionGroup(() -> new ParentAction("Expand All", "", AllIcons.Actions.Expandall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 collectionTable.setRootVisible(false);
-                SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),true);
+                SwingUtil.expandAll(tree, new TreePath(tree.getModel().getRoot()), true);
             }
 
         }));
 
-        toolbarDecorator.setActionGroup(new MyActionGroup(()->new AnAction("Collapse All", "", AllIcons.Actions.Collapseall) {
+        toolbarDecorator.setActionGroup(new MyActionGroup(() -> new ParentAction("Collapse All", "", AllIcons.Actions.Collapseall) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 collectionTable.setRootVisible(true);
-                SwingUtil.expandAll(tree,new TreePath(tree.getModel().getRoot()),false);
+                SwingUtil.expandAll(tree, new TreePath(tree.getModel().getRoot()), false);
             }
         }));
-        toolbarDecorator.setActionGroup(new MyActionGroup(() -> new AnAction("Refresh", "", AllIcons.Actions.Refresh) {
+        toolbarDecorator.setActionGroup(new MyActionGroup(() -> new ParentAction("Refresh", "", AllIcons.Actions.Refresh) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 refresh();
             }
         }));
-        MyActionGroup myActionGroup = new MyActionGroup(() -> new AnAction(MyResourceBundleUtil.getKey("button.exportToPostman"), "", PluginIcons.ICON_POSTMAN) {
+        MyActionGroup myActionGroup = new MyActionGroup(() -> new ParentAction(MyResourceBundleUtil.getKey("button.exportToPostman"), "", PluginIcons.ICON_POSTMAN) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
 
 
                 List<DataMapping> headerParamsKeyValueList;
                 FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
-                if(fastRequestToolWindow == null){
+                if (fastRequestToolWindow == null) {
                     headerParamsKeyValueList = new ArrayList<>();
                 } else {
                     headerParamsKeyValueList = fastRequestToolWindow.getHeaderParamsKeyValueList();
@@ -641,11 +642,11 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 assert config != null;
                 List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
                 List<DataMapping> globalHeaderListNew = JSONArray.parseArray(JSON.toJSONString(globalHeaderList), DataMapping.class);
-                globalHeaderListNew.removeIf(q->headerParamsKeyValueList.stream().anyMatch(p->p.getType().equals(q.getType())));
+                globalHeaderListNew.removeIf(q -> headerParamsKeyValueList.stream().anyMatch(p -> p.getType().equals(q.getType())));
                 headerParamsKeyValueList.addAll(globalHeaderListNew);
 
-                PostmanCollection postmanCollection = PostmanExportUtil.getPostmanCollection(headerParamsKeyValueList,rootDetail,myProject.getName());
-                ExporterToTextFile exporterToTextFile = new ExporterToTextFile(){
+                PostmanCollection postmanCollection = PostmanExportUtil.getPostmanCollection(headerParamsKeyValueList, rootDetail, myProject.getName());
+                ExporterToTextFile exporterToTextFile = new ExporterToTextFile() {
 
                     @Override
                     public @NotNull String getReportText() {
@@ -655,7 +656,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                     @Override
                     public @NotNull String getDefaultFilePath() {
                         VirtualFile virtualFile = ProjectUtil.guessProjectDir(myProject);
-                        if(virtualFile != null){
+                        if (virtualFile != null) {
                             return virtualFile.getPath() + File.separator + "QuickRequest.postman_collection.json";
                         }
                         return "";
@@ -666,7 +667,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                         return true;
                     }
                 };
-                ExportToFileUtil.chooseFileAndExport(myProject,exporterToTextFile);
+                ExportToFileUtil.chooseFileAndExport(myProject, exporterToTextFile);
             }
         });
 
@@ -683,25 +684,25 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setMoveUpAction(null);
         toolbarDecorator.setRemoveAction(e -> {
             int[] selectedIndices = collectionTable2.getSelectionModel().getSelectedIndices();
-            ListTableModel model = (ListTableModel)collectionTable2.getModel();
+            ListTableModel model = (ListTableModel) collectionTable2.getModel();
             List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
             indexes.forEach(model::removeRow);
             refreshTable2();
         });
-        MyActionGroup myActionGroup = new MyActionGroup(() -> new AnAction("Refresh", "", AllIcons.Actions.Refresh) {
+        MyActionGroup myActionGroup = new MyActionGroup(() -> new ParentAction("Refresh", "", AllIcons.Actions.Refresh) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 refresh2();
             }
         });
-        myActionGroup.add( new AnAction("Delete All", "", PluginIcons.ICON_DELETE_STH) {
+        myActionGroup.add(new ParentAction("Delete All", "", PluginIcons.ICON_DELETE_STH) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                if(historyTableDataList.isEmpty()){
+                if (historyTableDataList.isEmpty()) {
                     return;
                 }
                 int i = Messages.showOkCancelDialog("Are you sure to <b>delete all</b> ?", "Delete", "Delete", "Cancel", Messages.getQuestionIcon());
-                if(i != 0){
+                if (i != 0) {
                     return;
                 }
                 historyTableDataList.clear();
@@ -721,29 +722,29 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     /**
      * 这个类 完全是为了兼容新版本做的，因为新版本addExtraActions 和 addExtraAction方法都已经标记为过期
      */
-    public static class MyActionGroup extends ActionGroup{
+    public static class MyActionGroup extends ActionGroup {
 
         List<AnAction> allActions = new LinkedList<>();
 
-        public MyActionGroup(){
+        public MyActionGroup() {
 
         }
 
-        public MyActionGroup(AddAnActionFunction anActionFunction){
+        public MyActionGroup(AddAnActionFunction anActionFunction) {
             add(anActionFunction.initAnAction());
         }
 
-        public void add(AnAction anAction){
+        public void add(AnAction anAction) {
             allActions.add(anAction);
         }
 
-        public boolean isNotEmpty(){
+        public boolean isNotEmpty() {
             return !allActions.isEmpty();
         }
 
         @Override
-        public AnAction @NotNull [] getChildren(@Nullable AnActionEvent e) {
-            return allActions.toArray(new AnAction[allActions.size()]);
+        public ParentAction @NotNull [] getChildren(@Nullable AnActionEvent e) {
+            return allActions.toArray(new ParentAction[allActions.size()]);
         }
     }
 
@@ -890,9 +891,9 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             public @NotNull Component prepareRenderer(@NotNull TableCellRenderer renderer, int row, int column) {
                 if (column == 3) {
                     renderer = new TableButtonRenderer();
-                }else if(column == 1){
+                } else if (column == 1) {
                     renderer = new HighlightCellRenderer();
-                }else if(column == 0){
+                } else if (column == 0) {
                     renderer = new MethodFontTableCellRenderer();
                 }
                 return super.prepareRenderer(renderer, row, column);
@@ -900,7 +901,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
             @Override
             public boolean isCellEditable(int row, int column) {
-                if(column == 3){
+                if (column == 3) {
                     return true;
                 }
                 return false;
@@ -927,7 +928,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-                if(column == 3){
+                if (column == 3) {
                     return new TableButtonEditor(new JCheckBox());
                 }
                 return super.getCellEditor(row, column);
@@ -945,7 +946,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     private ColumnInfo<Object, Object>[] getHistoryColumnInfo() {
         ColumnInfo<Object, Object>[] columnArray = new ColumnInfo[4];
-        List<String> titleList = Lists.newArrayList("Method","Url", "Time", "Operation");
+        List<String> titleList = Lists.newArrayList("Method", "Url", "Time", "Operation");
         for (int i = 0; i < titleList.size(); i++) {
             ColumnInfo<Object, Object> envColumn = new ColumnInfo<>(titleList.get(i)) {
                 @Override
@@ -958,12 +959,12 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         return columnArray;
     }
 
-    private void navigate(TreeTableView table){
+    private void navigate(TreeTableView table) {
         int row = table.getSelectedRow();
         ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) collectionTable.getTableModel();
         Object rowValue = myModel.getRowValue(row);
         CollectionCustomNode node;
-        if(rowValue !=null && (node = (CollectionCustomNode) rowValue).getType() == 2){
+        if (rowValue != null && (node = (CollectionCustomNode) rowValue).getType() == 2) {
             load(node, false);
         }
     }
@@ -972,6 +973,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         public ButtonRenderer() {
 
         }
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
@@ -980,7 +982,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     }
 
-    public JBPanel renderButtons(JBPanel jbPanel, int row){
+    public JBPanel renderButtons(JBPanel jbPanel, int row) {
         BorderLayout borderLayout = new BorderLayout();
         jbPanel.setLayout(borderLayout);
         Dimension dimension = new Dimension(45, 20);
@@ -989,7 +991,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         jButton.setIcon(PluginIcons.ICON_LOCAL_SCOPE);
         JBColor jbColor = new JBColor(JBColor.WHITE, new Color(60, 63, 65));
         jButton.setBackground(jbColor);
-        jButton.addActionListener(e-> {
+        jButton.addActionListener(e -> {
             ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) collectionTable.getTableModel();
             CollectionCustomNode node = (CollectionCustomNode) myModel.getRowValue(row);
             load(node, false);
@@ -998,7 +1000,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         jButton1.setPreferredSize(dimension);
         jButton1.setIcon(PluginIcons.ICON_SEND_MINI);
         jButton1.setBackground(jbColor);
-        jButton1.addActionListener(e-> {
+        jButton1.addActionListener(e -> {
             ListTreeTableModelOnColumns myModel = (ListTreeTableModelOnColumns) collectionTable.getTableModel();
             CollectionCustomNode node = (CollectionCustomNode) myModel.getRowValue(row);
             load(node, true);
@@ -1010,6 +1012,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     class ButtonEditor extends DefaultCellEditor {
         private JBPanel jbPanel;
+
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             jbPanel = new JBPanel();
@@ -1027,6 +1030,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         public TableButtonRenderer() {
 
         }
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
@@ -1035,7 +1039,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     }
 
-    public JBPanel renderTableButtons(JBPanel jbPanel, int row){
+    public JBPanel renderTableButtons(JBPanel jbPanel, int row) {
         BorderLayout borderLayout = new BorderLayout();
         jbPanel.setLayout(borderLayout);
         Dimension dimension = new Dimension(60, 20);
@@ -1044,18 +1048,18 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         jButton.setIcon(PluginIcons.ICON_LOCAL_SCOPE);
         JBColor jbColor = new JBColor(JBColor.WHITE, new Color(60, 63, 65));
         jButton.setBackground(jbColor);
-        jButton.addActionListener(e-> {
-            ListTableModel model = (ListTableModel)collectionTable2.getModel();
-            HistoryTableData historyTableData = (HistoryTableData)model.getRowValue(row);
+        jButton.addActionListener(e -> {
+            ListTableModel model = (ListTableModel) collectionTable2.getModel();
+            HistoryTableData historyTableData = (HistoryTableData) model.getRowValue(row);
             loadDataFromHistory(historyTableData, false);
         });
         JButton jButton1 = new JButton();
         jButton1.setPreferredSize(dimension);
         jButton1.setIcon(PluginIcons.ICON_SEND_MINI);
         jButton1.setBackground(jbColor);
-        jButton1.addActionListener(e-> {
-            ListTableModel model = (ListTableModel)collectionTable2.getModel();
-            HistoryTableData historyTableData = (HistoryTableData)model.getRowValue(row);
+        jButton1.addActionListener(e -> {
+            ListTableModel model = (ListTableModel) collectionTable2.getModel();
+            HistoryTableData historyTableData = (HistoryTableData) model.getRowValue(row);
             loadDataFromHistory(historyTableData, true);
         });
         jbPanel.add(jButton, BorderLayout.WEST);
@@ -1065,6 +1069,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     class TableButtonEditor extends DefaultCellEditor {
         private JBPanel jbPanel;
+
         public TableButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             jbPanel = new JBPanel();
@@ -1166,16 +1171,16 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             append(node.getName());
             if (node.getType() == 2) {
                 setIcon(FrIconUtil.getIconByMethodType(node.getDetail().getParamGroup().getMethodType()));
-            }else if(node.getType() == 1 && !node.isRoot()){
-                if(node.getChildCount() == 0){
+            } else if (node.getType() == 1 && !node.isRoot()) {
+                if (node.getChildCount() == 0) {
                     return;
                 }
                 TreeNode firstChild = node.getFirstChild();
-                if(firstChild != null){
+                if (firstChild != null) {
                     CollectionCustomNode firstChildNode = (CollectionCustomNode) firstChild;
-                    if(firstChildNode.getType() == 1){
+                    if (firstChildNode.getType() == 1) {
                         setIcon(AllIcons.Nodes.Module);
-                    }else {
+                    } else {
                         setIcon(AllIcons.Nodes.Package);
                     }
                 }
@@ -1193,14 +1198,14 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         if (CollectionUtils.isNotEmpty(child)) {
             CollectionConfiguration.CollectionDetail defaultGroup = null;
             for (CollectionConfiguration.CollectionDetail d : child) {
-                if(Objects.equals("1", d.getId())){
+                if (Objects.equals("1", d.getId())) {
                     defaultGroup = d;
                     continue;
                 }
                 CollectionCustomNode nodeIn = convertToNode(d);
                 node.add(nodeIn);
             }
-            if(defaultGroup != null){
+            if (defaultGroup != null) {
                 detail.getChildList().remove(defaultGroup);
             }
         }
@@ -1244,7 +1249,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                     return;
                 }
                 ParamGroupCollection paramGroup = detail.getParamGroup();
-                if(paramGroup.getType() == null || paramGroup.getType() == 0){
+                if (paramGroup.getType() == null || paramGroup.getType() == 0) {
                     String className = paramGroup.getClassName();
                     String methodName = paramGroup.getMethod();
                     PsiClass psiClass = null;

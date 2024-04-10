@@ -17,7 +17,6 @@
 package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.Presentation;
@@ -27,9 +26,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleManager;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import org.jetbrains.annotations.NotNull;
 
-public class FormatAction extends AnAction {
+public class FormatAction extends ParentAction {
 
     public FormatAction() {
         super("Format", "Format", AllIcons.Diff.MagicResolve);
@@ -76,4 +76,5 @@ public class FormatAction extends AnAction {
             }
         }
     }
+
 }

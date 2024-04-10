@@ -63,39 +63,47 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
-import io.github.zjay.plugin.quickrequest.action.soft_wrap.BodyFormatAction;
-import io.github.zjay.plugin.quickrequest.complete.GeneralTextAutoCompleteEditor;
-import io.github.zjay.plugin.quickrequest.util.http.BodyContentType;
-import io.github.zjay.plugin.quickrequest.view.ui.MethodFontListCellRenderer;
-import quickRequest.icons.PluginIcons;
 import io.github.zjay.plugin.quickrequest.action.*;
+import io.github.zjay.plugin.quickrequest.action.soft_wrap.BodyFormatAction;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
+import io.github.zjay.plugin.quickrequest.complete.GeneralTextAutoCompleteEditor;
 import io.github.zjay.plugin.quickrequest.config.*;
 import io.github.zjay.plugin.quickrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.quickrequest.dubbo.DubboService;
 import io.github.zjay.plugin.quickrequest.jmh.JMHTest;
+import io.github.zjay.plugin.quickrequest.model.*;
 import io.github.zjay.plugin.quickrequest.util.*;
 import io.github.zjay.plugin.quickrequest.util.file.FileUtil;
+import io.github.zjay.plugin.quickrequest.util.http.BodyContentType;
 import io.github.zjay.plugin.quickrequest.util.http.Header;
 import io.github.zjay.plugin.quickrequest.util.http.UrlQuery;
 import io.github.zjay.plugin.quickrequest.util.thead.GlobalThreadPool;
-import io.github.zjay.plugin.quickrequest.view.component.*;
+import io.github.zjay.plugin.quickrequest.view.component.CheckBoxHeader;
+import io.github.zjay.plugin.quickrequest.view.component.MyLanguageTextField;
+import io.github.zjay.plugin.quickrequest.view.component.MyParamCheckItemListener;
 import io.github.zjay.plugin.quickrequest.view.inner.HeaderGroupView;
 import io.github.zjay.plugin.quickrequest.view.inner.SupportView;
-import io.github.zjay.plugin.quickrequest.model.*;
 import io.github.zjay.plugin.quickrequest.view.inner.SyncView;
+import io.github.zjay.plugin.quickrequest.view.ui.MethodFontListCellRenderer;
 import okhttp3.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartPanel;
+import quickRequest.icons.PluginIcons;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -2148,7 +2156,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         ).setRemoveAction(anActionButton -> {
             removeUrlParamsTableLines(headerTable, null, null, null, headerParamsKeyValueList);
         }).setToolbarPosition(ActionToolbarPosition.TOP);
-        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new AnAction(MyResourceBundleUtil.getKey("header.group.manage"), "", PluginIcons.ICON_GROUP) {
+        toolbarDecorator.setActionGroup(new FastRequestCollectionToolWindow.MyActionGroup(() -> new ParentAction(MyResourceBundleUtil.getKey("header.group.manage"), "", PluginIcons.ICON_GROUP) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 int idx = -1;
@@ -2248,7 +2256,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         urlParamsTablePanel = toolbarDecorator.createPanel();
     }
 
-    class ClearAction extends AnAction {
+    class ClearAction extends ParentAction {
         public ClearAction() {
             super("Clear", "", PluginIcons.ICON_CLEAR);
         }
@@ -4007,7 +4015,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
 
-    private final class StopPositionAction extends AnAction {
+    private final class StopPositionAction extends ParentAction {
         public StopPositionAction() {
             super("Stop", "Stop", AllIcons.Actions.Suspend);
 
@@ -4037,7 +4045,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
 
 
-    private final class SaveRequestAction extends AnAction {
+    private final class SaveRequestAction extends ParentAction {
         public SaveRequestAction() {
             super(MyResourceBundleUtil.getKey("SaveRequest"), MyResourceBundleUtil.getKey("SaveRequest"), PluginIcons.ICON_SAVE);
         }
@@ -4168,7 +4176,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private final class CopyCurlAction extends AnAction {
+    private final class CopyCurlAction extends ParentAction {
         public CopyCurlAction() {
             super("Copy as CURL", "Copy as CURL", PluginIcons.ICON_CURL);
         }
@@ -4185,7 +4193,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private final class CleanAction extends AnAction {
+    private final class CleanAction extends ParentAction {
         public CleanAction() {
             super("Clear[Help you create a new request instead of modifying a saved or historical one.]", "Clear[Help you create a new request instead of modifying a saved or historical one.]", PluginIcons.ICON_CLEAR);
         }
@@ -4198,7 +4206,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private static final class ShareAction extends AnAction {
+    private static final class ShareAction extends ParentAction {
         public ShareAction() {
             super(MyResourceBundleUtil.getKey("StarDocument"), MyResourceBundleUtil.getKey("StarDocument"), PluginIcons.ICON_DOC);
         }
@@ -4209,7 +4217,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-//    private static final class DocAction extends AnAction {
+//    private static final class DocAction extends ParentAction {
 //        public DocAction() {
 //            super(MyResourceBundleUtil.getKey("StarDocument"), MyResourceBundleUtil.getKey("StarDocument"), PluginIcons.ICON_DOC);
 //        }
@@ -4231,7 +4239,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //        }
 //    }
 
-//    private static final class WhatsNewAction extends AnAction {
+//    private static final class WhatsNewAction extends ParentAction {
 //        public WhatsNewAction() {
 //            super(MyResourceBundleUtil.getKey("whatsnew"), MyResourceBundleUtil.getKey("whatsnew"), PluginIcons.NOTIFICATIONS_NEW);
 //        }
@@ -4310,7 +4318,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //    }
 
 
-    private static final class CoffeeMeAction extends AnAction {
+    private static final class CoffeeMeAction extends ParentAction {
         public CoffeeMeAction() {
             super(MyResourceBundleUtil.getKey("CoffeeMe"), MyResourceBundleUtil.getKey("CoffeeMe"), AllIcons.Ide.Gift);
         }
@@ -4322,7 +4330,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private final class CompleteUrlAction extends AnAction {
+    private final class CompleteUrlAction extends ParentAction {
         public CompleteUrlAction() {
             super("Complete", "Complete", PluginIcons.ICON_COMPLETE);
         }
@@ -4348,7 +4356,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private static final class SynchronizationAction extends AnAction {
+    private static final class SynchronizationAction extends ParentAction {
         public SynchronizationAction() {
             super(MyResourceBundleUtil.getKey("synchronization"), MyResourceBundleUtil.getKey("synchronization"), PluginIcons.ICON_SYNC);
         }
@@ -4381,7 +4389,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
 
-    private class GotoFile extends AnAction {
+    private class GotoFile extends ParentAction {
         private File file;
 
         public GotoFile(File file) {

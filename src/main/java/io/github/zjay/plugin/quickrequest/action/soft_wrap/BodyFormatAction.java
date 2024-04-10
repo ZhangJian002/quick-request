@@ -1,13 +1,14 @@
 package io.github.zjay.plugin.quickrequest.action.soft_wrap;
 
 import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.editor.*;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.quickrequest.util.http.BodyContentType;
@@ -20,7 +21,7 @@ import quickRequest.icons.PluginIcons;
 import javax.swing.*;
 import java.awt.*;
 
-public class BodyFormatAction extends AnAction {
+public class BodyFormatAction extends ParentAction {
 
     public static volatile String chooseBodyType = "JSON";
 

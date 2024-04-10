@@ -5,12 +5,12 @@ import com.intellij.idea.ActionsBundle;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.actions.AbstractToggleUseSoftWrapsAction;
 import com.intellij.openapi.editor.impl.softwrap.SoftWrapAppliancePlaces;
+import io.github.zjay.plugin.quickrequest.base.ParentToggleAction;
 import io.github.zjay.plugin.quickrequest.config.Constant;
 import org.jetbrains.annotations.NotNull;
 
-public class SoftWrapAction extends AbstractToggleUseSoftWrapsAction {
+public class SoftWrapAction extends ParentToggleAction {
     /**
      * Creates new {@code AbstractToggleUseSoftWrapsAction} object.
      *

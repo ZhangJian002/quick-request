@@ -17,15 +17,15 @@
 package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.util.MyResourceBundleUtil;
 import org.jetbrains.annotations.NotNull;
 
-public class OpenConfigAction extends AnAction {
+public class OpenConfigAction extends ParentAction {
 
     public OpenConfigAction() {
         super(MyResourceBundleUtil.getKey("ManageConfig"), MyResourceBundleUtil.getKey("ManageConfig"), AllIcons.General.Settings);

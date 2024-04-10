@@ -16,9 +16,10 @@
 
 package io.github.zjay.plugin.quickrequest.action;
 
-import com.intellij.codeInsight.completion.*;
-import com.intellij.codeInsight.lookup.*;
-import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.codeInsight.completion.CompletionParameters;
+import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.lookup.CharFilter;
+import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -50,7 +51,7 @@ import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.GridBag;
 import com.intellij.util.ui.JBUI;
-import quickRequest.icons.PluginIcons;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.quickrequest.deprecated.MyPanelGridBuilder;
 import io.github.zjay.plugin.quickrequest.util.KeywordUtil;
@@ -58,15 +59,16 @@ import io.github.zjay.plugin.quickrequest.util.MyResourceBundleUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import quickRequest.icons.PluginIcons;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class GenerateMethodAction extends AnAction {
+public class GenerateMethodAction extends ParentAction {
 
     private static final Pattern PATTERN = Pattern.compile("[a-zA-Z_$][a-zA-Z0-9_$]*");
 

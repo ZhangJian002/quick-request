@@ -16,17 +16,17 @@
 
 package io.github.zjay.plugin.quickrequest.action;
 
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.service.GeneratorUrlService;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
 import org.jetbrains.annotations.NotNull;
 
-public class GenerateUrlAction extends AnAction {
+public class GenerateUrlAction extends ParentAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {

@@ -1,11 +1,7 @@
 package io.github.zjay.plugin.quickrequest.action;
 
-import com.alibaba.fastjson.JSON;
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
@@ -13,6 +9,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PsiNavigateUtil;
+import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.contributor.*;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
@@ -24,7 +21,10 @@ import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.idea.stubindex.KotlinFullClassNameIndex;
-import org.jetbrains.kotlin.psi.*;
+import org.jetbrains.kotlin.psi.KtClass;
+import org.jetbrains.kotlin.psi.KtClassOrObject;
+import org.jetbrains.kotlin.psi.KtDeclaration;
+import org.jetbrains.kotlin.psi.KtNamedFunction;
 import quickRequest.icons.PluginIcons;
 
 import java.lang.reflect.Constructor;
@@ -32,7 +32,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public final class FixPositionAction extends AnAction {
+public final class FixPositionAction extends ParentAction {
 
     private Project myProject;
 

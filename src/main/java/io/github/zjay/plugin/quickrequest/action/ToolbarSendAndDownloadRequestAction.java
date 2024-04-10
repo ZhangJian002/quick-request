@@ -18,15 +18,15 @@ package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import quickRequest.icons.PluginIcons;
+import io.github.zjay.plugin.quickrequest.base.ParentDumbAction;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.quickrequest.view.FastRequestToolWindow;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import quickRequest.icons.PluginIcons;
 
-public class ToolbarSendAndDownloadRequestAction extends DumbAwareAction {
+public class ToolbarSendAndDownloadRequestAction extends ParentDumbAction {
 
     public ToolbarSendAndDownloadRequestAction() {
         super(() -> "Send and Download", PluginIcons.ICON_SEND_DOWNLOAD);

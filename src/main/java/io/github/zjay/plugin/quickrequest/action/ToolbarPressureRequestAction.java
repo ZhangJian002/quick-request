@@ -18,14 +18,14 @@ package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import quickRequest.icons.PluginIcons;
+import io.github.zjay.plugin.quickrequest.base.ParentDumbAction;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
 import io.github.zjay.plugin.quickrequest.view.FastRequestToolWindow;
 import org.jetbrains.annotations.NotNull;
+import quickRequest.icons.PluginIcons;
 
-public class ToolbarPressureRequestAction extends DumbAwareAction {
+public class ToolbarPressureRequestAction extends ParentDumbAction {
 
     public ToolbarPressureRequestAction() {
         super(() -> "Pressure Testing", PluginIcons.ICON_PRESSURE_SEND);
