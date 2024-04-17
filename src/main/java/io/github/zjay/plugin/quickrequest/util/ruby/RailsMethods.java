@@ -14,7 +14,7 @@ public enum RailsMethods {
 
     public static boolean isExist(String name){
         for (RailsMethods value : values()) {
-            if(Objects.equals(name, value.name())){
+            if(Objects.equals(name.toLowerCase(), value.name().toLowerCase())){
                 return true;
             }
         }
@@ -23,7 +23,7 @@ public enum RailsMethods {
 
     public static String getMethodType(String name){
         for (RailsMethods value : values()) {
-            if(Objects.equals(name, value.name())){
+            if(Objects.equals(name.toLowerCase(), value.name().toLowerCase())){
                 return value.type;
             }
         }

@@ -14,7 +14,7 @@ public enum RustMethods {
 
     public static boolean isExist(String name){
         for (RustMethods value : values()) {
-            if(Objects.equals(name, value.name())){
+            if(Objects.equals(name.toLowerCase(), value.name().toLowerCase())){
                 return true;
             }
         }
@@ -23,7 +23,7 @@ public enum RustMethods {
 
     public static String getMethodType(String name){
         for (RustMethods value : values()) {
-            if(Objects.equals(name, value.name())){
+            if(Objects.equals(name.toLowerCase(), value.name().toLowerCase())){
                 return value.type;
             }
         }

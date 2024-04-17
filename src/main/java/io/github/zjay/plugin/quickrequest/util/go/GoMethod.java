@@ -22,7 +22,7 @@ public enum GoMethod {
 
     public static boolean isExist(String name){
         for (GoMethod value : values()) {
-            if(Objects.equals(value.name(), name)){
+            if(Objects.equals(value.name().toLowerCase(), name.toLowerCase())){
                 return true;
             }
         }
@@ -31,7 +31,7 @@ public enum GoMethod {
 
     public static String getMethodType(String name){
         for (GoMethod value : values()) {
-            if(Objects.equals(value.name(), name)){
+            if(Objects.equals(value.name().toLowerCase(), name.toLowerCase())){
                 return value.type;
             }
         }
