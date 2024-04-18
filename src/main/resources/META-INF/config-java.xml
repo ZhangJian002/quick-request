@@ -16,7 +16,7 @@
     </extensions>
     <actions>
         <!-- Add your actions here -->
-        <group id="generateUrlAndParamFree" text="QuickRequest" description="QuickRequest" popup="true" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow">
+        <group id="generateUrlAndParamFree" text="Quick Request" description="Quick request" popup="true" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow">
             <separator/>
             <group id="generateSubGroupFree"/>
             <add-to-group group-id="ToolsMenu" anchor="last"/>
