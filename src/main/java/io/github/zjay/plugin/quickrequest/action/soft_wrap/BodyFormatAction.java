@@ -68,7 +68,7 @@ public class BodyFormatAction extends ParentAction {
                 @Override
                 public void actionPerformed(@NotNull AnActionEvent e) {
                     DefaultActionGroup actionGroup = (DefaultActionGroup)ActionManager.getInstance().getAction("quickRequest.editor.floatGroup");
-                    AnAction[] children = actionGroup.getChildren(e);
+                    AnAction[] children = actionGroup.getChildActionsOrStubs();
                     for (AnAction child : children) {
                         if (child instanceof BodyFormatAction) {
                             actionGroup.replaceAction(child, new BodyFormatAction(bodyContentType.getIcon()));

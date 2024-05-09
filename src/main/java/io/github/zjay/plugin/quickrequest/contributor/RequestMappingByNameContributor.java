@@ -26,12 +26,12 @@ import io.github.zjay.plugin.quickrequest.generator.FastUrlGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.SpringMethodUrlGenerator;
+import io.github.zjay.plugin.quickrequest.util.FrIconUtil;
 import io.github.zjay.plugin.quickrequest.util.FrPsiUtil;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -61,9 +61,9 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
     private List<RequestMappingItem> findRequestMappingItems(Project project, String annotationName) {
         List<PsiAnnotation> annotationSearchers = getAnnotationSearchers(annotationName, project);
         //restful request
-        List<RequestMappingItem> requestList = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) != null)
+        LinkedList<RequestMappingItem> requestList = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) != null)
                 .map(this::mapItems)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(LinkedList::new));
 
         //dubbo
         annotationSearchers.stream().filter(x-> x != null && x.getParent() != null && Constant.DubboMethodConfig.exist(x.getQualifiedName()) && x.getParent().getParent() instanceof PsiClass
@@ -77,6 +77,21 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
                 requestList.add(new RequestMappingItem(method,dubboMethodGenerator.getMethodRequestMappingUrl(method),"DUBBO"));
             }
         });
+//        List<RequestMappingItem> interfaceList = requestList.stream().filter(x -> {
+//            PsiElement psiElement = x.getPsiElement();
+//            try {
+//                PsiFile psiFile = psiElement.getContainingFile();
+//                if (Objects.equals(psiElement.getClass().getCanonicalName(), "com.intellij.psi.impl.source.PsiJavaFileImpl")) {
+//                    PsiJavaFile psiJavaFile = (PsiJavaFile) psiFile;
+//                    return psiJavaFile.getClasses()[0].isInterface();
+//                }
+//            } catch (Exception e) {
+//                return false;
+//            }
+//            return false;
+//        }).collect(Collectors.toList());
+//        interfaceList.forEach(requestList::remove);
+//        requestList.addAll(interfaceList);
         return requestList;
 
     }

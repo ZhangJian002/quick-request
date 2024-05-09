@@ -87,6 +87,9 @@
 
         <codeInsight.lineMarkerProvider language="Rust"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="cs"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>
+
         <notificationGroup id="quickRequestWindowNotificationGroup" displayType="TOOL_WINDOW"/>
         <postStartupActivity implementation="io.github.zjay.plugin.quickrequest.update.WhatsNewActivity"/>
         <iw.actionProvider implementation="io.github.zjay.plugin.quickrequest.action.soft_wrap.QuickRequestToggleAction" />

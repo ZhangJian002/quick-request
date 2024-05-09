@@ -403,27 +403,12 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     }
 
     private void checkRule(String rule) {
-        AnAction[] children = myInstalledSearchGroup.getChildren(null);
+        AnAction[] children = myInstalledSearchGroup.getChildActionsOrStubs();
         for (AnAction anAction : children) {
             if (anAction instanceof Separator) {
                 continue;
             }
             SearchOptionAction child = (SearchOptionAction) anAction;
-            if (rule.contains(child.myOption.name())) {
-                child.myState = true;
-            } else {
-                child.myState = false;
-            }
-        }
-    }
-
-    private void checkRule2(String rule) {
-        AnAction[] children = myInstalledSearchGroup2.getChildren(null);
-        for (AnAction anAction : children) {
-            if (anAction instanceof Separator) {
-                continue;
-            }
-            SearchOption2Action child = (SearchOption2Action) anAction;
             if (rule.contains(child.myOption.name())) {
                 child.myState = true;
             } else {
@@ -523,46 +508,46 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             CollectionCustomNode root = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
             return !"0".equals(root.getId()) && !"1".equals(root.getId());
         });
-        toolbarDecorator.setAddActionName("Add Group").setAddAction(e -> {
-            int selectedRow = collectionTable.getSelectedRow();
-            if (selectedRow <= 0) {
-                return;
-            }
-            String id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
-            CollectionCustomNode addNode = null;
-            CollectionConfiguration.CollectionDetail detail = null;
-            CollectionCustomNode node = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
-            if (node.getType() == 1) {
-                String idGroup = node.getId();
-                CollectionConfiguration.CollectionDetail detailGroup = filterById(idGroup, rootDetail);
-                if (detailGroup != null) {
-                    List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
-                    long count = childList.stream().filter(q -> q.getType() == 1).count();
-                    addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
-                    detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
-                    childList.add(detail);
-                    detailGroup.setChildList(childList);
-                    node.insert(addNode, 0);
-                }
-            } else {
-
-                CollectionCustomNode parent = (CollectionCustomNode) node.getParent();
-                String idParent = parent.getId();
-                CollectionConfiguration.CollectionDetail detailGroup = filterById(idParent, rootDetail);
-                if (detailGroup != null) {
-                    List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
-                    long count = childList.stream().filter(q -> q.getType() == 1).count();
-                    addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
-                    detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
-                    childList.add(detail);
-                    detailGroup.setChildList(childList);
-                    parent.insert(addNode, 0);
-                }
-            }
-            collectionTable.setRowSelectionInterval(selectedRow, selectedRow);
-            refreshTable();
-
-        });
+//        toolbarDecorator.setAddActionName("Add Group").setAddAction(e -> {
+//            int selectedRow = collectionTable.getSelectedRow();
+//            if (selectedRow <= 0) {
+//                return;
+//            }
+//            String id = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+//            CollectionCustomNode addNode = null;
+//            CollectionConfiguration.CollectionDetail detail = null;
+//            CollectionCustomNode node = (CollectionCustomNode) ((ListTreeTableModelOnColumns) collectionTable.getTableModel()).getRowValue(selectedRow);
+//            if (node.getType() == 1) {
+//                String idGroup = node.getId();
+//                CollectionConfiguration.CollectionDetail detailGroup = filterById(idGroup, rootDetail);
+//                if (detailGroup != null) {
+//                    List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
+//                    long count = childList.stream().filter(q -> q.getType() == 1).count();
+//                    addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
+//                    detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
+//                    childList.add(detail);
+//                    detailGroup.setChildList(childList);
+//                    node.insert(addNode, 0);
+//                }
+//            } else {
+//
+//                CollectionCustomNode parent = (CollectionCustomNode) node.getParent();
+//                String idParent = parent.getId();
+//                CollectionConfiguration.CollectionDetail detailGroup = filterById(idParent, rootDetail);
+//                if (detailGroup != null) {
+//                    List<CollectionConfiguration.CollectionDetail> childList = detailGroup.getChildList();
+//                    long count = childList.stream().filter(q -> q.getType() == 1).count();
+//                    addNode = new CollectionCustomNode(id, "Group " + (count + 1), 1);
+//                    detail = new CollectionConfiguration.CollectionDetail(id, "Group " + (count + 1), 1);
+//                    childList.add(detail);
+//                    detailGroup.setChildList(childList);
+//                    parent.insert(addNode, 0);
+//                }
+//            }
+//            collectionTable.setRowSelectionInterval(selectedRow, selectedRow);
+//            refreshTable();
+//
+//        });
         toolbarDecorator.setRemoveAction(e -> {
             int i = Messages.showOkCancelDialog("Delete it(contains children)?", "Delete", "Delete", "Cancel", Messages.getQuestionIcon());
             if (i == 0) {
