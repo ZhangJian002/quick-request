@@ -36,9 +36,7 @@ import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
-import com.intellij.openapi.ui.popup.JBPopup;
-import com.intellij.openapi.ui.popup.JBPopupListener;
-import com.intellij.openapi.ui.popup.LightweightWindowEvent;
+import com.intellij.openapi.ui.popup.*;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
@@ -66,6 +64,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.intellij.util.ui.StatusText;
 import io.github.zjay.plugin.quickrequest.base.ParentAction;
+import io.github.zjay.plugin.quickrequest.base.ParentToggle2Action;
 import io.github.zjay.plugin.quickrequest.config.FastRequestCollectionComponent;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.config.FastRequestHistoryCollectionComponent;
@@ -268,7 +267,8 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
         DataContext context = DataManager.getInstance().getDataContext(component);
 
-        JBPopup popup = new PopupFactoryImpl.ActionGroupPopup(null, actions, context, false, false, false, true, null, -1, null, null);
+        ListPopup popup = JBPopupFactory.getInstance().createActionGroupPopup(null, actions, context, false, null, -1);
+//        JBPopup popup = new PopupFactoryImpl.ActionGroupPopup(null, actions, context, false, false, false, true, null, -1, null, null);
         popup.addListener(new JBPopupListener() {
             @Override
             public void beforeShown(@NotNull LightweightWindowEvent event) {
@@ -1353,7 +1353,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private final class SearchOptionAction extends ToggleAction implements DumbAware {
+    private final class SearchOptionAction extends ParentToggle2Action implements DumbAware {
         private final SearchTypeEnum myOption;
         private boolean myState;
 
@@ -1379,7 +1379,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private final class SearchOption2Action extends ToggleAction implements DumbAware {
+    private final class SearchOption2Action extends ParentToggle2Action implements DumbAware {
         private final SearchTypeEnum myOption;
         private boolean myState;
 

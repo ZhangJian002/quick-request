@@ -8,10 +8,10 @@
                 serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.SpringMethodUrlGenerator"/>
         <applicationService
                 serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.DubboMethodGenerator"/>
-        <codeInsight.lineMarkerProvider language="JAVA"
+        <codeInsight.lineMarkerProvider language="JAVA" order="last"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.JavaLineMarkerProvider"/>
 
-        <codeInsight.lineMarkerProvider language="JAVA"
+        <codeInsight.lineMarkerProvider language="JAVA" order="last"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider"/>
     </extensions>
     <actions>

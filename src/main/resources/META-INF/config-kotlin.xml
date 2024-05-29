@@ -4,7 +4,7 @@
                 implementation="io.github.zjay.plugin.quickrequest.contributor.KotlinRequestMappingContributor"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
-        <codeInsight.lineMarkerProvider language="kotlin"
+        <codeInsight.lineMarkerProvider language="kotlin" order="first"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.KotlinLineMarkerProvider"/>
     </extensions>
 </idea-plugin>
