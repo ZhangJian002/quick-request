@@ -18,17 +18,12 @@ package io.github.zjay.plugin.quickrequest.view.component.tree;
 
 import com.goide.GoIcons;
 import com.intellij.icons.AllIcons;
-import icons.PhpIcons;
-import icons.PythonIcons;
-import icons.RubyIcons;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
-import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.idea.KotlinIcons;
 import quickRequest.icons.PluginIcons;
 
 import javax.swing.*;
-import java.lang.reflect.Constructor;
 
 public class ClassNode extends BaseNode<String> {
 
@@ -45,13 +40,13 @@ public class ClassNode extends BaseNode<String> {
             case go:
                 return GoIcons.ICON;
             case php:
-                return PhpIcons.PhpIcon;
+                return PluginIcons.ICON_PHP;
             case Python:
                 return PluginIcons.ICON_PYTHON;
             case Kotlin:
                 return KotlinIcons.CLASS;
             case Ruby:
-                return RubyIcons.Ruby.Ruby;
+                return PluginIcons.ICON_RUBY;
             case Rust:
                 return PluginIcons.ICON_RUST;
         }
