@@ -2,7 +2,6 @@
 
 <a href="https://www.jetbrains.com"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width = "10%" /></a>
 <a href="https://www.jetbrains.com/idea"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/IntelliJ_IDEA_icon.svg" width = "10%" /></a>
-<a href='https://gitee.com/zj-666/quick-request-idea'><img src='https://gitee.com/dromara/fast-request/widgets/widget_3.svg' width = "15%" alt='Fork me on Gitee'></img></a>
 
 [**Quick Request**](https://plugins.jetbrains.com/plugin/21800-quick-request) 是一个基于各种语言框架的帮助你快速生成**url**和**参数**
 的IDEA 插件。
