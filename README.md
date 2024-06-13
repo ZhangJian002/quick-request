@@ -4,6 +4,14 @@
 <a href="https://www.jetbrains.com/idea"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/IntelliJ_IDEA_icon.svg" width = "10%" /></a>
 <a href='https://gitee.com/zj-666/quick-request-idea'><img src='https://gitee.com/dromara/fast-request/widgets/widget_3.svg' width = "15%" alt='Fork me on Gitee'></img></a>
 
-[**Quick Request**](https://plugins.jetbrains.com/plugin/21800-quick-request) is an IDEA plugin based on springmvc that helps you quickly generate URLs and parameters. It provides good page interaction, can easily generate requests, parameters and other settings, can adapt to the file download of the request, can quickly help you test whether the interface is normal, and also supports filling in forms to generate code for the Controller layer and the Service layer, which can help you quickly generate code, and can help you quickly test results.
-
-
+[**Quick Request**](https://plugins.jetbrains.com/plugin/21800-quick-request) is an IDEA plugin based on various language frameworks that helps you quickly generate **URLs** and **parameters**.
+It provides excellent page interaction, making it easy to generate requests, parameters, and other settings. It can adapt to file downloads of requests and quickly help you test whether the interface is working properly.
+Currently, it supports 7 programming languages and 10 Restful frameworks, including:
+Java：Spring MVC、Dubbo、JAX-RS  
+Kotlin: Spring MVC (same as Java)
+Go：gin、echo  
+Python：flask  
+PHP：Laravel  
+Ruby：Rails  
+Rust：Actix-web、Rocket
+If you also have your own ideas, you can directly raise issues and they will all recover!
