@@ -45,7 +45,7 @@ public class WhatsNewActivity implements StartupActivity {
 //            Runtime.Version.parse(plugin.getVersion());
             RunOnceUtil.runOnceForApp("Quick Request Tip", () -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    String msg = "Welcome to Quick Request. If you have any questions, please report to me https://github.com/zhangjianay/Quick_Request/issues.";
+                    String msg = "Welcome to Quick Request. If you have any questions, please report to me https://github.com/zhangjianay/quick-request/issues.";
                     NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification(msg, MessageType.INFO)
                             .notify(project);
                 });

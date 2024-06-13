@@ -8,7 +8,7 @@
         <p>The request is so simple. With it, you can abandon Postman.
         It has features such as easy debugging, saving requests, and generating methods.
         It already supports all JetBrains products, but some features may differ.
-        If you find any issues, please mention <a href="https://github.com/zhangjianay/Quick_Request/issues">Github</a>.
+        If you find any issues, please mention <a href="https://github.com/zhangjianay/quick-request/issues">Github</a>.
         </p>
         <h1>English</h1>
         <ul>
@@ -25,7 +25,7 @@
             <li>Support pressure testing</li>
         </ul>
         <h2>Help me</h2>
-        <p>Due to the significant differences in the way request parameters are obtained in different languages and frameworks, and my limited ability, I would like to seek your opinions. Please send me your suggestions on commonly used frameworks and request parameter generation to my email or mention <a href="https://github.com/zhangjianay/Quick_Request/issues">Github.</a></p>
+        <p>Due to the significant differences in the way request parameters are obtained in different languages and frameworks, and my limited ability, I would like to seek your opinions. Please send me your suggestions on commonly used frameworks and request parameter generation to my email or mention <a href="https://github.com/zhangjianay/quick-request/issues">Github.</a></p>
         <h2>Links</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a></p>
         <h1>中文</h1>
@@ -43,7 +43,7 @@
             <li>简单支持压测，参考为主</li>
         </ul>
         <h2>帮助我</h2>
-        <p>由于不同语言不同框架的请求参数获取方式有很大区别，本人也能力有限，因此向大家征求意见，请将你常用的框架和请求参数生成建议发送至我的邮箱或者提到<a href="https://github.com/zhangjianay/Quick_Request/issues">Github.</a></p>
+        <p>由于不同语言不同框架的请求参数获取方式有很大区别，本人也能力有限，因此向大家征求意见，请将你常用的框架和请求参数生成建议发送至我的邮箱或者提到<a href="https://github.com/zhangjianay/quick-request/issues">Github.</a></p>
         <h2>链接</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">文档</a></p>
         ]]>
