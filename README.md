@@ -13,4 +13,4 @@ Python：flask
 PHP：Laravel  
 Ruby：Rails  
 Rust：Actix-web、Rocket  
-If you also have your own ideas, you can directly raise issues and they will all recover!
+If you also have your own ideas, you can directly raise issues and reply when you see them!
