@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.6.13'
+version '2024.7.16'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.6.13'
+    pluginVersion = '2024.7.16'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -110,6 +110,15 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.7.16</h3>
+    <p>中文</p>
+    <ul>
+        <li>局部优化及兼容性修改</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Compatibility modification</li>
+    </ul>
     <h3>v2024.6.13</h3>
     <p>中文</p>
     <ul>
@@ -548,7 +557,7 @@ test {
 }
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED', "-Xmx4096m","-Xms128m"
-    jbrVersion 'jbrsdk-11_0_10-osx-x64-b1314.58'
+//    jbrVersion 'jbrsdk-11_0_10-osx-x64-b1314.58'
     autoReloadPlugins true
 }
 

@@ -19,6 +19,7 @@ package io.github.zjay.plugin.quickrequest.util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import io.github.zjay.plugin.quickrequest.model.*;
+import okhttp3.HttpUrl;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -148,9 +149,7 @@ public class PostmanExportUtil {
     private static PostmanCollection.Url convertToUrl(String domain, String rawUrl, List<ParamKeyValue> urlParamsKeyValueList) {
         PostmanCollection.Url result = new PostmanCollection.Url();
         String completeUrl = domain + rawUrl;
-
-        URL url = UrlUtil.url(completeUrl);
-//        result.setProtocol(url.getProtocol());
+        HttpUrl httpUrl = HttpUrl.parse(completeUrl);
         if (!hostList.contains(domain)) {
             hostList.add(domain);
         }
@@ -158,7 +157,9 @@ public class PostmanExportUtil {
         String host = idx == 0 ? "{{host}}" : "{{host" + idx + "}}";
         result.setHost(List.of(host));
         result.setPort(null);
-        result.setPath(Arrays.asList(url.getPath().split("/")));
+        if (httpUrl != null) {
+            result.setPath(httpUrl.pathSegments());
+        }
         result.setRaw(host + rawUrl);
         List<PostmanCollection.Query> queryList = urlParamsKeyValueList.stream().filter(ParamKeyValue::getEnabled).map(q -> {
             PostmanCollection.Query query = new PostmanCollection.Query();

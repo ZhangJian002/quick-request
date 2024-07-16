@@ -585,7 +585,7 @@ public class MyComponentPanelBuilder implements GridBagPanelBuilder {
         private MouseEvent convertMouseEvent(MouseEvent e) {
             Point p = e.getPoint();
             SwingUtilities.convertPoint(e.getComponent(), p, myComponent);
-            return new MouseEvent(myComponent, e.getID(), e.getWhen(), e.getModifiers(),
+            return new MouseEvent(myComponent, e.getID(), e.getWhen(), e.getModifiersEx(),
                     p.x, p.y, e.getXOnScreen(), e.getYOnScreen(),
                     e.getClickCount(), e.isPopupTrigger(), e.getButton());
         }

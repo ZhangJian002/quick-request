@@ -1200,7 +1200,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 }
                 if(value instanceof File){
                     File file = (File)value;
-                    multipartBody.addFormDataPart(key, file.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), file));
+                    multipartBody.addFormDataPart(key, file.getName(), RequestBody.create(file, MediaType.parse("application/octet-stream")));
                 }else {
                     multipartBody.addFormDataPart(key, value.toString());
                 }

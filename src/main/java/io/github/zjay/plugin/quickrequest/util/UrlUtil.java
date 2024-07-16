@@ -23,8 +23,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLStreamHandler;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -47,7 +45,6 @@ public class UrlUtil {
     public static boolean isURL(String url) {
         try {
             url = (url.startsWith("http://") || url.startsWith("https://")) ? url : "http://" + url;
-            new URL(url).toURI();
             return true;
         } catch (Exception e) {
             return false;
@@ -56,7 +53,6 @@ public class UrlUtil {
 
     public static boolean isHttpURL(String url) {
         try {
-            new URL(url).toURI();
             return  (url.startsWith("http://") || url.startsWith("https://"));
         } catch (Exception e) {
             return false;
@@ -71,59 +67,59 @@ public class UrlUtil {
         }
     }
 
-    public static URL url(String url) {
-        return url(url, null);
-    }
+//    public static URL url(String url) {
+//        return url(url, null);
+//    }
+//
+//    public static URL url(String url, URLStreamHandler handler) {
+//        Asserts.notNull(url, "URL");
+//
+//        // 兼容Spring的ClassPath路径
+////        if (url.startsWith(CLASSPATH_URL_PREFIX)) {
+////            url = url.substring(CLASSPATH_URL_PREFIX.length());
+////            return getClassLoader().getResource(url);
+////        }
+//
+//        try {
+//            return new URL(null, url, handler);
+//        } catch (MalformedURLException e) {
+//            // 尝试文件路径
+//            try {
+//                return new File(url).toURI().toURL();
+//            } catch (MalformedURLException ex2) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//    }
 
-    public static URL url(String url, URLStreamHandler handler) {
-        Asserts.notNull(url, "URL");
-
-        // 兼容Spring的ClassPath路径
-        if (url.startsWith(CLASSPATH_URL_PREFIX)) {
-            url = url.substring(CLASSPATH_URL_PREFIX.length());
-            return getClassLoader().getResource(url);
-        }
-
-        try {
-            return new URL(null, url, handler);
-        } catch (MalformedURLException e) {
-            // 尝试文件路径
-            try {
-                return new File(url).toURI().toURL();
-            } catch (MalformedURLException ex2) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public static ClassLoader getClassLoader() {
-        ClassLoader classLoader = getContextClassLoader();
-        if (classLoader == null) {
-            classLoader = UrlUtil.class.getClassLoader();
-            if (null == classLoader) {
-                classLoader = getSystemClassLoader();
-            }
-        }
-        return classLoader;
-    }
-
-    public static ClassLoader getContextClassLoader() {
-        if (System.getSecurityManager() == null) {
-            return Thread.currentThread().getContextClassLoader();
-        } else {
-            // 绕开权限检查
-            return AccessController.doPrivileged(
-                    (PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
-        }
-    }
-
-    public static ClassLoader getSystemClassLoader() {
-        if (System.getSecurityManager() == null) {
-            return ClassLoader.getSystemClassLoader();
-        } else {
-            // 绕开权限检查
-            return AccessController.doPrivileged(
-                    (PrivilegedAction<ClassLoader>) ClassLoader::getSystemClassLoader);
-        }
-    }
+//    public static ClassLoader getClassLoader() {
+//        ClassLoader classLoader = getContextClassLoader();
+//        if (classLoader == null) {
+//            classLoader = UrlUtil.class.getClassLoader();
+//            if (null == classLoader) {
+//                classLoader = getSystemClassLoader();
+//            }
+//        }
+//        return classLoader;
+//    }
+//
+//    public static ClassLoader getContextClassLoader() {
+//        if (System.getSecurityManager() == null) {
+//            return Thread.currentThread().getContextClassLoader();
+//        } else {
+//            // 绕开权限检查
+//            return AccessController.doPrivileged(
+//                    (PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
+//        }
+//    }
+//
+//    public static ClassLoader getSystemClassLoader() {
+//        if (System.getSecurityManager() == null) {
+//            return ClassLoader.getSystemClassLoader();
+//        } else {
+//            // 绕开权限检查
+//            return AccessController.doPrivileged(
+//                    (PrivilegedAction<ClassLoader>) ClassLoader::getSystemClassLoader);
+//        }
+//    }
 }

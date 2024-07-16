@@ -2,13 +2,10 @@ package io.github.zjay.plugin.quickrequest.util;
 
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
-import okhttp3.*;
+import okhttp3.ConnectionPool;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class OkHttp3Util {
@@ -28,110 +25,4 @@ public class OkHttp3Util {
                 .retryOnConnectionFailure(true)
                 .build();
     }
-
-    /**
-     * @param url getUrl
-     * @return java.lang.String
-     * @author xiaobu
-     * @date 2019/3/4 11:20
-     * @descprition
-     * @version 1.0
-     */
-    public static String sendByGetUrl(String url) {
-        String result;
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            assert response.body() != null;
-            result = response.body().string();
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * @param url , json
-     * @return java.lang.String
-     * @author xiaobu
-     * @date 2019/3/4 11:13
-     * @descprition
-     * @version 1.0 post+json方式
-     */
-    public static String sendByPostJson(String url, String json) {
-        OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, json);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            assert response.body() != null;
-            return response.body().string();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-
-    /**
-     * @author xiaobu
-     * @date 2019/3/4 15:58
-     * @param url , params]
-     * @return java.lang.String
-     * @descprition  post方式请求
-     * @version 1.0
-     */
-    public static String sendByPostMap(String url, Map<String, String> params) {
-        String result;
-        OkHttpClient client = new OkHttpClient();
-        StringBuilder content = new StringBuilder();
-        Set<Map.Entry<String, String>> entrys = params.entrySet();
-        Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            content.append(entry.getKey()).append("=").append(entry.getValue());
-            if (iterator.hasNext()) {
-                content.append("&");
-            }
-        }
-
-        RequestBody requestBody = RequestBody.create(MEDIA_TYPE_TEXT, content.toString());
-        Request request = new Request.Builder().url(url).post(requestBody).build();
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            assert response.body() != null;
-            result = response.body().string();
-            System.out.println("result = " + result);
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-
-    public static void main(String[] args) {
-        //String url = "http://172.18.9.166:8080/user/login.kq";
-        //String url = "http://172.18.9.166:8899/demo/postByMap?loginName=admin&loginPassword=Hans1107laser";
-        String url = "http://172.18.9.166:8899/demo/postByMap";
-        Map<String, String> params = new HashMap<>();
-        params.put("loginName", "admin");
-        params.put("loginPassword", "123456");
-        String result = sendByPostMap(url, params);
-        System.out.println("result = " + result);
-
-    }
-
 }
