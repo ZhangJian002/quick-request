@@ -17,6 +17,7 @@
 package io.github.zjay.plugin.quickrequest.parse;
 
 import com.google.common.collect.Lists;
+import com.intellij.psi.PsiClass;
 import com.siyeh.ig.psiutils.CollectionUtils;
 import io.github.zjay.plugin.quickrequest.model.DataMapping;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class BodyParamParse extends AbstractParamParse {
     @Override
-    public LinkedHashMap<String, Object> parseParam(FastRequestConfiguration config, List<ParamNameType> paramNameTypeList) {
+    public LinkedHashMap<String, Object> parseParam(FastRequestConfiguration config, List<ParamNameType> paramNameTypeList, PsiClass numberClass) {
         //每次解析重置解析的类
         KV.reset();
 
@@ -65,6 +66,9 @@ public class BodyParamParse extends AbstractParamParse {
                 } else {
                     nameValueMap.put(name, new ParamKeyValue(name, StringUtils.randomString(name,randomStringDelimiter,randomStringLength,randomStringStrategy), 2, TypeUtil.Type.String.name()));
                 }
+                continue;
+            }else if (numberClass != null && (paramNameType.getPsiClass().isInheritor(numberClass, true) || paramNameType.getPsiClass() == numberClass)) {
+                nameValueMap.put(name, new ParamKeyValue(name, ThreadLocalRandom.current().nextInt(0, 101), 2, TypeUtil.Type.Number.name()));
                 continue;
             }
 
@@ -112,7 +116,7 @@ public class BodyParamParse extends AbstractParamParse {
                 continue;
             }
             //json解析
-            KV kv = KV.getFields(paramNameType.getPsiClass());
+            KV kv = KV.getFields(paramNameType.getPsiClass(), numberClass);
 
             //String json = kv.toPrettyJson();
 //            Map parse = JSON.parseObject(json, Map.class);

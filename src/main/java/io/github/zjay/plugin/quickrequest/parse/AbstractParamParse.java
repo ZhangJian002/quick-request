@@ -16,6 +16,7 @@
 
 package io.github.zjay.plugin.quickrequest.parse;
 
+import com.intellij.psi.PsiClass;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamNameType;
 
@@ -24,5 +25,5 @@ import java.util.List;
 
 public abstract class AbstractParamParse {
 
-    abstract LinkedHashMap<String, Object> parseParam(FastRequestConfiguration config, List<ParamNameType> paramNameTypeList);
+    abstract LinkedHashMap<String, Object> parseParam(FastRequestConfiguration config, List<ParamNameType> paramNameTypeList, PsiClass numberClass);
 }

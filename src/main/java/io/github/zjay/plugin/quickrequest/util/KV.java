@@ -36,6 +36,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class KV<K, V> extends LinkedHashMap<K, V> {
@@ -112,7 +113,7 @@ public class KV<K, V> extends LinkedHashMap<K, V> {
         return normalTypes.containsKey(typeName);
     }
 
-    public static KV getFields(PsiClass psiClass) {
+    public static KV getFields(PsiClass psiClass, PsiClass numberClass) {
         normalTypes.put("java.util.Date", df.format(new Date()));
         normalTypes.put("java.sql.Date", df.format(new Date()));
         normalTypes.put("java.sql.Timestamp", System.currentTimeMillis());
@@ -169,6 +170,7 @@ public class KV<K, V> extends LinkedHashMap<K, V> {
                 } else {    //reference Type
 //                    String fieldTypeName = type.getPresentableText();
                     String fieldTypeName = type.getCanonicalText();
+
                     if (isNormalType(fieldTypeName)) {    //normal Type
                         if ("java.lang.String".equals(fieldTypeName)) {
                             String v = StringUtils.randomString(name,randomStringDelimiter,randomStringLength,randomStringStrategy);
@@ -180,6 +182,9 @@ public class KV<K, V> extends LinkedHashMap<K, V> {
                             kv.set(name, paramKeyValue);
                         }
 
+                    } else if (type instanceof PsiClassType && numberClass != null && (((PsiClassType)type).resolve().isInheritor(numberClass, true) || ((PsiClassType)type).resolve() == numberClass)) {
+                        ParamKeyValue paramKeyValue = new ParamKeyValue(name, ThreadLocalRandom.current().nextInt(0, 101), 2, TypeUtil.Type.Number.name(), comment);
+                        kv.set(name, paramKeyValue);
                     } else if (type instanceof PsiArrayType) {   //数组
                         PsiType deepType = type.getDeepComponentType();
                         ArrayList list = new ArrayList<>();
@@ -214,7 +219,7 @@ public class KV<K, V> extends LinkedHashMap<K, V> {
                             if (parseArrayEntityCount.get(key) > 1) {
                                 continue;
                             }
-                            list.add(getFields(psiClassInArray));
+                            list.add(getFields(psiClassInArray, numberClass));
                         }
                         ParamKeyValue paramKeyValue = new ParamKeyValue(name, list, 2, TypeUtil.Type.Array.name(), comment);
                         kv.set(name, paramKeyValue);
@@ -255,7 +260,7 @@ public class KV<K, V> extends LinkedHashMap<K, V> {
                             if (parseListEntityCount.get(key) > 1) {
                                 continue;
                             }
-                            list.add(getFields(iterableClass));
+                            list.add(getFields(iterableClass, numberClass));
                             ParamKeyValue paramKeyValue = new ParamKeyValue(name, list, 2, TypeUtil.Type.Array.name(), comment);
                             kv.set(name, paramKeyValue);
                         }
@@ -317,7 +322,7 @@ public class KV<K, V> extends LinkedHashMap<K, V> {
                         if (root.getNode(psiClassType) == null) {
                             root.addChildren(parent);
                         }
-                        KV fields = getFields(PsiUtil.resolveClassInType(type));
+                        KV fields = getFields(PsiUtil.resolveClassInType(type), numberClass);
                         ParamKeyValue paramKeyValue = new ParamKeyValue(name, fields, 2, TypeUtil.Type.Object.name(), comment);
                         kv.set(name, paramKeyValue);
                     }

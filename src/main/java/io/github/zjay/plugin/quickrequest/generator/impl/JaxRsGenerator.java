@@ -25,6 +25,7 @@ import com.intellij.psi.impl.source.PsiMethodImpl;
 import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.javadoc.PsiDocToken;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiUtil;
 import com.siyeh.ig.psiutils.CollectionUtils;
 import io.github.zjay.plugin.quickrequest.config.Constant;
@@ -69,14 +70,17 @@ public class JaxRsGenerator extends FastUrlGenerator {
         List<ParamNameType> methodUrlParamList = getMethodUrlParamList(psiMethod);
         List<ParamNameType> methodBodyParamList = getMethodBodyParamList(psiMethod);
 
+        PsiClass numberClass = JavaPsiFacade.getInstance(psiElement.getProject()).findClass("java.lang.Number", GlobalSearchScope.allScope(psiElement.getProject()));
+
+
         //pathParam
-        LinkedHashMap<String, Object> pathParamMap = pathValueParamParse.parseParam(config, methodUrlParamList);
+        LinkedHashMap<String, Object> pathParamMap = pathValueParamParse.parseParam(config, methodUrlParamList, numberClass);
 
         //requestParam
-        LinkedHashMap<String, Object> requestParamMap = requestParamParse.parseParam(config, methodUrlParamList);
+        LinkedHashMap<String, Object> requestParamMap = requestParamParse.parseParam(config, methodUrlParamList, numberClass);
 
         //bodyParam
-        LinkedHashMap<String, Object> bodyParamMap = bodyParamParse.parseParam(config, methodBodyParamList);
+        LinkedHashMap<String, Object> bodyParamMap = bodyParamParse.parseParam(config, methodBodyParamList, numberClass);
 
         //methodType
         String methodType = getMethodType(psiMethod);

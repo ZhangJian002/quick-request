@@ -29,11 +29,12 @@ import io.github.zjay.plugin.quickrequest.util.TypeUtil;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class PathValueParamParse extends AbstractParamParse {
     @Override
-    public LinkedHashMap<String, Object> parseParam(FastRequestConfiguration config, List<ParamNameType> paramNameTypeList) {
+    public LinkedHashMap<String, Object> parseParam(FastRequestConfiguration config, List<ParamNameType> paramNameTypeList, PsiClass numberClass) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         List<DataMapping> customDataMappingList = config.getCustomDataMappingList();
         List<DataMapping> defaultDataMappingList = config.getDefaultDataMappingList();
@@ -48,6 +49,9 @@ public class PathValueParamParse extends AbstractParamParse {
             if ("java.lang.String".equals(type)) {
                 ParamKeyValue value = new ParamKeyValue(name, StringUtils.randomString(name,randomStringDelimiter,randomStringLength,randomStringStrategy), 2, TypeUtil.Type.String.name());
                 result.put(name, value);
+                continue;
+            } else if (numberClass != null && (paramNameType.getPsiClass().isInheritor(numberClass, true) || paramNameType.getPsiClass() == numberClass)) {
+                result.put(name, new ParamKeyValue(name, ThreadLocalRandom.current().nextInt(0, 101), 2, TypeUtil.Type.Number.name()));
                 continue;
             }
             //pathValueParam 不支持自定义类解析 只能是基础类型
@@ -69,7 +73,7 @@ public class PathValueParamParse extends AbstractParamParse {
                 boolean isEnum = psiClass != null && psiClass.isEnum();
                 if (isEnum) {
 
-                    KV kv = KV.getFields(paramNameType.getPsiClass());
+                    KV kv = KV.getFields(paramNameType.getPsiClass(), numberClass);
                     Object enumParamKeyValue = kv.values().stream().findFirst().orElse(null);
                     if (enumParamKeyValue != null) {
                         result.put(name, new ParamKeyValue(name, ((ParamKeyValue) enumParamKeyValue).getValue(), 2, TypeUtil.Type.String.name()));
