@@ -22,10 +22,12 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import io.github.zjay.plugin.quickrequest.config.Constant;
+import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.generator.FastUrlGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.SpringMethodUrlGenerator;
+import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.util.FrIconUtil;
 import io.github.zjay.plugin.quickrequest.util.FrPsiUtil;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider;
@@ -61,9 +63,9 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
     private List<RequestMappingItem> findRequestMappingItems(Project project, String annotationName) {
         List<PsiAnnotation> annotationSearchers = getAnnotationSearchers(annotationName, project);
         //restful request
-        LinkedList<RequestMappingItem> requestList = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) != null)
+        ArrayList<RequestMappingItem> requestList = annotationSearchers.stream().filter(q -> fetchAnnotatedPsiElement(q) != null)
                 .map(this::mapItems)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toCollection(ArrayList::new));
 
         //dubbo
         annotationSearchers.stream().filter(x-> x != null && x.getParent() != null && Constant.DubboMethodConfig.exist(x.getQualifiedName()) && x.getParent().getParent() instanceof PsiClass
@@ -122,6 +124,18 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
     private PsiMethod fetchAnnotatedPsiElement(PsiElement psiElement) {
         if(psiElement == null){
             return null;
+        }
+        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+        assert config != null;
+        if (config.getNeedInterface() == null || !config.getNeedInterface()){
+            try {
+                PsiJavaFile containingFile = (PsiJavaFile) psiElement.getContainingFile();
+                if (containingFile.getClasses()[0].isInterface()){
+                    return null;
+                }
+            }catch (Exception e){
+                //ignore
+            }
         }
         PsiElement parent = psiElement.getParent();
         if (parent instanceof PsiMethod) return (PsiMethod)parent;

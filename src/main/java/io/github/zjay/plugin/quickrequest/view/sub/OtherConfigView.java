@@ -48,6 +48,8 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     private Boolean clickAndSend = null;
 
+    private Boolean needInterface = null;
+
     private Integer connectionTimeout = null;
 
     private Integer readTimeout = null;
@@ -93,6 +95,7 @@ public class OtherConfigView extends AbstractConfigurableView {
         panel.add(createJmhPanel(), gb.nextLine().fillCell().weighty(1.0));
         return panel;
     }
+
 
     private JPanel createConnectionPanel() {
         connectionTimeout = config.getConnectionTimeout();
@@ -147,17 +150,35 @@ public class OtherConfigView extends AbstractConfigurableView {
     }
 
     private JPanel createBasePanel() {
+        JBCheckBox clickAndSendCheckBox = createClickAndSendPanel();
+        JBCheckBox needInterfaceCheckBox = createNeedInterfacePanel();
+        JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
+                .add(new MyComponentPanelBuilder(clickAndSendCheckBox))
+                .add(new MyComponentPanelBuilder(needInterfaceCheckBox))
+                .createPanel();
+        clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("BaseConfig")));
+        return clickAndSendConfigPanel;
+
+    }
+
+    private JBCheckBox createClickAndSendPanel() {
         Boolean clickAndSend = config.getClickAndSend();
         this.clickAndSend = clickAndSend;
         JBCheckBox completeCheckBox = new JBCheckBox(MyResourceBundleUtil.getKey("ClickAndSendConfig"), clickAndSend != null && clickAndSend);
         completeCheckBox.addItemListener(e -> {
             this.clickAndSend = e.getStateChange() == ItemEvent.SELECTED;
         });
-        JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
-                .add(new MyComponentPanelBuilder(completeCheckBox)).createPanel();
-        clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("ClickIconConfig")));
-        return clickAndSendConfigPanel;
+        return completeCheckBox;
+    }
 
+    private JBCheckBox createNeedInterfacePanel() {
+        Boolean needInterface = config.getNeedInterface();
+        this.needInterface = needInterface;
+        JBCheckBox completeCheckBox = new JBCheckBox(MyResourceBundleUtil.getKey("NeedInterfaceConfig"), needInterface != null && needInterface);
+        completeCheckBox.addItemListener(e -> {
+            this.needInterface = e.getStateChange() == ItemEvent.SELECTED;
+        });
+        return completeCheckBox;
     }
 
     private JPanel createJmhPanel() {
@@ -383,6 +404,14 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     public void setClickAndSend(Boolean clickAndSend) {
         this.clickAndSend = clickAndSend;
+    }
+
+    public Boolean getNeedInterface() {
+        return needInterface;
+    }
+
+    public void setNeedInterface(Boolean needInterface) {
+        this.needInterface = needInterface;
     }
 
     public Integer getConnectionTimeout() {

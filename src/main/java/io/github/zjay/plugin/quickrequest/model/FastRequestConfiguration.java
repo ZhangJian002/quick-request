@@ -71,6 +71,19 @@ public class FastRequestConfiguration implements Serializable {
     private Integer testCount = null;
 
     /**
+     * Apis中是否过滤接口方法
+     */
+    private Boolean needInterface = null;
+
+    public Boolean getNeedInterface() {
+        return needInterface;
+    }
+
+    public void setNeedInterface(Boolean needInterface) {
+        this.needInterface = needInterface;
+    }
+
+    /**
      * 默认的数据映射
      */
     private List<DataMapping> defaultDataMappingList = Lists.newArrayList(
