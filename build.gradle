@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.7.16'
+version '2024.8.20'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.7.16'
+    pluginVersion = '2024.8.20'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -110,6 +110,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.8.20</h3>
+    <p>中文</p>
+    <ul>
+        <li>Java: 请求生成支持Number数字类型</li>
+        <li>Java: Apis搜索结果默认不包含接口中的方法，如果需要包含可在设置里面勾选</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Java: Request to generate support for Number numeric type</li>
+        <li>Java: Apis search results do not include methods in the interface by default. If you need to include them, you can check the settings</li>
+    </ul>
     <h3>v2024.7.16</h3>
     <p>中文</p>
     <ul>
