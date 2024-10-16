@@ -19,7 +19,6 @@ package io.github.zjay.plugin.quickrequest.view;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.CommonActionsManager;
 import com.intellij.ide.actions.searcheverywhere.PersistentSearchEverywhereContributorFilter;
-import com.intellij.ide.plugins.newui.ListPluginComponent;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
@@ -46,6 +45,7 @@ import io.github.zjay.plugin.quickrequest.action.CheckBoxFilterAction;
 import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.configurable.FastRequestSearchEverywhereConfiguration;
+import io.github.zjay.plugin.quickrequest.deprecated.JBConstant;
 import io.github.zjay.plugin.quickrequest.model.ApiService;
 import io.github.zjay.plugin.quickrequest.model.MethodType;
 import io.github.zjay.plugin.quickrequest.view.component.tree.*;
@@ -72,6 +72,7 @@ import java.util.stream.Collectors;
 public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Disposable {
     private final Project myProject;
     private JPanel panel;
+
 
     private SearchTextField searchPanel;
 
@@ -118,7 +119,7 @@ public class AllApisNavToolWindow extends SimpleToolWindowPanel implements Dispo
         JBTextField searchTextField2 = searchPanel.getTextEditor();
         searchTextField2.putClientProperty("StatusVisibleFunction", (BooleanFunction<JBTextField>) field -> field.getText().isEmpty());
         StatusText emptyText2 = searchTextField2.getEmptyText();
-        emptyText2.appendText("Search by url or method name", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, ListPluginComponent.GRAY_COLOR));
+        emptyText2.appendText("Search by url or method name", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBConstant.GRAY_COLOR));
 //        searchTextField2.putClientProperty("search.extension", ExtendableTextComponent.Extension
 //                .create(AllIcons.Actions.More, AllIcons.Actions.More, "Search options",
 //                        () -> showRightBottomPopup(searchTextField2, "By", myInstalledSearchGroup2)));

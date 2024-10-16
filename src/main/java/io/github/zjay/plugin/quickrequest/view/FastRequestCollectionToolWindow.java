@@ -25,7 +25,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
 import com.intellij.ide.ExporterToTextFile;
 import com.intellij.ide.HelpTooltip;
-import com.intellij.ide.plugins.newui.ListPluginComponent;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
@@ -70,6 +69,7 @@ import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.config.FastRequestHistoryCollectionComponent;
 import io.github.zjay.plugin.quickrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.quickrequest.deprecated.AddAnActionFunction;
+import io.github.zjay.plugin.quickrequest.deprecated.JBConstant;
 import io.github.zjay.plugin.quickrequest.idea.ExportToFileUtil;
 import io.github.zjay.plugin.quickrequest.model.*;
 import io.github.zjay.plugin.quickrequest.util.*;
@@ -200,7 +200,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         JBTextField searchTextField = jbSearchPanelText.getTextEditor();
         searchTextField.putClientProperty("StatusVisibleFunction", (BooleanFunction<JBTextField>) field -> field.getText().isEmpty());
         StatusText emptyText = searchTextField.getEmptyText();
-        emptyText.appendText("Search by name or url ->", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, ListPluginComponent.GRAY_COLOR));
+        emptyText.appendText("Search by name or url ->", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBConstant.GRAY_COLOR));
         searchTextField.putClientProperty("search.extension", ExtendableTextComponent.Extension
                 .create(AllIcons.Actions.More, AllIcons.Actions.More, "Search options",
                         () -> showRightBottomPopup(searchTextField, "By", myInstalledSearchGroup)));
@@ -217,7 +217,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         JBTextField searchTextField2 = jbSearchPanelText2.getTextEditor();
         searchTextField2.putClientProperty("StatusVisibleFunction", (BooleanFunction<JBTextField>) field -> field.getText().isEmpty());
         StatusText emptyText2 = searchTextField2.getEmptyText();
-        emptyText2.appendText("Search by url", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, ListPluginComponent.GRAY_COLOR));
+        emptyText2.appendText("Search by url", new SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBConstant.GRAY_COLOR));
 //        searchTextField2.putClientProperty("search.extension", ExtendableTextComponent.Extension
 //                .create(AllIcons.Actions.More, AllIcons.Actions.More, "Search options",
 //                        () -> showRightBottomPopup(searchTextField2, "By", myInstalledSearchGroup2)));
