@@ -75,6 +75,19 @@ public class FastRequestConfiguration implements Serializable {
      */
     private Boolean needInterface = null;
 
+    /**
+     * 是否需要在启动时自动生成配置，仅对spring boot项目生效
+     */
+    private Boolean noNeedAutoGenerateConfig = null;
+
+    public Boolean getNoNeedAutoGenerateConfig() {
+        return noNeedAutoGenerateConfig;
+    }
+
+    public void setNoNeedAutoGenerateConfig(Boolean noNeedAutoGenerateConfig) {
+        this.noNeedAutoGenerateConfig = noNeedAutoGenerateConfig;
+    }
+
     public Boolean getNeedInterface() {
         return needInterface;
     }

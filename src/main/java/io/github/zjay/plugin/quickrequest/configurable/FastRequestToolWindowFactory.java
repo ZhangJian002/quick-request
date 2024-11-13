@@ -28,12 +28,10 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import io.github.zjay.plugin.quickrequest.model.CollectionConfiguration;
 import io.github.zjay.plugin.quickrequest.model.HistoryTableData;
-import io.github.zjay.plugin.quickrequest.util.ToolUtils;
 import io.github.zjay.plugin.quickrequest.view.AllApisNavToolWindow;
 import io.github.zjay.plugin.quickrequest.view.FastRequestCollectionToolWindow;
 import io.github.zjay.plugin.quickrequest.view.FastRequestToolWindow;
 import org.jetbrains.annotations.NotNull;
-import quickRequest.icons.PluginIcons;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,6 +78,7 @@ public class FastRequestToolWindowFactory implements ToolWindowFactory, DumbAwar
         //change data
         MessageBus messageBus = project.getMessageBus();
         MessageBusConnection connect = messageBus.connect();
+
         connect.subscribe(ConfigChangeNotifier.PARAM_CHANGE_TOPIC, new ConfigChangeNotifier() {
             @Override
             public void configChanged(boolean active, String projectName) {

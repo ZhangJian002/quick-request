@@ -25,11 +25,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
-import com.intellij.json.json5.Json5FileType;
-import com.intellij.json.json5.Json5Language;
+import com.intellij.json.JsonFileType;
+import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
 import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
@@ -448,10 +449,10 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         });
         managerConfigLink.setExternalLinkIcon();
         manageConfigButton = managerConfigLink;
-        prettyJsonEditorPanel = new MyLanguageTextField(myProject, Json5Language.INSTANCE, Json5FileType.INSTANCE, true, true, 1);
+        prettyJsonEditorPanel = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, true, true, 1);
         responseTextAreaPanel = new MyLanguageTextField(myProject, PlainTextLanguage.INSTANCE, PlainTextFileType.INSTANCE, true, false, 1);
 
-        rowParamsTextArea = new MyLanguageTextField(myProject, Json5Language.INSTANCE, Json5FileType.INSTANCE, false, true, 1);
+        rowParamsTextArea = new MyLanguageTextField(myProject, JsonLanguage.INSTANCE, JsonFileType.INSTANCE, false, true, 1);
 
         //设置高度固定搜索框
         prettyJsonEditorPanel.setMinimumSize(new Dimension(-1, 120));
@@ -503,6 +504,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         group.add(new CopyCurlAction());
         group.add(new CleanAction());
         group.add(new CoffeeMeAction());
+        group.add(new ParentAction(MyResourceBundleUtil.getKey("Question"), MyResourceBundleUtil.getKey("Question"), PluginIcons.ICON_QUESTION) {
+            @Override
+            public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+                BrowserUtil.browse("https://github.com/ZhangJian002/quick-request/issues");
+            }
+        });
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_CONTENT, group, true);
         actionToolbar.setTargetComponent(panel);
         JComponent toolbarComponent = actionToolbar.getComponent();
@@ -4547,8 +4554,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         FileType fileType;
         switch (bodyContentType){
             case JSON:
-                language = Json5Language.INSTANCE;
-                fileType = Json5FileType.INSTANCE;
+                language = JsonLanguage.INSTANCE;
+                fileType = JsonFileType.INSTANCE;
                 break;
             case XML:
                 language = XMLLanguage.INSTANCE;

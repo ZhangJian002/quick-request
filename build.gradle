@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.10.16'
+version '2024.11.14'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.10.16'
+    pluginVersion = '2024.11.14'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
     implementation files('./lib/quick-request-base-3.0.jar')
+//    implementation files('./lib/spring-boot-core.jar')
     implementation 'com.alibaba:fastjson:1.2.83'
     annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
     implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.4'
@@ -110,6 +111,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.11.14</h3>
+    <p>中文</p>
+    <ul>
+        <li>Spring boot项目启动时可自动生成项目环境及其url（不会覆盖已存在的配置，如果不想要自动配置，可在基础设置中勾选）</li>
+        <li>局部优化及兼容性修改</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>During startup, the Spring Boot project can automatically generate the project environment and its URL (without overwriting existing configurations; to disable auto-configuration, you can select the option in basic settings). Not supported in the Community Edition.</li>
+        <li>Compatibility modification</li>
+    </ul>
     <h3>v2024.10.16</h3>
     <p>中文</p>
     <ul>

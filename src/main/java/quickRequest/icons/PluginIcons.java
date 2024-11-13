@@ -119,5 +119,7 @@ public interface PluginIcons {
     Icon ICON_PHP = IconLoader.getIcon("/quickRequest.icon/language/php.svg", PluginIcons.class);
     Icon ICON_RUBY = IconLoader.getIcon("/quickRequest.icon/language/ruby.svg", PluginIcons.class);
 
+    Icon ICON_QUESTION= IconLoader.getIcon("/quickRequest.icon/question.svg", PluginIcons.class);
+
 
 }

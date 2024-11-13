@@ -54,6 +54,10 @@ public class EnvAddView extends DialogWrapper {
         return textField.getText();
     }
 
+    public void setText(String defaultText){
+        textField.setText(defaultText);
+    }
+
 
     public JPanel getPanel() {
         return panel;

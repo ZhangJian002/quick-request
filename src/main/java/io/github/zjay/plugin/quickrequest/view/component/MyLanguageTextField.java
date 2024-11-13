@@ -19,8 +19,8 @@ package io.github.zjay.plugin.quickrequest.view.component;
 import com.alibaba.fastjson.JSONObject;
 import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
-import com.intellij.json.json5.Json5FileType;
-import com.intellij.json.json5.Json5Language;
+import com.intellij.json.JsonFileType;
+import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
 import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
@@ -117,8 +117,8 @@ public class MyLanguageTextField extends LanguageTextField {
         Language myLanguage = null;
         try {
             JSONObject.parseObject(text);
-            myLanguage = Json5Language.INSTANCE;
-            super.setFileType(Json5FileType.INSTANCE);
+            myLanguage = JsonLanguage.INSTANCE;
+            super.setFileType(JsonFileType.INSTANCE);
         } catch (Exception e) {
             //ignore
         }

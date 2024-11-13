@@ -50,6 +50,11 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     private Boolean needInterface = null;
 
+    /**
+     * 是否需要在启动时自动生成配置，仅对spring boot项目生效
+     */
+    private Boolean noNeedAutoGenerateConfig = null;
+
     private Integer connectionTimeout = null;
 
     private Integer readTimeout = null;
@@ -152,9 +157,11 @@ public class OtherConfigView extends AbstractConfigurableView {
     private JPanel createBasePanel() {
         JBCheckBox clickAndSendCheckBox = createClickAndSendPanel();
         JBCheckBox needInterfaceCheckBox = createNeedInterfacePanel();
+        JBCheckBox needAutoGenerateConfigPanel = createNeedAutoGenerateConfigPanel();
         JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
                 .add(new MyComponentPanelBuilder(clickAndSendCheckBox))
                 .add(new MyComponentPanelBuilder(needInterfaceCheckBox))
+                .add(new MyComponentPanelBuilder(needAutoGenerateConfigPanel).withTooltip(MyResourceBundleUtil.getKey("NoNeedAutoGenerateConfigTip")))
                 .createPanel();
         clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("BaseConfig")));
         return clickAndSendConfigPanel;
@@ -177,6 +184,16 @@ public class OtherConfigView extends AbstractConfigurableView {
         JBCheckBox completeCheckBox = new JBCheckBox(MyResourceBundleUtil.getKey("NeedInterfaceConfig"), needInterface != null && needInterface);
         completeCheckBox.addItemListener(e -> {
             this.needInterface = e.getStateChange() == ItemEvent.SELECTED;
+        });
+        return completeCheckBox;
+    }
+
+    private JBCheckBox createNeedAutoGenerateConfigPanel() {
+        Boolean noNeedAutoGenerateConfig = config.getNoNeedAutoGenerateConfig();
+        this.noNeedAutoGenerateConfig = noNeedAutoGenerateConfig;
+        JBCheckBox completeCheckBox = new JBCheckBox(MyResourceBundleUtil.getKey("NoNeedAutoGenerateConfig"), noNeedAutoGenerateConfig != null && noNeedAutoGenerateConfig);
+        completeCheckBox.addItemListener(e -> {
+            this.noNeedAutoGenerateConfig = e.getStateChange() == ItemEvent.SELECTED;
         });
         return completeCheckBox;
     }
@@ -524,5 +541,13 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     public void setTestCount(Integer testCount) {
         this.testCount = testCount;
+    }
+
+    public Boolean getNoNeedAutoGenerateConfig() {
+        return noNeedAutoGenerateConfig;
+    }
+
+    public void setNoNeedAutoGenerateConfig(Boolean noNeedAutoGenerateConfig) {
+        this.noNeedAutoGenerateConfig = noNeedAutoGenerateConfig;
     }
 }

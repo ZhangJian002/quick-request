@@ -38,6 +38,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CommonConfigView extends AbstractConfigurableView {
     private JPanel panel;
@@ -401,14 +403,15 @@ public class CommonConfigView extends AbstractConfigurableView {
                     return name;
                 } else {
                     List<HostGroup> hostGroupList = nameGroup.getHostGroup();
-                    if (hostGroupList.isEmpty() || hostGroupList.size() < column) {
+                    if (hostGroupList.isEmpty()) {
                         return StringUtils.EMPTY;
                     }
-                    HostGroup hostGroup = hostGroupList.get(column - 1);
-                    if (hostGroup == null) {
-                        return StringUtils.EMPTY;
+                    ColumnInfo<Object, Object> column1 = columns[column];
+                    List<HostGroup> hostGroups = hostGroupList.stream().filter(x -> Objects.equals(x.getEnv(), column1.getName())).collect(Collectors.toList());
+                    if (!hostGroups.isEmpty()){
+                        return hostGroups.get(0).getUrl();
                     }
-                    return hostGroup.getUrl();
+                    return StringUtils.EMPTY;
                 }
             }
 
@@ -416,7 +419,13 @@ public class CommonConfigView extends AbstractConfigurableView {
             public void setValueAt(Object aValue, int row, int column) {
                 String value = aValue.toString();
                 List<HostGroup> hostGroupList = viewDataList.get(row).getHostGroup();
-                hostGroupList.get(column - 1).setUrl(value);
+                ColumnInfo<Object, Object> column1 = columns[column];
+                List<HostGroup> hostGroups = hostGroupList.stream().filter(x -> Objects.equals(x.getEnv(), column1.getName())).collect(Collectors.toList());
+                if (!hostGroups.isEmpty()){
+                    hostGroups.get(0).setUrl(value);
+                }else {
+                    hostGroupList.add(new HostGroup(column1.getName(), value));
+                }
                 super.setValueAt(aValue, row, column);
             }
 

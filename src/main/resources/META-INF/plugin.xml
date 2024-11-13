@@ -58,7 +58,7 @@
     <depends optional="true" config-file="config-php.xml">com.jetbrains.php</depends>
     <depends optional="true" config-file="config-python.xml">Pythonid</depends>
     <depends optional="true" config-file="config-ruby.xml">org.jetbrains.plugins.ruby</depends>
-    <depends>com.intellij.modules.json</depends>
+    <depends optional="true" config-file="config-json.xml">com.intellij.modules.json</depends>
 
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
