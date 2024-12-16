@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.11.14'
+version '2024.12.16'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.11.14'
+    pluginVersion = '2024.12.16'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -111,6 +111,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2024.12.16</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复了Response->Pretty下不支持JSON数组美化的问题，并提高渲染的效率</li>
+        <li>局部优化及兼容性修改</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fixed the issue where JSON arrays were not properly formatted under Response -> Pretty and improved rendering performance.</li>
+        <li>Compatibility modification</li>
+    </ul>
     <h3>v2024.11.14</h3>
     <p>中文</p>
     <ul>
@@ -119,7 +130,7 @@ patchPluginXml {
     </ul>
     <p>English</p>
     <ul>
-        <li>During startup, the Spring Boot project can automatically generate the project environment and its URL (without overwriting existing configurations; to disable auto-configuration, you can select the option in basic settings). Not supported in the Community Edition.</li>
+        <li>During startup, the Spring Boot project can automatically generate the project environment and its URL (without overwriting existing configurations; to disable auto-configuration, you can select the option in basic settings).</li>
         <li>Compatibility modification</li>
     </ul>
     <h3>v2024.10.16</h3>

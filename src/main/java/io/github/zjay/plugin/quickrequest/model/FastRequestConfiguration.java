@@ -21,7 +21,9 @@ import io.github.zjay.plugin.quickrequest.config.Constant;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 总配置
@@ -277,6 +279,7 @@ public class FastRequestConfiguration implements Serializable {
     }
 
     public List<HeaderGroup> getHeaderGroupList() {
+        headerGroupList.removeIf(Objects::isNull);
         return headerGroupList;
     }
 

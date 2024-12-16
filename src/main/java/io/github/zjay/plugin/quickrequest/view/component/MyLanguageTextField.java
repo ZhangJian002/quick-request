@@ -16,7 +16,9 @@
 
 package io.github.zjay.plugin.quickrequest.view.component;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONValidator;
 import com.intellij.ide.highlighter.HtmlFileType;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.json.JsonFileType;
@@ -44,7 +46,10 @@ import io.github.zjay.plugin.quickrequest.config.Constant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.regex.Pattern;
+
 public class MyLanguageTextField extends LanguageTextField {
+
 
     private Project myProject;
     private FileType fileType;
@@ -116,11 +121,12 @@ public class MyLanguageTextField extends LanguageTextField {
         }
         Language myLanguage = null;
         try {
-            JSONObject.parseObject(text);
-            myLanguage = JsonLanguage.INSTANCE;
-            super.setFileType(JsonFileType.INSTANCE);
-        } catch (Exception e) {
-            //ignore
+            if(JSONValidator.from(text).validate()){
+                myLanguage = JsonLanguage.INSTANCE;
+                super.setFileType(JsonFileType.INSTANCE);
+            }
+        }catch (Exception e){
+
         }
         if (myLanguage == null) {
             if (text.matches("<\\s*html[\\s\\S]*>")) {

@@ -70,7 +70,7 @@ public class DubboLineMarkerProvider implements LineMarkerProvider {
             PsiClass psiClass = (PsiClass) psiMethod.getParent();
             if(psiMethod.getAnnotation("java.lang.Override") == null || psiClass.getInterfaces().length == 0){
                 //不是实现方法 或者 没有实现接口的 跳过
-                return false;
+                return false; 
             }
             PsiAnnotation annotationRequestMapping = psiClass.getAnnotation(code);
             if (annotationRequestMapping != null) {
