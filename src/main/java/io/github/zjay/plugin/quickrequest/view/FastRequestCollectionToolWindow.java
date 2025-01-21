@@ -300,8 +300,10 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         assert historyTable != null;
         List<HistoryTableData> list = historyTable.getList();
         historyTableDataList = list;
-        ListTableModel model = (ListTableModel) collectionTable2.getModel();
-        model.setItems(list);
+        filterRequest2();
+//        collectionTable2.setModel(new ListTableModel<>(getHistoryColumnInfo(), historyTableDataList));
+//        ListTableModel model = (ListTableModel) collectionTable2.getModel();
+//        model.setItems(list);
     }
 
     private void filterRequest(String query, String rule) {
@@ -365,19 +367,27 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
     private void filterRequest2() {
         String search = ((SearchTextField) searchPanel2).getText();
-        TableRowSorter<TableModel> rowSorter = (TableRowSorter) collectionTable2.getRowSorter();
-        rowSorter.setRowFilter(new RowFilter<>() {
-            @Override
-            public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
-                int rowIndex = entry.getIdentifier();
-                HistoryTableData historyTableData = (HistoryTableData) entry.getModel().getValueAt(rowIndex, 0);
-                if (StringUtils.isNotBlank(search) && !historyTableData.getUrl().toLowerCase().contains(search.toLowerCase())) {
-                    return false;
-                }
-                return true;
-            }
-        });
-        collectionTable2.repaint();
+        List<HistoryTableData> resultList;
+        if (StringUtils.isNotBlank(search)) {
+            resultList = historyTableDataList.stream().filter(x -> x.getUrl().toLowerCase().contains(search.toLowerCase())).collect(Collectors.toList());
+        }else {
+            resultList = historyTableDataList;
+        }
+        collectionTable2.setModel(new ListTableModel<>(getHistoryColumnInfo(), resultList));
+        setColumnWidth(collectionTable2);
+//        TableRowSorter<TableModel> rowSorter = (TableRowSorter) collectionTable2.getRowSorter();
+//        rowSorter.setRowFilter(new RowFilter<>() {
+//            @Override
+//            public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
+//                int rowIndex = entry.getIdentifier();
+//                HistoryTableData historyTableData = (HistoryTableData) entry.getModel().getValueAt(rowIndex, 0);
+//                if (StringUtils.isNotBlank(search) && !historyTableData.getUrl().toLowerCase().contains(search.toLowerCase())) {
+//                    return false;
+//                }
+//                return true;
+//            }
+//        });
+//        collectionTable2.repaint();
     }
 
     private class HighlightCellRenderer extends DefaultTableCellRenderer {
@@ -390,13 +400,20 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
             String cellValue = String.valueOf(value);
             JLabel jLabel = (JLabel) component;
             int width = table.getColumnModel().getColumn(column).getWidth();
-            String realValue = cellValue;
-            if (cellValue.length() * 7.5 > width) {
-                realValue = realValue.substring(0, (int) (width / 7.5)) + "...";
-            }
             jLabel.setToolTipText(cellValue);
             if (cellValue.toLowerCase().contains(searchKeyword.toLowerCase())) {
-                jLabel.setText("<html>" + realValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>") + "</html>");
+                String realValue = cellValue;
+                if (cellValue.length() * 6.3 > width) {
+                    realValue = realValue.substring(0, (int) (width / 6.3));
+                    if(!realValue.toLowerCase().contains(searchKeyword.toLowerCase())) {
+                        //被截取掉了
+                        jLabel.setText("<html>" + realValue +  "<span style='color: #ffffff; background-color: #007acc;'>...</span></html>");
+                    }else {
+                        jLabel.setText("<html>" + realValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>") + "...</html>");
+                    }
+                }else {
+                    jLabel.setText("<html>" + realValue.replaceAll("(?i)" + searchKeyword, "<span style='color: #ffffff; background-color: #007acc;'>$0</span>") + "</html>");
+                }
             }
             return component;
         }
@@ -669,9 +686,13 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         toolbarDecorator.setMoveUpAction(null);
         toolbarDecorator.setRemoveAction(e -> {
             int[] selectedIndices = collectionTable2.getSelectionModel().getSelectedIndices();
-            ListTableModel model = (ListTableModel) collectionTable2.getModel();
+            ListTableModel<HistoryTableData> model = (ListTableModel<HistoryTableData>) collectionTable2.getModel();
             List<Integer> indexes = Arrays.stream(selectedIndices).boxed().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-            indexes.forEach(model::removeRow);
+            indexes.forEach(index -> {
+                HistoryTableData historyTableData = model.getItems().get(index);
+                model.removeRow(index);
+                historyTableDataList.remove(historyTableData);
+            });
             refreshTable2();
         });
         MyActionGroup myActionGroup = new MyActionGroup(() -> new ParentAction("Refresh", "", AllIcons.Actions.Refresh) {
@@ -898,10 +919,8 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
 
             @Override
             public Object getValueAt(int row, int column) {
-                if (historyTableDataList.isEmpty()) {
-                    return StringUtils.EMPTY;
-                }
-                HistoryTableData historyTableData = historyTableDataList.get(row);
+                ListTableModel<HistoryTableData> currModel = (ListTableModel<HistoryTableData>) getModel();
+                HistoryTableData historyTableData = currModel.getItem(row);
                 if (historyTableData == null) {
                     return StringUtils.EMPTY;
                 }
@@ -923,14 +942,18 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                 return super.getCellEditor(row, column);
             }
         };
-        jbTable.getColumnModel().getColumn(0).setMinWidth(100);
-        jbTable.getColumnModel().getColumn(0).setMaxWidth(100);
+        setColumnWidth(jbTable);
+        return jbTable;
+    }
+
+    private void setColumnWidth(JBTable jbTable) {
+        jbTable.getColumnModel().getColumn(0).setMinWidth(75);
+        jbTable.getColumnModel().getColumn(0).setMaxWidth(75);
         jbTable.getColumnModel().getColumn(2).setMinWidth(150);
         jbTable.getColumnModel().getColumn(2).setMaxWidth(150);
-        jbTable.getColumnModel().getColumn(3).setMinWidth(120);
-        jbTable.getColumnModel().getColumn(3).setMaxWidth(120);
+        jbTable.getColumnModel().getColumn(3).setMinWidth(91);
+        jbTable.getColumnModel().getColumn(3).setMaxWidth(91);
         jbTable.setRowHeight(30);
-        return jbTable;
     }
 
     private ColumnInfo<Object, Object>[] getHistoryColumnInfo() {
@@ -1031,7 +1054,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
     public JBPanel renderTableButtons(JBPanel jbPanel, int row) {
         BorderLayout borderLayout = new BorderLayout();
         jbPanel.setLayout(borderLayout);
-        Dimension dimension = new Dimension(60, 20);
+        Dimension dimension = new Dimension(45, 20);
         JButton jButton = new JButton();
         jButton.setPreferredSize(dimension);
         jButton.setIcon(PluginIcons.ICON_LOCAL_SCOPE);

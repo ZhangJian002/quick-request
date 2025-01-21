@@ -26,7 +26,6 @@ public class ToolUtil {
      * 拷贝到剪贴板
      *
      * @param text 文本
-     * @author Kings
      * @date 2021/06/07
      */
     public static void setClipboardString(String text) {

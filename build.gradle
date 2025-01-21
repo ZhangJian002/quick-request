@@ -1,9 +1,9 @@
-import proguard.gradle.ProGuardTask
-buildscript {
-    dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.3.2'
-    }
-}
+//import proguard.gradle.ProGuardTask
+//buildscript {
+//    dependencies {
+//        classpath 'com.guardsquare:proguard-gradle:7.3.2'
+//    }
+//}
 
 plugins {
     id 'java'
@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2024.12.16'
+version '2025.1.21'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2024.12.16'
+    pluginVersion = '2025.1.21'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -41,54 +41,54 @@ dependencies {
 // idea 依赖所在目录
 def ideaPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3"
 def kotlinPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3\\plugins\\Kotlin"
-task proguard(type: ProGuardTask, dependsOn: jar) {
-    // 输出混淆前->混淆后的映射
-//    printmapping "$buildDir/dic.txt"
-    // 混淆规则文件
-    configuration 'proguard-rules.pro'
-    verbose()
-
-    // 项目依赖jar
-    libraryjars configurations.runtimeClasspath.collect()
-    dontshrink()
-    dontoptimize()
-
-    adaptclassstrings("**.xml")
-    adaptresourcefilecontents("**.xml")
-    overloadaggressively()
-    repackageclasses("")
-    dontwarn()
-    printmapping("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}-ProGuard-ChangeLog.txt")
-
-    target(project.property("pluginVersion") as String)
-
-    adaptresourcefilenames()
-    optimizationpasses(9)
-    allowaccessmodification()
-
-    keepattributes("Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod")
-    keep("class * implements com.intellij.openapi.components.PersistentStateComponent {*;}")
-    keepclassmembers("class * {public static ** INSTANCE;}")
-
-    // jdk 依赖，区分jdk8 前后版本
-    if (System.getProperty('java.version').startsWith('1.')) {
-        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
-    } else {
-        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-        libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-        libraryjars "${System.getProperty('java.home')}/jmods/java.datatransfer.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    }
-    // 如果使用了插件，附加插件jar
-    libraryjars fileTree("$ideaPath/plugins/java/lib").filter {!it.name.startsWith("debugger")}.collect()
-    // idea 依赖的jar
-    libraryjars files("$ideaPath/lib")
-
-    libraryjars files("$kotlinPath/lib")
-
-    injars("build/libs/${project.property("pluginName")}-${project.property("pluginVersion")}.jar")
-    outjars("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar")
-
-}
+//task proguard(type: ProGuardTask, dependsOn: jar) {
+//    // 输出混淆前->混淆后的映射
+////    printmapping "$buildDir/dic.txt"
+//    // 混淆规则文件
+//    configuration 'proguard-rules.pro'
+//    verbose()
+//
+//    // 项目依赖jar
+//    libraryjars configurations.runtimeClasspath.collect()
+//    dontshrink()
+//    dontoptimize()
+//
+//    adaptclassstrings("**.xml")
+//    adaptresourcefilecontents("**.xml")
+//    overloadaggressively()
+//    repackageclasses("")
+//    dontwarn()
+//    printmapping("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}-ProGuard-ChangeLog.txt")
+//
+//    target(project.property("pluginVersion") as String)
+//
+//    adaptresourcefilenames()
+//    optimizationpasses(9)
+//    allowaccessmodification()
+//
+//    keepattributes("Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod")
+//    keep("class * implements com.intellij.openapi.components.PersistentStateComponent {*;}")
+//    keepclassmembers("class * {public static ** INSTANCE;}")
+//
+//    // jdk 依赖，区分jdk8 前后版本
+//    if (System.getProperty('java.version').startsWith('1.')) {
+//        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+//    } else {
+//        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+//        libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+//        libraryjars "${System.getProperty('java.home')}/jmods/java.datatransfer.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+//    }
+//    // 如果使用了插件，附加插件jar
+//    libraryjars fileTree("$ideaPath/plugins/java/lib").filter {!it.name.startsWith("debugger")}.collect()
+//    // idea 依赖的jar
+//    libraryjars files("$ideaPath/lib")
+//
+//    libraryjars files("$kotlinPath/lib")
+//
+//    injars("build/libs/${project.property("pluginName")}-${project.property("pluginVersion")}.jar")
+//    outjars("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar")
+//
+//}
 
 //prepareSandbox.dependsOn("proguard")
 //prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
@@ -111,6 +111,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2025.1.21</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复了历史记录查询问题</li>
+        <li>对请求头进行一些优化</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fixed history query issue.</li>
+        <li>Optimize the request header to some extent.</li>
+    </ul>
     <h3>v2024.12.16</h3>
     <p>中文</p>
     <ul>
@@ -601,9 +612,9 @@ test {
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED', "-Xmx4096m","-Xms128m"
 //    jbrVersion 'jbrsdk-11_0_10-osx-x64-b1314.58'
-    autoReloadPlugins true
+//    autoReloadPlugins = true
+//    setAutoReloadPlugins(true)
 }
-
 runPluginVerifier {
     ideVersions = ["IIU-2020.3.1", "IIU-2021.2.1"]
 //  https://github.com/JetBrains/intellij-plugin-verifier/releases

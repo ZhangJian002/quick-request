@@ -686,7 +686,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
 
         //更新域名
-        config.getParamGroup().setOriginUrl("");
+//        config.getParamGroup().setOriginUrl("");
         setDomain(config);
 
         //动态更新text中的内容
@@ -779,6 +779,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         actionToolbar1.setTargetComponent(sendPanel);
         JComponent component = actionToolbar1.getComponent();
         sendPanel.add(component);
+    }
+
+    private void initRequestParams(FastRequestConfiguration config) {
+        ParamGroup paramGroup = config.getParamGroup();
+        paramGroup.getRequestParamMap();
+
     }
 
     private void changeUrlParamsText() {
@@ -1166,10 +1172,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 }, HashMap::putAll);
         Map<String, Object> urlParam = urlParamsKeyValueList.stream().filter(ParamKeyValue::getEnabled).collect(Collectors.toMap(ParamKeyValue::getKey, ParamKeyValue::getValue, (existing, replacement) -> existing));
         String rowParams = ((LanguageTextField) rowParamsTextArea).getText();
-        StringBuilder urlEncodedParam = new StringBuilder("");
-        urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> {
-            urlEncodedParam.append(q.getKey()).append("=").append(q.getValue()).append("&");
-        });
+        StringBuilder urlEncodedParam = new StringBuilder();
+        urlEncodedKeyValueList.stream().filter(ParamKeyValue::getEnabled).forEach(q -> urlEncodedParam.append(q.getKey()).append("=").append(q.getValue()).append("&"));
 
         if (!urlParam.isEmpty()) {
             String queryParam = UrlQuery.of(urlParam).toString();
@@ -1630,8 +1634,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
      * 根据配置设置domain
      *
      * @param config 配置
-     * @author Kings
-     * @date 2021/05/23
      */
     private void setDomain(FastRequestConfiguration config) {
 //        warnLabel1.setVisible(config.getEnvList().isEmpty() || config.getProjectList().isEmpty());
@@ -1661,6 +1663,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         config.setDomain(domain);
         projectConfig.setDomain(domain);
         changeUrl();
+//        System.out.println(config.getParamGroup());
+
 
 
     }
@@ -1669,8 +1673,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     /**
      * message事件:修改env和project动态修改ToolWindow中的内容
      *
-     * @author Kings
-     * @date 2021/06/02
      */
     public void changeEnvAndProject() {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
@@ -1845,8 +1847,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String multipartKeyValueListJson = data.getMultipart();
         String headers = data.getHeaders();
         if (StringUtils.isNotBlank(headers)) {
-            headerParamsKeyValueList = JSON.parseObject(headers, new TypeReference<List<DataMapping>>() {
-            });
+            headerParamsKeyValueList = JSON.parseArray(headers, DataMapping.class);
         } else {
             headerParamsKeyValueList = new ArrayList<>();
         }
@@ -2007,6 +2008,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //            return;
 //        }
 
+
         //request param
         String requestParamStr = conventDataToString(conventMapToList(requestParamMap));
 
@@ -2117,7 +2119,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         if (StringUtils.isNotBlank(paramGroup.getMethodType())) {
             methodTypeComboBox.setSelectedItem(paramGroup.getMethodType());
         }
-//        tabbedPane.setTitleAt(0, "Headers(" + headerParamsKeyValueList.size() + ")");
     }
 
     private String buildPathParamUrl(String url) {
@@ -2538,16 +2539,21 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     private List<ParamKeyValue> conventMapToList(LinkedHashMap<String, ?> paramLinkedMap) {
         List<ParamKeyValue> paramKeyValueList = new ArrayList<>();
         paramLinkedMap.forEach((key, value) -> {
-            ParamKeyValue paramKeyValue = (ParamKeyValue) value;
-            if (paramKeyValue.getCustomFlag() == 1) {
-                KV<String, ParamKeyValue> data = (KV<String, ParamKeyValue>) paramKeyValue.getValue();
-                //kv转成普通类型
-                List<ParamKeyValue> list = new ArrayList<>();
-                convertToParamKeyValueList("", data, list);
-                paramKeyValueList.addAll(list);
-            } else {
-                paramKeyValueList.add(paramKeyValue);
+            if (value instanceof ParamKeyValue){
+                ParamKeyValue paramKeyValue = (ParamKeyValue) value;
+                if (paramKeyValue.getCustomFlag() == 1) {
+                    KV<String, ParamKeyValue> data = (KV<String, ParamKeyValue>) paramKeyValue.getValue();
+                    //kv转成普通类型
+                    List<ParamKeyValue> list = new ArrayList<>();
+                    convertToParamKeyValueList("", data, list);
+                    paramKeyValueList.addAll(list);
+                } else {
+                    paramKeyValueList.add(paramKeyValue);
+                }
+            }else {
+                paramKeyValueList.add(new ParamKeyValue(key, "", 2, "String"));
             }
+
         });
         return paramKeyValueList;
     }
@@ -3777,6 +3783,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                     dataMapping.setValue(aValue.toString());
                 }
                 saveAndChangeHeader();
+                setHeaderTitle();
 //                config.setHeaderList(headerParamsKeyValueList);
             }
 
@@ -4411,49 +4418,51 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
     }
 
     private void calcHeaderList() {
-        setHeaderTitle();
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
         List<HeaderGroup> headerGroupList = config.getHeaderGroupList();
-        if (headerGroupList == null || headerGroupList.isEmpty()) {
-            headerParamsKeyValueList = new ArrayList<>();
+        if (CollectionUtils.isEmpty(headerGroupList)) {
+            headerParamsKeyValueList  = new ArrayList<>();
             return;
         }
         String enableEnv = getActiveEnv();
         String enableProject = getActiveProject();
         if (StringUtils.isBlank(enableEnv) || StringUtils.isBlank(enableProject)) {
-            headerParamsKeyValueList = new ArrayList<>();
+            headerParamsKeyValueList  = new ArrayList<>();
             return;
         }
         HeaderGroup headerGroup = headerGroupList.stream().filter(q -> enableProject.equals(q.getProjectName())).findFirst().orElse(null);
         if (headerGroup == null) {
-            headerParamsKeyValueList = new ArrayList<>();
+            headerParamsKeyValueList  = new ArrayList<>();
             return;
         }
         Map<String, LinkedHashMap<String, String>> envMap = headerGroup.getEnvMap();
         if (envMap == null || envMap.isEmpty()) {
-            headerParamsKeyValueList = new ArrayList<>();
+            headerParamsKeyValueList  = new ArrayList<>();
             return;
         }
         List<DataMapping> headerList = new ArrayList<>();
         LinkedHashMap<String, String> headerKeyValues = envMap.get(enableEnv);
         if (headerKeyValues == null || headerKeyValues.isEmpty()) {
-            headerParamsKeyValueList = new ArrayList<>();
+            headerParamsKeyValueList  = new ArrayList<>();
             return;
         }
         for (Map.Entry<String, String> entry : headerKeyValues.entrySet()) {
             headerList.add(new DataMapping(entry.getKey(), entry.getValue(), true));
         }
-        headerParamsKeyValueList = headerList;
+        if (CollectionUtils.isEmpty(headerParamsKeyValueList)){
+            headerParamsKeyValueList = headerList;
+        }
         setHeaderTitle();
     }
 
     private void setHeaderTitle(){
-        if(tabbedPane != null && headerParamsKeyValueList != null){
-            if(headerParamsKeyValueList.isEmpty()){
+        if(tabbedPane != null && !headerParamsKeyValueList.isEmpty()){
+            long headCount = headerParamsKeyValueList.stream().filter(x -> x.getEnabled() != null && x.getEnabled() && StringUtils.isNotBlank(x.getType()) && StringUtils.isNotBlank(x.getValue())).count();
+            if(headCount == 0){
                 tabbedPane.setTitleAt(0, "Headers");
             }else {
-                tabbedPane.setTitleAt(0, "Headers(" + headerParamsKeyValueList.size() + ")");
+                tabbedPane.setTitleAt(0, "Headers(" + headCount + ")");
             }
         }
     }
