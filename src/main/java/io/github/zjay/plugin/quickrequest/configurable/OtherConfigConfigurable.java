@@ -91,6 +91,9 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         if(!Objects.equals(view.getJmhTestCountText().getText(), config.getTestCount() + "")){
             return true;
         }
+        if(!Objects.equals(view.getGrpcurlPath(), config.getGrpcurlPath())){
+            return true;
+        }
 
         return !judgeEqual(currentUrlReplaceMappingList, urlReplaceMappingList);
     }
@@ -110,6 +113,7 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         config.setJmhWriteTimeout(view.getJmhWriteTimeout());
         config.setThreads(view.getThreads());
         config.setTestCount(view.getTestCount());
+        config.setGrpcurlPath(view.getGrpcurlPath());
     }
 
     @Override
@@ -131,6 +135,7 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         view.setJmhWriteTimeout(60);
         view.setThreads(50);
         view.setTestCount(5);
+        view.setGrpcurlPath(null);
     }
 
     public boolean judgeEqual(List<DataMapping> list1, List<DataMapping> list2) {

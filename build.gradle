@@ -8,13 +8,14 @@
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '0.7.3'
+//    id 'org.jetbrains.kotlin.jvm'
 }
 
 group 'io.github.zjay'
-version '2025.1.21'
+version '2025.3.7'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2025.1.21'
+    pluginVersion = '2025.3.7'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -25,17 +26,15 @@ repositories {
 
 dependencies {
     implementation files('./lib/quick-request-base-3.0.jar')
-//    implementation files('./lib/spring-boot-core.jar')
-    implementation 'com.alibaba:fastjson:1.2.83'
-    annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
-    implementation group: 'org.jfree', name: 'jfreechart', version: '1.5.4'
-    implementation ('com.squareup.okhttp3:okhttp:4.11.0') {
-        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib'
+    implementation ('com.alibaba:fastjson:1.2.83')
+    implementation ('org.openjdk.jmh:jmh-core:1.36')
+    annotationProcessor ('org.openjdk.jmh:jmh-generator-annprocess:1.36')
+    implementation ('org.jfree:jfreechart:1.5.4')
+    implementation ('com.squareup.okhttp3:okhttp:4.12.0') {
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-common'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib'
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-    }
-    implementation ('org.openjdk.jmh:jmh-core:1.36') {
     }
 }
 // idea 依赖所在目录
@@ -102,7 +101,7 @@ def kotlinPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrain
 ////    type = "IU"
 //}
 intellij {
-    type = "IC"
+    type = "IU"
     plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin',
                'org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223', 'org.jetbrains.plugins.ruby:213.5744.223']
     version '2021.3'//2021.3、2021.1、2020.3.4
@@ -110,7 +109,22 @@ intellij {
     downloadSources false
 }
 patchPluginXml {
-    changeNotes """
+    changeNotes """、
+    <h3>v2025.3.7</h3>
+    <p>中文</p>
+    <ul>
+        <li>新增GRPC请求方式（不支持压测），是基于grpcurl实现</li>
+        <li>在右键菜单中增加Tools，增加Base64、Base32及MD5按钮，可以直接替换你选中的字符串</li>
+        <li>保存时：增加输入请求名称的输入框，可直接定义请求名</li>
+        <li>局部优化和一些BUG修复</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>A new gRPC request method (excluding stress testing) has been implemented based on grpcurl. </li>
+        <li>Add a "Tools" section to the context menu, including "Base64", "Base32", and "MD5" buttons that can directly replace the selected text.</li>
+        <li>Add an input field to specify the request name during saving, allowing direct definition of the request name.</li>
+        <li>Minor optimizations and various bug fixes.</li>
+    </ul>
     <h3>v2025.1.21</h3>
     <p>中文</p>
     <ul>
@@ -612,7 +626,7 @@ test {
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED', "-Xmx4096m","-Xms128m"
 //    jbrVersion 'jbrsdk-11_0_10-osx-x64-b1314.58'
-//    autoReloadPlugins = true
+    autoReloadPlugins = true
 //    setAutoReloadPlugins(true)
 }
 runPluginVerifier {

@@ -27,12 +27,17 @@ import io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerPro
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
 
+import java.util.LinkedHashMap;
+
 public class RustMethodGenerator extends NormalUrlGenerator {
     private FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
     @Override
     public String generate(PsiElement psiElement, String method, Object parameters) {
         ParamGroup paramGroup = config.getParamGroup();
         //methodType
+        if (paramGroup.getBodyParamMap() == null){
+            paramGroup.setBodyParamMap(new LinkedHashMap<>());
+        }
         paramGroup.getBodyParamMap().clear();
         String[] methodType = RustLineMarkerProvider.getUrlAndMethodType(psiElement);
         assert methodType != null;

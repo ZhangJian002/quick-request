@@ -26,12 +26,17 @@ import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
 import org.jetbrains.plugins.ruby.ruby.lang.psi.impl.methodCall.RCallImpl;
 
+import java.util.LinkedHashMap;
+
 public class RubyMethodGenerator extends NormalUrlGenerator {
     private FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
     @Override
     public String generate(PsiElement psiElement, String url, Object parameters) {
         ParamGroup paramGroup = config.getParamGroup();
         //methodType
+        if (paramGroup.getBodyParamMap() == null){
+            paramGroup.setBodyParamMap(new LinkedHashMap<>());
+        }
         paramGroup.getBodyParamMap().clear();
         String[] methodType = RubyLineMarkerProvider.getUrlAndMethodType(psiElement);
         paramGroup.setMethodType(methodType[1]);

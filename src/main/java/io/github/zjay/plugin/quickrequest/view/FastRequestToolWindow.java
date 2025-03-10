@@ -34,6 +34,8 @@ import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
 import com.intellij.lang.html.HTMLLanguage;
 import com.intellij.lang.xml.XMLLanguage;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
@@ -64,6 +66,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.AbstractTableCellEditor;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
+import groovy.json.StringEscapeUtils;
 import io.github.zjay.plugin.quickrequest.action.*;
 import io.github.zjay.plugin.quickrequest.action.soft_wrap.BodyFormatAction;
 import io.github.zjay.plugin.quickrequest.base.ParentAction;
@@ -71,6 +74,8 @@ import io.github.zjay.plugin.quickrequest.complete.GeneralTextAutoCompleteEditor
 import io.github.zjay.plugin.quickrequest.config.*;
 import io.github.zjay.plugin.quickrequest.configurable.ConfigChangeNotifier;
 import io.github.zjay.plugin.quickrequest.dubbo.DubboService;
+import io.github.zjay.plugin.quickrequest.grpc.GrpcCurlUtils;
+import io.github.zjay.plugin.quickrequest.grpc.GrpcRequest;
 import io.github.zjay.plugin.quickrequest.jmh.JMHTest;
 import io.github.zjay.plugin.quickrequest.model.*;
 import io.github.zjay.plugin.quickrequest.util.*;
@@ -82,6 +87,7 @@ import io.github.zjay.plugin.quickrequest.util.thead.GlobalThreadPool;
 import io.github.zjay.plugin.quickrequest.view.component.CheckBoxHeader;
 import io.github.zjay.plugin.quickrequest.view.component.MyLanguageTextField;
 import io.github.zjay.plugin.quickrequest.view.component.MyParamCheckItemListener;
+import io.github.zjay.plugin.quickrequest.view.inner.EnvAddView;
 import io.github.zjay.plugin.quickrequest.view.inner.HeaderGroupView;
 import io.github.zjay.plugin.quickrequest.view.inner.SupportView;
 import io.github.zjay.plugin.quickrequest.view.inner.SyncView;
@@ -224,6 +230,11 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             .build();
     private ComboBox<String> typeJComboBox;
     private ComboBox<String> normalTypeJComboBox;
+
+    @Override
+    public void setRequestFocusEnabled(boolean requestFocusEnabled) {
+        super.setRequestFocusEnabled(requestFocusEnabled);
+    }
 
     public boolean sendButtonFlag = true;
 
@@ -876,10 +887,91 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         requestProgressBarSetting();
         if (Objects.equals(methodType, "DUBBO")) {
             dubboRequest(conditions);
+        }else if (Objects.equals(methodType, "GRPC")) {
+            grpcRequest(conditions);
         } else {
             //Restful Request
             restfulRequest(conditions);
         }
+    }
+
+    private void grpcRequest(boolean[] conditions) {
+        try {
+            String finalDomain;
+            if (urlTextField.getText().contains(":")){
+                finalDomain = urlTextField.getText();
+            }else {
+                finalDomain = getActiveDomain();
+            }
+            boolean isGrpcDomain = UrlUtil.isGrpcURL(finalDomain);
+            if (!isGrpcDomain){
+                setErrorInfo("Grpc");
+                return;
+            }
+            FastRequestConfiguration configuration = FastRequestComponent.getInstance().getState();
+            boolean existGrpcCurl = GrpcCurlUtils.existGrpcCurl(configuration.queryNotNullGrpcurlPath());
+            if (!existGrpcCurl){
+                Notification notification = NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification(MyResourceBundleUtil.getKey("GrpcurlNotExist"), MessageType.ERROR);
+                notification.addAction(new NotificationAction(MyResourceBundleUtil.getKey("GrpcurlInstall")) {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent anActionEvent, @NotNull Notification notification) {
+                        BrowserUtil.browse("https://github.com/fullstorydev/grpcurl");
+                    }
+                });
+                notification.notify(project);
+                sendButtonFlag = true;
+                futureAtomicReference.set(null);
+                requestProgressBar.setVisible(false);
+            }else {
+                futureAtomicReference.set(GlobalThreadPool.submit(() -> {
+                    try {
+                        GrpcRequest grpcRequest = getGrpcRequest(configuration);
+                        long startTime = System.currentTimeMillis();
+                        String[] result = GrpcCurlUtils.request(grpcRequest);
+                        long endTime = System.currentTimeMillis();
+                        grpcResponseHandler(result, startTime, endTime);
+                    }catch (Exception e){
+                        requestExceptionHandler(e);
+                    } finally {
+                        sendButtonFlag = true;
+                        futureAtomicReference.set(null);
+                        requestProgressBar.setVisible(false);
+                    }
+                }));
+            }
+        }catch (Exception e){
+            requestExceptionHandler(e);
+        }
+    }
+
+    private @NotNull GrpcRequest getGrpcRequest(FastRequestConfiguration configuration) {
+        GrpcRequest grpcRequest = new GrpcRequest();
+        String path = configuration.queryNotNullGrpcurlPath();
+        grpcRequest.setGrpcurlPath(path);
+        grpcRequest.setTls(false);
+        grpcRequest.setProtoFile(configuration.getParamGroup().getPbFileName());
+        grpcRequest.setProtoPath(configuration.getParamGroup().getPbImportPath());
+        String body = ((MyLanguageTextField)rowParamsTextArea).getText();
+        body = body.replaceAll("\n", "");
+        grpcRequest.setData("\"" + StringEscapeUtils.escapeJava(body) +  "\"");
+        if (urlTextField.getText().contains(":")){
+            try {
+                String[] split = urlTextField.getText().split(":");
+                grpcRequest.setHost(split[0]);
+                grpcRequest.setPort(Integer.parseInt(split[1].split("/")[0]));
+            }catch (Exception e){
+                NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification(MyResourceBundleUtil.getKey("CheckYourUrl"), MessageType.ERROR).notify(project);
+                throw new RuntimeException(e);
+            }
+        }else {
+            String[] domain = getActiveDomain().split(":");
+            grpcRequest.setHost(domain[0]);
+            grpcRequest.setPort(Integer.parseInt(domain[1]));
+        }
+        grpcRequest.setService(configuration.getParamGroup().getClassName());
+        grpcRequest.setMethod(configuration.getParamGroup().getMethod());
+        grpcRequest.setHeaderMap(getFinalHeader());
+        return grpcRequest;
     }
 
     private void dubboRequest(boolean... conditions) {
@@ -898,15 +990,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 address = "127.0.0.1:20880";
             }
             if (!UrlUtil.isDubboURL(address)) {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required.Dubbo url should start with ip:port.");
-                    ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
-                    tabbedPane.setSelectedIndex(4);
-                    responseTabbedPanel.setSelectedIndex(2);
-                    sendButtonFlag = true;
-                    futureAtomicReference.set(null);
-                    requestProgressBar.setVisible(false);
-                });
+                setErrorInfo("Dubbo");
                 return;
             }
             String finalAddress = address;
@@ -936,6 +1020,18 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         } catch (Exception e) {
             requestExceptionHandler(e);
         }
+    }
+
+    private void setErrorInfo(String type) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            ((MyLanguageTextField) responseTextAreaPanel).setText("Correct url required." + type + " url should start with ip:port.");
+            ((MyLanguageTextField) prettyJsonEditorPanel).setText("");
+            tabbedPane.setSelectedIndex(4);
+            responseTabbedPanel.setSelectedIndex(2);
+            sendButtonFlag = true;
+            futureAtomicReference.set(null);
+            requestProgressBar.setVisible(false);
+        });
     }
 
     private LinkedHashMap<String, Object> buildParamForDubbo() {
@@ -1026,6 +1122,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             } finally {
                 sendButtonFlag = true;
                 futureAtomicReference.set(null);
+                requestProgressBar.setVisible(false);
             }
         }));
     }
@@ -1117,9 +1214,33 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //        return request;
 //    }
 
-    public Request buildOkHttpRequest() {
+    private Map<String, String> getFinalHeader(){
+        Map<String, String> resultMap = new HashMap<>();
+        Map<String, List<String>> header = getHeader();
+        header.forEach((key, values) -> {
+            resultMap.put(key, values.get(0));
+        });
+        return resultMap;
+    }
+
+    private Map<String, List<String>> getHeader(){
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
+        headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
+        List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
+        globalHeaderList = globalHeaderList == null ? new ArrayList<>() : globalHeaderList;
+        Map<String, List<String>> globalHeaderMap = globalHeaderList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
+        Map<String, List<String>> headerMap = headerParamsKeyValueList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
+        globalHeaderMap.putAll(headerMap);
+        Map<String, List<String>> finalMap = new HashMap<>();
+        globalHeaderMap.forEach((key, value) -> {
+            if(StringUtils.isNotBlank(key) && !value.isEmpty() && StringUtils.isNotBlank(value.get(0))){
+                finalMap.put(key, value);
+            }
+        });
+        return finalMap;
+    }
+    public Request buildOkHttpRequest() {
         String sendUrl = getSendUrl();
 
         if (!UrlUtil.isURL(sendUrl)) {
@@ -1141,12 +1262,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
         Request.Builder request = new Request.Builder().method(methodType, initBody)
                 .url(sendUrl);
-        headerParamsKeyValueList = headerParamsKeyValueList == null ? new ArrayList<>() : headerParamsKeyValueList;
-        List<DataMapping> globalHeaderList = config.getGlobalHeaderList();
-        globalHeaderList = globalHeaderList == null ? new ArrayList<>() : globalHeaderList;
-        Map<String, List<String>> globalHeaderMap = globalHeaderList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
-        Map<String, List<String>> headerMap = headerParamsKeyValueList.stream().filter(DataMapping::getEnabled).collect(Collectors.toMap(DataMapping::getType, p -> Lists.newArrayList(p.getValue()), (existing, replacement) -> existing));
-        globalHeaderMap.putAll(headerMap);
+        Map<String, List<String>> globalHeaderMap = getHeader();
         Iterator<Map.Entry<String, List<String>>> iterator = globalHeaderMap.entrySet().iterator();
         while (iterator.hasNext()){
             Map.Entry<String, List<String>> next = iterator.next();
@@ -1232,8 +1348,8 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         String domain = FastRequestComponent.getInstance().getState().getDataList().stream().filter(n -> n.getName().equals(projectComboBox.getSelectedItem())).findFirst().orElse(defaultNameGroup)
                 .getHostGroup().stream().filter(h -> h.getEnv().equals(envComboBox.getSelectedItem())).findFirst().orElse(defaultHostGroup).getUrl();
         String sendUrl;
-        //考虑到可能人为修改url，就直接判断url是不是http请求 不是再把前缀加上
-        if (UrlUtil.isHttpURL(urlTextField.getText())) {
+        //考虑到可能人为修改url，就直接判断url是不是http或者houst:port型请求 不是再把前缀加上
+        if (UrlUtil.isURL(urlTextField.getText())) {
             sendUrl = urlTextField.getText();
         } else {
             //如果不是url 就给加
@@ -1318,10 +1434,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             //response渲染
             responsePageHandler(response, status, duration);
             ApplicationManager.getApplication().invokeLater(() -> {
-                if (getActiveDomain().isBlank()) {
-                    return;
-                }
-                if (urlTextField.getText().isBlank()) {
+                if (urlTextField.getText().isBlank() && getActiveDomain().isBlank()) {
                     return;
                 }
                 if(status >= 200 && status < 300){
@@ -1343,10 +1456,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             //response渲染
             responseDubboPageHandler(response.getResponseStr(), duration);
             ApplicationManager.getApplication().invokeLater(() -> {
-                if (getActiveDomain().isBlank()) {
-                    return;
-                }
-                if (urlTextField.getText().isBlank()) {
+                if (urlTextField.getText().isBlank() && getActiveDomain().isBlank()) {
                     return;
                 }
                 //saveToHistory
@@ -1354,6 +1464,51 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             });
 
         });
+    }
+
+    private void grpcResponseHandler(String[] result, long start, long end) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            tabbedPane.setSelectedIndex(4);
+            String duration = String.valueOf(end - start);
+            requestProgressBar.setVisible(false);
+            if(result[2].equals("0")){
+                resultHandler(false, result[0]);
+                //response渲染
+                responseGrpcPageHandler(duration, true, result);
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    if (urlTextField.getText().isBlank() && getActiveDomain().isBlank()) {
+                        return;
+                    }
+                    //saveToHistory
+                    saveTableRequest(3, "GRPC");
+                });
+            }else {
+                //response渲染
+                responseGrpcPageHandler(duration,false, result);
+                responseTabbedPanel.setSelectedIndex(3);
+            }
+        });
+    }
+
+    private void responseGrpcPageHandler(String duration, boolean success, String[] result) {
+        String statusDis;
+        if(success){
+            statusDis = "<html><span style=\"color: #0CCD08;\">Success</span></html>";
+        }else {
+            statusDis = "<html><span style=\"color: #FB1A00;\">Failure</span></html>";
+        }
+        responseInfoParamsKeyValueList = Lists.newArrayList(
+                new ParamKeyValue("Status", statusDis, 2, TypeUtil.Type.String.name()),
+                new ParamKeyValue("API Call Script", result[1], 2, TypeUtil.Type.String.name())
+        );
+        if (!success){
+            responseInfoParamsKeyValueList.add(new ParamKeyValue("Error Message", result[0], 2, TypeUtil.Type.String.name()));
+        }
+        responseInfoParamsKeyValueList.add(new ParamKeyValue("Time", duration + " ms", 2, TypeUtil.Type.String.name()));
+        responseInfoParamsKeyValueList.add(new ParamKeyValue("Date", new Date()));
+        responseInfoTable.setModel(new ListTableModel<>(getColumns(Lists.newArrayList("Key", "Value")), responseInfoParamsKeyValueList));
+        responseInfoTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+        responseInfoTable.getColumnModel().getColumn(0).setMaxWidth(150);
     }
 
     private void pressureResponseHandler(PressureEntity pressureEntity) {
@@ -1373,7 +1528,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         // 格式化当前时间
         String formattedDateTime = now.format(formatter);
-        HistoryTableData historyTableData;
+        HistoryTableData historyTableData = new HistoryTableData();
         if (type == 1) {
             historyTableData = new HistoryTableData(methodName, getSendUrl(), formattedDateTime);
             historyTableData.setHeaders(JSONArray.toJSONString(headerParamsKeyValueList));
@@ -1390,11 +1545,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             if (CollectionUtils.isNotEmpty(multipartKeyValueList)) {
                 historyTableData.setMultipart(JSONArray.toJSONString(multipartKeyValueList));
             }
-        } else {
+        } else if(type == 2) {
             historyTableData = new HistoryTableData(methodName, getDubboSendUrl(), formattedDateTime);
             if (CollectionUtils.isNotEmpty(urlEncodedKeyValueList)) {
                 historyTableData.setUrlEncoded(JSONArray.toJSONString(urlEncodedKeyValueList));
             }
+        } else if (type == 3) {
+            historyTableData = new HistoryTableData(methodName, getDubboSendUrl(), formattedDateTime);
+            historyTableData.setJsonParam(((LanguageTextField) rowParamsTextArea).getText());
+            FastRequestConfiguration configuration = FastRequestComponent.getInstance().getState();
+            historyTableData.setPbInfo(configuration.getParamGroup().getPbImportPath(), configuration.getParamGroup().getPbFileName());
         }
         historyTable.getList().add(0, historyTableData);
     }
@@ -1663,10 +1823,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         config.setDomain(domain);
         projectConfig.setDomain(domain);
         changeUrl();
-//        System.out.println(config.getParamGroup());
-
-
-
     }
 
 
@@ -1851,6 +2007,16 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         } else {
             headerParamsKeyValueList = new ArrayList<>();
         }
+        try {
+            if (data.getType().equals("GRPC")){
+                String[] url = data.getUrl().split("/");
+                config.getParamGroup().setClassName(url[url.length-2]);
+                config.getParamGroup().setMethod(url[url.length-1]);
+                config.getParamGroup().setPbInfo(data.getPbImportPath(), data.getPbFileName());
+            }
+        }catch (Exception e){
+
+        }
         if (StringUtils.isNotBlank(pathParamsKeyValueListJson)) {
             pathParamsKeyValueList = JSON.parseObject(pathParamsKeyValueListJson, new TypeReference<List<ParamKeyValue>>() {
             });
@@ -1996,7 +2162,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         LinkedHashMap<String, Object> pathParamMap = paramGroup.getPathParamMap();
         LinkedHashMap<String, Object> requestParamMap = paramGroup.getRequestParamMap();
-        bodyParamMap = paramGroup.getBodyParamMap();
+        bodyParamMap = paramGroup.getBodyParamMap() == null ? new LinkedHashMap<>() : paramGroup.getBodyParamMap();
         String methodType = paramGroup.getMethodType();
         Integer type = paramGroup.getType();
 
@@ -2396,16 +2562,19 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
             return;
         }
+        try {
+            if (body.startsWith("{")) {
+                convertJsonObjectToNode(root, JSONObject.parseObject(body));
+                ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
+            } else {
+                convertJsonArrayToNode("index ", JSONObject.parseArray(body), root);
+                ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
+            }
 
-        if (body.startsWith("{")) {
-            convertJsonObjectToNode(root, JSONObject.parseObject(body));
-            ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
-        } else {
-            convertJsonArrayToNode("index ", JSONObject.parseArray(body), root);
+            expandAll(responseTable.getTree(), new TreePath(root), true);
+        }catch (Exception e){
             ((DefaultTreeModel) responseTable.getTableModel()).setRoot(root);
         }
-
-        expandAll(responseTable.getTree(), new TreePath(root), true);
         responseTable.updateUI();
     }
 
@@ -4075,10 +4244,20 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 Messages.showMessageDialog(MyResourceBundleUtil.getKey("msg_UrlNull"), "Error", Messages.getInformationIcon());
                 return;
             }
-
-            CollectionConfiguration collectionConfiguration = FastRequestCollectionComponent.getInstance(myProject).getState();
+            CollectionConfiguration.CollectionDetail saved = getFromSaved();
+            String name = "";
+            if (saved != null){
+                name = saved.getName();
+            }
+            EnvAddView envAddView = new EnvAddView(MyResourceBundleUtil.getKey("InputRequestName"), MyResourceBundleUtil.getKey("PleaseModify"));
+            envAddView.setText(name);
+            if (envAddView.showAndGet()) {
+                name = envAddView.getText();
+            }else {
+                return;
+            }
             //保存请求
-            saveTreeRequest(collectionConfiguration);
+            saveTreeRequest(name);
 
             //send message to change param
             MessageBus messageBus = myProject.getMessageBus();
@@ -4092,10 +4271,21 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-    private void saveTreeRequest(CollectionConfiguration collectionConfiguration) {
+    private CollectionConfiguration.CollectionDetail getFromSaved(){
+        FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
+        assert config != null;
+        CollectionConfiguration collectionConfiguration = FastRequestCollectionComponent.getInstance(myProject).getState();
+        assert collectionConfiguration != null;
+        ParamGroup paramGroup = config.getParamGroup();
+        String id = "id_" + paramGroup.getClassName() + "." + paramGroup.getMethod();
+        return filterById(id, collectionConfiguration.getDetail());
+    }
+
+    private void saveTreeRequest(String name) {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
         ParamGroup paramGroup = config.getParamGroup();
+        CollectionConfiguration collectionConfiguration = FastRequestCollectionComponent.getInstance(myProject).getState();
         assert collectionConfiguration != null;
         if(StringUtils.isBlank(paramGroup.getClassName()) || StringUtils.isBlank(paramGroup.getMethod())){
             paramGroup.setClassName("temp");
@@ -4119,12 +4309,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         collectionDetail.setEnableProject(getActiveProject());
         collectionDetail.setDomain(getActiveDomain());
         collectionDetail.setType(2);
-        collectionDetail.setName(paramGroup.getMethodDescription());
+        collectionDetail.setName(name);
         if(StringUtils.isBlank(paramGroup.getMethodDescription())){
-            collectionDetail.setName("req_" + config.getDefaultGroupCount());
+            collectionDetail.setName(name);
             config.setDefaultGroupCount(config.getDefaultGroupCount() + 1);
         }else {
-            collectionDetail.setName(paramGroup.getMethodDescription() + "_req");
+            collectionDetail.setName(name);
         }
         paramGroupCollection.setOriginUrl(paramGroup.getOriginUrl());
         paramGroupCollection.setUrl(urlTextField.getText());

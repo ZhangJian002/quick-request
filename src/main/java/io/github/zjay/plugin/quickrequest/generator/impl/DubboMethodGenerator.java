@@ -51,6 +51,9 @@ public class DubboMethodGenerator extends FastUrlGenerator {
         LinkedHashMap<String, Object> bodyParamMap = dubboParamParse.parseParam(config, psiMethod.getParameterList());
 
         String methodDescription = getMethodDescription(psiMethod);
+        if (paramGroup.getBodyParamMap() == null){
+            paramGroup.setBodyParamMap(new LinkedHashMap<>());
+        }
         paramGroup.getBodyParamMap().clear();
         paramGroup.setRequestParamMap(bodyParamMap);
         paramGroup.setMethodType(methodType);

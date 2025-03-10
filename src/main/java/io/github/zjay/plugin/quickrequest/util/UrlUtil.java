@@ -44,12 +44,12 @@ public class UrlUtil {
 
     public static boolean isURL(String url) {
         try {
-            url = (url.startsWith("http://") || url.startsWith("https://")) ? url : "http://" + url;
-            return true;
+            return isDubboURL(url) || isHttpURL(url);
         } catch (Exception e) {
             return false;
         }
     }
+
 
     public static boolean isHttpURL(String url) {
         try {
@@ -62,6 +62,14 @@ public class UrlUtil {
     public static boolean isDubboURL(String url) {
         try {
             return !url.startsWith("http") && url.split(":").length > 1;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isGrpcURL(String url) {
+        try {
+            return !url.startsWith("http") && url.split(":").length == 2;
         } catch (Exception e) {
             return false;
         }

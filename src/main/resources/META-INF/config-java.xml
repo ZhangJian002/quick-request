@@ -16,17 +16,9 @@
     </extensions>
     <actions>
         <!-- Add your actions here -->
-        <group id="generateUrlAndParamFree" text="Quick Request" description="Quick request" popup="true" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow">
-            <separator/>
-            <group id="generateSubGroupFree"/>
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <add-to-group group-id="EditorPopupMenu" anchor="first" />
-            <action id="quickRequest.generatorMethod" class="io.github.zjay.plugin.quickrequest.action.GenerateMethodAction"
-                    text="Generate Spring Method"
-                    description="Generate spring method">
-                <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
-            </action>
-        </group>
+<!--        <group id="generateUrlAndParamFree" text="Quick Request" description="Quick request" popup="true" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow">-->
+<!--            -->
+<!--        </group>-->
 
     </actions>
 

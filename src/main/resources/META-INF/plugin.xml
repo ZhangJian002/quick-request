@@ -52,14 +52,13 @@
     <!--    2021.1-->
     <idea-version since-build="211.6693.111" />
     <depends>com.intellij.modules.platform</depends>
+<!--    <depends optional="true" config-file="config-json.xml">com.intellij.modules.json</depends>-->
     <depends optional="true" config-file="config-java.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
     <depends optional="true" config-file="config-go.xml">org.jetbrains.plugins.go</depends>
     <depends optional="true" config-file="config-php.xml">com.jetbrains.php</depends>
     <depends optional="true" config-file="config-python.xml">Pythonid</depends>
     <depends optional="true" config-file="config-ruby.xml">org.jetbrains.plugins.ruby</depends>
-    <depends optional="true" config-file="config-json.xml">com.intellij.modules.json</depends>
-
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 
@@ -86,9 +85,15 @@
         </applicationConfigurable>
 
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.RustMethodGenerator"/>
+        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PbMethodGenerator"/>
+
+
+        <codeInsight.lineMarkerProvider language="protobuf"
+                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.ProtobufLineMarkerProvider"/>
 
         <codeInsight.lineMarkerProvider language="Rust"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>
+
 <!--        <codeInsight.lineMarkerProvider language="cs"-->
 <!--                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>-->
 
@@ -120,6 +125,22 @@
                 class="io.github.zjay.plugin.quickrequest.action.GotoFastRequestAction">
             <keyboard-shortcut first-keystroke="alt F" keymap="$default"/>
         </action>
+
+        <group id="quickRequest.Tools"
+               popup="true" text="Tools" icon="quickRequest.icons.PluginIcons.fastRequest_toolwindow"
+               description="Tools" >
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
+            <action class="io.github.zjay.plugin.quickrequest.action.right_actions.Base64Action"/>
+            <action class="io.github.zjay.plugin.quickrequest.action.right_actions.Base32Action"/>
+            <action class="io.github.zjay.plugin.quickrequest.action.right_actions.MD5Action"/>
+            <separator/>
+            <action id="quickRequest.generatorMethod" class="io.github.zjay.plugin.quickrequest.action.GenerateMethodAction"
+                    text="Generate Spring Method"
+                    description="Generate spring method">
+                <keyboard-shortcut keymap="$default" first-keystroke="alt BACK_SLASH"/>
+            </action>
+        </group>
     </actions>
 
 

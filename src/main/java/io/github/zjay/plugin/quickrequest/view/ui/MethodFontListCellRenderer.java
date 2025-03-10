@@ -18,6 +18,8 @@ public class MethodFontListCellRenderer extends DefaultListCellRenderer  {
     }
 
     public static Color getColor(String type){
+        if (type == null)
+            return JBColor.WHITE;
         switch (type){
             case "GET":
                 return Color.decode("#389fd6");
@@ -31,6 +33,8 @@ public class MethodFontListCellRenderer extends DefaultListCellRenderer  {
                 return Color.decode("#6a5acd");
             case "DUBBO":
                 return Color.decode("#e23dda");
+            case "GRPC":
+                return Color.decode("#3BED53");
             default:
                 return JBColor.WHITE;
         }

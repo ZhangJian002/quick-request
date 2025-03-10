@@ -39,6 +39,9 @@ public class HistoryTableData implements Serializable {
 
     private String form;
 
+    //Protobuf的相关信息
+    private PbInfo pbInfo;
+
     public HistoryTableData() {
     }
 
@@ -46,6 +49,34 @@ public class HistoryTableData implements Serializable {
         this.type = type;
         this.url = url;
         this.time = time;
+    }
+
+    private static class PbInfo{
+        private String pbImportPath;
+        private String pbFileName;
+
+    }
+
+    public String getPbImportPath() {
+        checkPbInfo();
+        return pbInfo.pbImportPath;
+    }
+
+    public String getPbFileName() {
+        checkPbInfo();
+        return pbInfo.pbFileName;
+    }
+
+    public void setPbInfo(String pbImportPath, String pbFileName) {
+        checkPbInfo();
+        pbInfo.pbImportPath = pbImportPath;
+        pbInfo.pbFileName = pbFileName;
+    }
+
+    private void checkPbInfo(){
+        if (pbInfo == null){
+            pbInfo = new PbInfo();
+        }
     }
 
     public String getUrl() {

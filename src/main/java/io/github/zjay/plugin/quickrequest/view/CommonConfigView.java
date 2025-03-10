@@ -73,9 +73,6 @@ public class CommonConfigView extends AbstractConfigurableView {
     /**
      * 创建uicomponent
      *
-     * @return
-     * @author Kings
-     * @date 2021/05/21
      */
     private void createUIComponents() {
         FastRequestConfiguration configOld = JSONObject.parseObject(JSONObject.toJSONString(config), FastRequestConfiguration.class);
@@ -90,9 +87,6 @@ public class CommonConfigView extends AbstractConfigurableView {
     /**
      * 渲染table面板
      *
-     * @return
-     * @author Kings
-     * @date 2021/05/21
      */
     private void renderingTablePanel() {
         JBTable table = createTable();
@@ -108,9 +102,6 @@ public class CommonConfigView extends AbstractConfigurableView {
     /**
      * 渲染项目名面板
      *
-     * @return
-     * @author Kings
-     * @date 2021/05/21
      */
     private void renderingProjectPanel(FastRequestConfiguration configOld) {
         viewProjectList = configOld.getProjectList();
@@ -150,8 +141,6 @@ public class CommonConfigView extends AbstractConfigurableView {
     /**
      * 渲染env面板
      *
-     * @author Kings
-     * @date 2021/05/21
      */
     private void renderingEnvPanel(FastRequestConfiguration configOld) {
         viewEnvList = configOld.getEnvList();
@@ -202,7 +191,7 @@ public class CommonConfigView extends AbstractConfigurableView {
             globalHeaderList = new ArrayList<>();
         }
         JBTable table = createGlobalRequestHeaderTable();
-        table.getEmptyText().setText("Key:token  Value:xxx");
+        table.getEmptyText().setText("Key:token  value:xxx");
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(table, null);
         toolbarDecorator.setMoveDownAction(null);
         toolbarDecorator.setMoveUpAction(null);

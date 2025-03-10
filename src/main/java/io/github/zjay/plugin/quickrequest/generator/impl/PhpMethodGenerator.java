@@ -28,6 +28,7 @@ import io.github.zjay.plugin.quickrequest.model.ParamGroup;
 import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 
 public class PhpMethodGenerator extends NormalUrlGenerator {
     private FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
@@ -35,6 +36,9 @@ public class PhpMethodGenerator extends NormalUrlGenerator {
     public String generate(PsiElement psiElement, String url, Object parameters) {
         ParamGroup paramGroup = config.getParamGroup();
         //methodType
+        if (paramGroup.getBodyParamMap() == null){
+            paramGroup.setBodyParamMap(new LinkedHashMap<>());
+        }
         paramGroup.getBodyParamMap().clear();
         try {
             Method getMethodName = psiElement.getClass().getMethod("getName");

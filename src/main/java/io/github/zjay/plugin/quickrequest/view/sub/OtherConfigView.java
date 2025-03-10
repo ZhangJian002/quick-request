@@ -19,7 +19,13 @@ package io.github.zjay.plugin.quickrequest.view.sub;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.fileChooser.FileChooserDialog;
+import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.IdeBorderFactory;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBCheckBox;
@@ -27,6 +33,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.*;
 import io.github.zjay.plugin.quickrequest.deprecated.MyComponentPanelBuilder;
 import io.github.zjay.plugin.quickrequest.deprecated.MyPanelGridBuilder;
+import io.github.zjay.plugin.quickrequest.grpc.GrpcCurlUtils;
 import io.github.zjay.plugin.quickrequest.model.DataMapping;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.util.MyResourceBundleUtil;
@@ -36,19 +43,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class OtherConfigView extends AbstractConfigurableView {
 
-    private List<DataMapping> viewUrlReplaceMappingList = new LinkedList<>();
+    private List<DataMapping> viewUrlReplaceMappingList = new ArrayList<>();
 
     private Boolean clickAndSend = null;
 
     private Boolean needInterface = null;
+
+    private String grpcurlPath = null;
 
     /**
      * 是否需要在启动时自动生成配置，仅对spring boot项目生效
@@ -97,6 +115,7 @@ public class OtherConfigView extends AbstractConfigurableView {
         panel.add(createConnectionPanel(), gb.nextLine().fillCell().weighty(1.0));
         panel.add(createMyTablePanel(), gb.nextLine().fillCell().weighty(1.0));
         panel.add(createBasePanel(), gb.nextLine().fillCell().weighty(1.0));
+        panel.add(createRequestPanel(), gb.nextLine().fillCell().weighty(1.0));
         panel.add(createJmhPanel(), gb.nextLine().fillCell().weighty(1.0));
         return panel;
     }
@@ -167,6 +186,39 @@ public class OtherConfigView extends AbstractConfigurableView {
         return clickAndSendConfigPanel;
 
     }
+
+    private JPanel createRequestPanel() {
+        TextFieldWithBrowseButton grpcurlPathPanel = createGrpcurlPathPanel();
+        JPanel requestPanel = new MyPanelGridBuilder()
+                .add(new MyComponentPanelBuilder(grpcurlPathPanel).withLabel(MyResourceBundleUtil.getKey("GrpcurlPathChoose")).withTooltip(MyResourceBundleUtil.getKey("GrpcurlPathChooseTip")))
+                .createPanel();
+        requestPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("RequestConfig")));
+        return requestPanel;
+
+    }
+
+    private TextFieldWithBrowseButton createGrpcurlPathPanel() {
+        String grpcurlPath = config.getGrpcurlPath();
+        setGrpcurlPath(grpcurlPath);
+        TextFieldWithBrowseButton chooseFile = new TextFieldWithBrowseButton();
+        chooseFile.setText(grpcurlPath);
+        FileChooserDescriptor descriptor = new FileChooserDescriptor(
+                true,  // 是否选择文件
+                false, // 是否选择目录
+                false, // 是否多选
+                true,  // 是否隐藏隐藏文件
+                false, false
+        ).withFileFilter(withFileFilter-> withFileFilter.getName().contains(GrpcCurlUtils.GRPC_PATH_DEFAULT));
+        chooseFile.addBrowseFolderListener(new TextBrowseFolderListener(descriptor, null){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                super.actionPerformed(e);
+                setGrpcurlPath(chooseFile.getText());
+            }
+        });
+        return chooseFile;
+    }
+
 
     private JBCheckBox createClickAndSendPanel() {
         Boolean clickAndSend = config.getClickAndSend();
@@ -549,5 +601,13 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     public void setNoNeedAutoGenerateConfig(Boolean noNeedAutoGenerateConfig) {
         this.noNeedAutoGenerateConfig = noNeedAutoGenerateConfig;
+    }
+
+    public String getGrpcurlPath() {
+        return grpcurlPath;
+    }
+
+    public void setGrpcurlPath(String grpcurlPath) {
+        this.grpcurlPath = grpcurlPath;
     }
 }

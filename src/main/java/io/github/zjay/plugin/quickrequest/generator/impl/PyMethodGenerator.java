@@ -24,12 +24,17 @@ import io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvi
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
 
+import java.util.LinkedHashMap;
+
 public class PyMethodGenerator extends NormalUrlGenerator {
     private FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
     @Override
     public String generate(PsiElement psiElement, String url, Object parameters) {
         ParamGroup paramGroup = config.getParamGroup();
         //methodType
+        if (paramGroup.getBodyParamMap() == null){
+            paramGroup.setBodyParamMap(new LinkedHashMap<>());
+        }
         paramGroup.getBodyParamMap().clear();
         String[] methodType = PyLineMarkerProvider.getMethodType(psiElement);
         if(methodType != null){

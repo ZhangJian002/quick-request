@@ -34,8 +34,11 @@ public class ParamGroup implements Serializable {
     private String method;
     private String module;
 
+    //Protobuf的相关信息
+    private PbInfo pbInfo;
+
     /**
-     * 类型：1java、2Kotlin、3Php、4Python、5Ruby、6Rust
+     * 类型：1java、2Kotlin、3Php、4Python、5Ruby、6Rust、7ProtoBuf
      */
     private Integer type;
 
@@ -53,6 +56,34 @@ public class ParamGroup implements Serializable {
         this.method = "";
         this.module = "";
         this.type = 1;
+    }
+
+    private static class PbInfo{
+        private String pbImportPath;
+        private String pbFileName;
+
+    }
+
+    public String getPbImportPath() {
+        checkPbInfo();
+        return pbInfo.pbImportPath;
+    }
+
+    public String getPbFileName() {
+        checkPbInfo();
+        return pbInfo.pbFileName;
+    }
+
+    public void setPbInfo(String pbImportPath, String pbFileName) {
+        checkPbInfo();
+        pbInfo.pbImportPath = pbImportPath;
+        pbInfo.pbFileName = pbFileName;
+    }
+
+    private void checkPbInfo(){
+        if (pbInfo == null){
+            pbInfo = new PbInfo();
+        }
     }
 
     public String getInterfaceName() {

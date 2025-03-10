@@ -80,6 +80,17 @@ public class GenerateMethodAction extends ParentAction {
     Project project;
 
     @Override
+    public void update(@NotNull AnActionEvent e) {
+        project = e.getProject();
+        editor = e.getData(CommonDataKeys.EDITOR);
+        if (editor == null || editor.isViewer() || !isJavaFile()){
+            e.getPresentation().setVisible(false);
+        }else {
+            e.getPresentation().setVisible(true);
+        }
+    }
+
+    @Override
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
         project = anActionEvent.getData(LangDataKeys.PROJECT);
         if (project == null) {
@@ -117,6 +128,10 @@ public class GenerateMethodAction extends ParentAction {
                 .createPopup();
         popup.showInBestPositionFor(editor);
 
+    }
+
+    private boolean isJavaFile(){
+        return getPsiJavaFile() != null;
     }
 
     private PsiJavaFile getPsiJavaFile() {

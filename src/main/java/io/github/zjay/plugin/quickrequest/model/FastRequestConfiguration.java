@@ -18,6 +18,7 @@ package io.github.zjay.plugin.quickrequest.model;
 
 import com.google.common.collect.Lists;
 import io.github.zjay.plugin.quickrequest.config.Constant;
+import io.github.zjay.plugin.quickrequest.grpc.GrpcCurlUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -81,6 +82,23 @@ public class FastRequestConfiguration implements Serializable {
      * 是否需要在启动时自动生成配置，仅对spring boot项目生效
      */
     private Boolean noNeedAutoGenerateConfig = null;
+
+    /**
+     * grpcurl的路径
+     */
+    private String grpcurlPath = null;
+
+    public String getGrpcurlPath() {
+        return grpcurlPath;
+    }
+
+    public String queryNotNullGrpcurlPath(){
+        return grpcurlPath == null ? GrpcCurlUtils.GRPC_PATH_DEFAULT : grpcurlPath;
+    }
+
+    public void setGrpcurlPath(String grpcurlPath) {
+        this.grpcurlPath = grpcurlPath;
+    }
 
     public Boolean getNoNeedAutoGenerateConfig() {
         return noNeedAutoGenerateConfig;

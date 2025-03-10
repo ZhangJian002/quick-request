@@ -78,6 +78,11 @@ public class LineMarkerRightClickAction extends ParentAction implements DumbAwar
                     ToolWindowUtil.openToolWindow(myProject);
                     ToolWindowUtil.sendRequest(myProject, true);
                     break;
+                case ProtoBuf:
+                    ApplicationManager.getApplication().getService(PbMethodGenerator.class).generate(functionTooltip.getElement(), ((PbFunctionTooltip)functionTooltip).getMethod(), null);
+                    ToolWindowUtil.openToolWindow(myProject);
+                    ToolWindowUtil.sendRequest(myProject, true);
+                    break;
             }
         });
         clickIconPopupMenu.add(clickAndSendItem);

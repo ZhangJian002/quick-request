@@ -75,6 +75,7 @@ public interface PluginIcons {
     Icon ICON_PUT_CLASS = IconLoader.getIcon("/quickRequest.icon/put-class.svg", PluginIcons.class);
     Icon ICON_DEL_CLASS = IconLoader.getIcon("/quickRequest.icon/del-class.svg", PluginIcons.class);
     Icon ICON_DUB_CLASS = IconLoader.getIcon("/quickRequest.icon/dubbo-class.svg", PluginIcons.class);
+    Icon ICON_GRPC = IconLoader.getIcon("/quickRequest.icon/grpc.svg", PluginIcons.class);
 
 
 
@@ -92,6 +93,8 @@ public interface PluginIcons {
     Icon ICON_SYNC = IconLoader.getIcon("/quickRequest.icon/sync.svg", PluginIcons.class);
 
     Icon ICON_DUBBO = IconLoader.getIcon("/quickRequest.icon/dubbo.svg", PluginIcons.class);
+
+    Icon ICON_GPRC = IconLoader.getIcon("/quickRequest.icon/grpc.svg", PluginIcons.class);
 
     Icon ICON_GROUP = IconLoader.getIcon("/quickRequest.icon/group.svg", PluginIcons.class);
 

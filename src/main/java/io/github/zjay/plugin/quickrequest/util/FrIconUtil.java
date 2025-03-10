@@ -34,6 +34,8 @@ public class FrIconUtil {
                 return PluginIcons.ICON_PATCH;
             case "DUBBO":
                 return PluginIcons.ICON_DUBBO;
+            case "GRPC":
+                return PluginIcons.ICON_GPRC;
             default:
                 return PluginIcons.ICON_GET;
         }
@@ -74,6 +76,9 @@ public class FrIconUtil {
             }else {
                 return PluginIcons.ICON_DUB_CLASS;
             }
+        }
+        if("GRPC".equals(methodType)){
+            return PluginIcons.ICON_GRPC;
         }
         if(isInterface){
             return AllIcons.Nodes.Interface;

@@ -65,6 +65,7 @@
                     <item value="PUT"/>
                     <item value="PATCH"/>
                     <item value="DUBBO"/>
+                    <item value="GRPC"/>
                   </model>
                 </properties>
               </component>

@@ -1282,6 +1282,8 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
                             NotificationGroupManager.getInstance().getNotificationGroup("quickRequestWindowNotificationGroup").createNotification("Method not found", MessageType.INFO).notify(myProject);
                         }
                     }
+                }else if (paramGroup.getType() == 7) {
+                    flag = true;
                 }
                 loadAncChangeTab(flag, detail, sendFlag);
             });
