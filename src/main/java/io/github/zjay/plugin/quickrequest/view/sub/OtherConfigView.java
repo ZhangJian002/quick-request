@@ -76,6 +76,9 @@ public class OtherConfigView extends AbstractConfigurableView {
     private JTextField jmhThreadsText;
     private JTextField jmhTestCountText;
 
+    private JBCheckBox clickAndSendCheckBox ;
+    private JBCheckBox needInterfaceCheckBox ;
+    private JBCheckBox noNeedAutoGenerateConfigCheckBox;
 
     public OtherConfigView(FastRequestConfiguration config) {
         super(config);
@@ -155,13 +158,13 @@ public class OtherConfigView extends AbstractConfigurableView {
     }
 
     private JPanel createBasePanel() {
-        JBCheckBox clickAndSendCheckBox = createClickAndSendPanel();
-        JBCheckBox needInterfaceCheckBox = createNeedInterfacePanel();
-        JBCheckBox needAutoGenerateConfigPanel = createNeedAutoGenerateConfigPanel();
+        this.clickAndSendCheckBox = createClickAndSendPanel();
+        this.needInterfaceCheckBox = createNeedInterfacePanel();
+        this.noNeedAutoGenerateConfigCheckBox = createNeedAutoGenerateConfigPanel();
         JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
                 .add(new MyComponentPanelBuilder(clickAndSendCheckBox))
                 .add(new MyComponentPanelBuilder(needInterfaceCheckBox))
-                .add(new MyComponentPanelBuilder(needAutoGenerateConfigPanel).withTooltip(MyResourceBundleUtil.getKey("NoNeedAutoGenerateConfigTip")))
+                .add(new MyComponentPanelBuilder(noNeedAutoGenerateConfigCheckBox).withTooltip(MyResourceBundleUtil.getKey("NoNeedAutoGenerateConfigTip")))
                 .createPanel();
         clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("BaseConfig")));
         return clickAndSendConfigPanel;
@@ -549,5 +552,17 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     public void setNoNeedAutoGenerateConfig(Boolean noNeedAutoGenerateConfig) {
         this.noNeedAutoGenerateConfig = noNeedAutoGenerateConfig;
+    }
+
+    public JBCheckBox getClickAndSendCheckBox() {
+        return clickAndSendCheckBox;
+    }
+
+    public JBCheckBox getNeedInterfaceCheckBox() {
+        return needInterfaceCheckBox;
+    }
+
+    public JBCheckBox getNoNeedAutoGenerateConfigCheckBox() {
+        return noNeedAutoGenerateConfigCheckBox;
     }
 }

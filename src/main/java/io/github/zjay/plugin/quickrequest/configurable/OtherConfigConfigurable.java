@@ -100,16 +100,16 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         List<DataMapping> viewUrlReplaceMappingList = view.getViewUrlReplaceMappingList();
         List<DataMapping> changeUrlReplaceMappingList = JSONArray.parseArray(JSON.toJSONString(viewUrlReplaceMappingList), DataMapping.class);
         config.setUrlReplaceMappingList(changeUrlReplaceMappingList);
-        config.setClickAndSend(view.getClickAndSend());
-        config.setNeedInterface(view.getNeedInterface());
-        config.setNoNeedAutoGenerateConfig(view.getNoNeedAutoGenerateConfig());
-        config.setConnectionTimeout(view.getConnectionTimeout());
-        config.setReadTimeout(view.getReadTimeout());
-        config.setJmhConnectionTimeout(view.getJmhConnectionTimeout());
-        config.setJmhReadTimeout(view.getJmhReadTimeout());
-        config.setJmhWriteTimeout(view.getJmhWriteTimeout());
-        config.setThreads(view.getThreads());
-        config.setTestCount(view.getTestCount());
+        config.setClickAndSend(view.getClickAndSendCheckBox().isSelected());
+        config.setNeedInterface(view.getNeedInterfaceCheckBox().isSelected());
+        config.setNoNeedAutoGenerateConfig(view.getNoNeedAutoGenerateConfigCheckBox().isSelected());
+        config.setConnectionTimeout(Integer.valueOf(view.getConnectionTimeoutText().getText()));
+        config.setReadTimeout(Integer.valueOf(view.getReadTimeoutText().getText()));
+        config.setJmhConnectionTimeout(Integer.valueOf(view.getJmhConnectionTimeoutText().getText()));
+        config.setJmhReadTimeout(Integer.valueOf(view.getJmhReadTimeoutText().getText()));
+        config.setJmhWriteTimeout(Integer.valueOf(view.getJmhWriteTimeoutText().getText()));
+        config.setThreads(Integer.valueOf(view.getJmhThreadsText().getText()));
+        config.setTestCount(Integer.valueOf(view.getJmhTestCountText().getText()));
     }
 
     @Override
