@@ -21,7 +21,7 @@ public class MyLineMarkerInfo<T extends PsiElement> extends LineMarkerInfo<PsiEl
 
   private BaseFunctionTooltip functionTooltip;
 
-  public MyLineMarkerInfo(@NotNull PsiElement element, @NotNull TextRange range, @NotNull Icon icon, @Nullable Function<? super PsiElement, @NlsContexts.Tooltip String> tooltipProvider, @Nullable GutterIconNavigationHandler<PsiElement> navHandler, GutterIconRenderer.@NotNull Alignment alignment, @NotNull Supplier<@NotNull String> accessibleNameProvider) {
+  public MyLineMarkerInfo(@NotNull PsiElement element, @NotNull TextRange range, @NotNull Icon icon, @Nullable Function<? super PsiElement, @NlsContexts.Tooltip String> tooltipProvider, @Nullable GutterIconNavigationHandler<PsiElement> navHandler, GutterIconRenderer. Alignment alignment, @NotNull Supplier< String> accessibleNameProvider) {
     super(element, range, icon, tooltipProvider, navHandler, alignment, accessibleNameProvider);
     this.functionTooltip = (BaseFunctionTooltip) tooltipProvider;
   }

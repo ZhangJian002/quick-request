@@ -103,7 +103,7 @@ def kotlinPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrain
 intellij {
     type = "IU"
     plugins = ['com.jetbrains.php:213.5744.279', 'java', 'Kotlin',
-               'org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223', 'org.jetbrains.plugins.ruby:213.5744.223']
+               'org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223', 'org.jetbrains.plugins.ruby:213.5744.223', 'com.intellij.lang.jsgraphql:3.1.2']
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
     downloadSources false

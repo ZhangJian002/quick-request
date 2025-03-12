@@ -235,7 +235,7 @@ public final class ExportToFileUtil {
     }
 
     @Override
-    protected Action @NotNull [] createActions() {
+    protected Action[] createActions() {
       return new Action[]{getOKAction(), new CopyToClipboardAction(), getCancelAction()};
     }
 

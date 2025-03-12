@@ -749,7 +749,7 @@ public class FastRequestCollectionToolWindow extends SimpleToolWindowPanel {
         }
 
         @Override
-        public ParentAction @NotNull [] getChildren(@Nullable AnActionEvent e) {
+        public ParentAction[] getChildren(@Nullable AnActionEvent e) {
             ParentAction[] parentActions = new ParentAction[allActions.size()];
             for (int i = 0; i < allActions.size(); i++) {
                 parentActions[i] = allActions.get(i);

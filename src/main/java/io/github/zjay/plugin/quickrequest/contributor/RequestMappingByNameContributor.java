@@ -46,7 +46,7 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
     abstract List<PsiAnnotation> getAnnotationSearchers(String annotationName, Project project);
     private List<RequestMappingItem> navigationItems = new ArrayList<>();
     @Override
-    public String @NotNull [] getNames(Project project, boolean includeNonProjectItems) {
+    public String[] getNames(Project project, boolean includeNonProjectItems) {
         navigationItems = Constant.SUPPORTED_ANNOTATIONS.stream().flatMap(annotation -> findRequestMappingItems(project, annotation).stream()).collect(Collectors.toList());
         return navigationItems.stream()
                 .map(RequestMappingItem::getName).distinct().toArray(String[]::new);
@@ -56,7 +56,7 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
 
 
     @Override
-    public NavigationItem @NotNull [] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
+    public NavigationItem [] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
         return navigationItems.stream().filter(q -> q.getName().equals(name)).toArray(RequestMappingItem[]::new);
     }
 

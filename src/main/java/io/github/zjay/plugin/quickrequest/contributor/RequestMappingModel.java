@@ -86,7 +86,7 @@ public class RequestMappingModel extends FilteringGotoByModel<FileType> {
 
 
     @Override
-    public String @NotNull [] getSeparators() {
+    public String[] getSeparators() {
         return new String[0];
     }
 

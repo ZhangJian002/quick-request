@@ -35,7 +35,7 @@ public abstract class OtherRequestMappingByNameContributor implements ChooseByNa
     abstract List<OtherRequestEntity> getPsiElementSearchers(Project project);
     private List<RequestMappingItem> navigationItems = new ArrayList<>();
     @Override
-    public String @NotNull [] getNames(Project project, boolean includeNonProjectItems) {
+    public String[] getNames(Project project, boolean includeNonProjectItems) {
         navigationItems = findRequestMappingItems(project);
         return navigationItems.stream()
                 .map(RequestMappingItem::getName).distinct().toArray(String[]::new);
@@ -45,7 +45,7 @@ public abstract class OtherRequestMappingByNameContributor implements ChooseByNa
 
 
     @Override
-    public NavigationItem @NotNull [] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
+    public NavigationItem[] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
         return navigationItems.stream().filter(q -> q.getName().equals(name)).toArray(RequestMappingItem[]::new);
     }
 

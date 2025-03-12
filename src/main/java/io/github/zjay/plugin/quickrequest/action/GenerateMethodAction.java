@@ -700,7 +700,7 @@ public class GenerateMethodAction extends ParentAction {
         }
 
         @Override
-        public CharFilter.@Nullable Result acceptChar(char c) {
+        public CharFilter.Result acceptChar(char c) {
 //            if(c == '<'){
 //                this.textField.setText(this.textField.getText() + ">");
 //            }
