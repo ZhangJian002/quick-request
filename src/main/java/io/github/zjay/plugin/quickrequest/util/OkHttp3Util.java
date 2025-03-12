@@ -9,13 +9,10 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import java.util.concurrent.TimeUnit;
 
 public class OkHttp3Util {
-    public static  ConnectionPool connectionPool = null;
+    public static  ConnectionPool connectionPool = new ConnectionPool(Runtime.getRuntime().availableProcessors()*2 ,10, TimeUnit.SECONDS);
     public static OkHttpClient getSingleClientInstance() {
         FastRequestConfiguration config = FastRequestComponent.getInstance().getState();
         assert config != null;
-        if(connectionPool==null){
-            connectionPool= new ConnectionPool(config.getThreads(),10, TimeUnit.SECONDS);
-        }
         HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new OkHttp3Logger());
         logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         return new OkHttpClient.Builder()

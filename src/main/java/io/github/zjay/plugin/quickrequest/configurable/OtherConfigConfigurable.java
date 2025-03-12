@@ -95,6 +95,10 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
             return true;
         }
 
+        if(!Objects.equals(view.getNeedIdeaLog(), config.getNeedIdeaLog())){
+            return true;
+        }
+
         return !judgeEqual(currentUrlReplaceMappingList, urlReplaceMappingList);
     }
 
@@ -106,6 +110,7 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
         config.setClickAndSend(view.getClickAndSend());
         config.setNeedInterface(view.getNeedInterface());
         config.setNoNeedAutoGenerateConfig(view.getNoNeedAutoGenerateConfig());
+        config.setNeedIdeaLog(view.getNeedIdeaLog());
         config.setConnectionTimeout(view.getConnectionTimeout());
         config.setReadTimeout(view.getReadTimeout());
         config.setJmhConnectionTimeout(view.getJmhConnectionTimeout());
@@ -125,11 +130,12 @@ public class OtherConfigConfigurable extends AbstractConfigConfigurable {
             view.setViewUrlReplaceMappingList(oldUrlReplaceMappingListNew);
             view.getUrlReplaceTable().setModel(new ListTableModel<>(view.getColumnInfo(), oldUrlReplaceMappingListNew));
         }
-        view.setReadTimeout(30);
-        view.setConnectionTimeout(30);
+        view.setReadTimeout(60);
+        view.setConnectionTimeout(60);
         view.setClickAndSend(false);
         view.setNeedInterface(false);
         view.setNoNeedAutoGenerateConfig(false);
+        view.setNeedIdeaLog(false);
         view.setJmhConnectionTimeout(60);
         view.setJmhReadTimeout(60);
         view.setJmhWriteTimeout(60);

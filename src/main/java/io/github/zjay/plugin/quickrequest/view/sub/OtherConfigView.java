@@ -73,6 +73,11 @@ public class OtherConfigView extends AbstractConfigurableView {
      */
     private Boolean noNeedAutoGenerateConfig = null;
 
+    /**
+     * 是否需要记录请求日志（idea）
+     */
+    private Boolean needIdeaLog = null;
+
     private Integer connectionTimeout = null;
 
     private Integer readTimeout = null;
@@ -124,8 +129,8 @@ public class OtherConfigView extends AbstractConfigurableView {
     private JPanel createConnectionPanel() {
         connectionTimeout = config.getConnectionTimeout();
         readTimeout = config.getReadTimeout();
-        connectionTimeoutText = new JTextField("30");
-        readTimeoutText = new JTextField("30");
+        connectionTimeoutText = new JTextField("60");
+        readTimeoutText = new JTextField("60");
         if(connectionTimeout != null){
             connectionTimeoutText.setText(connectionTimeout + "");
         }
@@ -144,7 +149,7 @@ public class OtherConfigView extends AbstractConfigurableView {
                     return true;
                 } catch (Exception e) {
                     Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
-                    connectionTimeoutText.setText("30");
+                    connectionTimeoutText.setText("60");
                     return false;
                 }
             }
@@ -161,7 +166,7 @@ public class OtherConfigView extends AbstractConfigurableView {
                     return true;
                 } catch (Exception e) {
                     Messages.showMessageDialog("Positive integer required", "Error", Messages.getInformationIcon());
-                    readTimeoutText.setText("30");
+                    readTimeoutText.setText("60");
                     return false;
                 }
             }
@@ -177,14 +182,26 @@ public class OtherConfigView extends AbstractConfigurableView {
         JBCheckBox clickAndSendCheckBox = createClickAndSendPanel();
         JBCheckBox needInterfaceCheckBox = createNeedInterfacePanel();
         JBCheckBox needAutoGenerateConfigPanel = createNeedAutoGenerateConfigPanel();
+        JBCheckBox needIdeaLogPanel = createNeedIdeaLogPanel();
         JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
                 .add(new MyComponentPanelBuilder(clickAndSendCheckBox))
                 .add(new MyComponentPanelBuilder(needInterfaceCheckBox))
                 .add(new MyComponentPanelBuilder(needAutoGenerateConfigPanel).withTooltip(MyResourceBundleUtil.getKey("NoNeedAutoGenerateConfigTip")))
+                .add(new MyComponentPanelBuilder(needIdeaLogPanel))
                 .createPanel();
         clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("BaseConfig")));
         return clickAndSendConfigPanel;
 
+    }
+
+    private JBCheckBox createNeedIdeaLogPanel() {
+        Boolean needIdeaLog = config.getNeedIdeaLog();
+        this.needIdeaLog = needIdeaLog;
+        JBCheckBox completeCheckBox = new JBCheckBox(MyResourceBundleUtil.getKey("NeedIdeaLog"), needIdeaLog != null && needIdeaLog);
+        completeCheckBox.addItemListener(e -> {
+            this.needIdeaLog = e.getStateChange() == ItemEvent.SELECTED;
+        });
+        return completeCheckBox;
     }
 
     private JPanel createRequestPanel() {
@@ -609,5 +626,13 @@ public class OtherConfigView extends AbstractConfigurableView {
 
     public void setGrpcurlPath(String grpcurlPath) {
         this.grpcurlPath = grpcurlPath;
+    }
+
+    public Boolean getNeedIdeaLog() {
+        return needIdeaLog;
+    }
+
+    public void setNeedIdeaLog(Boolean needIdeaLog) {
+        this.needIdeaLog = needIdeaLog;
     }
 }

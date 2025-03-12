@@ -84,9 +84,22 @@ public class FastRequestConfiguration implements Serializable {
     private Boolean noNeedAutoGenerateConfig = null;
 
     /**
+     * 是否需要记录请求日志（idea）
+     */
+    private Boolean needIdeaLog = null;
+
+    /**
      * grpcurl的路径
      */
     private String grpcurlPath = null;
+
+    public Boolean getNeedIdeaLog() {
+        return needIdeaLog;
+    }
+
+    public void setNeedIdeaLog(Boolean needIdeaLog) {
+        this.needIdeaLog = needIdeaLog;
+    }
 
     public String getGrpcurlPath() {
         return grpcurlPath;
