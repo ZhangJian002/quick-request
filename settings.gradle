@@ -1,7 +1,10 @@
 pluginManagement {
-    plugins {
-        id 'org.jetbrains.kotlin.jvm' version '1.7.21'
+    println "aliyun pluginManagement"
+    repositories {
+        maven {
+            url "https://maven.aliyun.com/repository/gradle-plugin"
+        }
+        gradlePluginPortal()
     }
 }
 rootProject.name = 'quick-request-idea'
-
