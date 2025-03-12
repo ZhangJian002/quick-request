@@ -37,6 +37,7 @@ dependencies {
     }
     implementation ('org.openjdk.jmh:jmh-core:1.36') {
     }
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
 }
 // idea 依赖所在目录
 def ideaPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3"
