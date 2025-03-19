@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.StringTokenizer;
 
 public class GrpcCurlUtils {
 
@@ -22,19 +23,16 @@ public class GrpcCurlUtils {
             grpcurlPath += " -version";
             process = getProcess(grpcurlPath);
             int code = process.waitFor();
-            if (code == 0) {
-                return true;
-            }else {
-                throw new RuntimeException("code：" + code);
-            }
+            return code == 0;
         }catch (Exception e) {
             //ignore
-            throw new RuntimeException("grpcurl cannot be executed! " + e.getMessage() , e);
+//            throw new RuntimeException("grpcurl cannot be executed! " + e.getMessage() , e);
         }finally {
             if(process != null){
                 process.destroy();
             }
         }
+        return false;
     }
 
     public static String[] request(GrpcRequest grpcRequest) {
@@ -100,13 +98,19 @@ public class GrpcCurlUtils {
     }
 
     private static Process getProcess(String cmd) throws IOException {
-        Runtime runtime = Runtime.getRuntime();
         Process process;
+        StringTokenizer st = new StringTokenizer(cmd);
         if (SystemInfo.isWindows){
-            process = runtime.exec(cmd);
+            String[] cmdarray = new String[st.countTokens()];
+            for (int i = 0; st.hasMoreTokens(); i++)
+                cmdarray[i] = st.nextToken();
+            process = new ProcessBuilder(cmdarray).start();
         } else {
-            String[] cmdArray = {"/bin/bash", "-c", cmd};
-            process = Runtime.getRuntime().exec(cmdArray);
+            String[] cmdarray = new String[3];
+            cmdarray[0] = "/bin/bash";
+            cmdarray[1] = "-c";
+            cmdarray[2] = cmd;
+            process = new ProcessBuilder(cmdarray).start();
         }
         return process;
     }

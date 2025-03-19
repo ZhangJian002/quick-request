@@ -905,7 +905,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             }
             boolean isGrpcDomain = UrlUtil.isGrpcURL(finalDomain);
             if (!isGrpcDomain){
-                setErrorInfo("Grpc");
+                setErrorInfo("gRPC");
                 return;
             }
             FastRequestConfiguration configuration = FastRequestComponent.getInstance().getState();
@@ -915,7 +915,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
                 notification.addAction(new NotificationAction(MyResourceBundleUtil.getKey("GrpcurlInstall")) {
                     @Override
                     public void actionPerformed(@NotNull AnActionEvent anActionEvent, @NotNull Notification notification) {
-                        BrowserUtil.browse("https://github.com/fullstorydev/grpcurl");
+                        BrowserUtil.browse(Constant.GRPCURL_URL);
                     }
                 });
                 notification.notify(project);

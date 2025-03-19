@@ -18,9 +18,6 @@ package io.github.zjay.plugin.quickrequest.generator.linemarker;
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
-import com.intellij.lang.jsgraphql.ide.search.GraphQLDefinitionsSearchExecutor;
-import com.intellij.lang.jsgraphql.types.schema.GraphQLType;
-import com.intellij.lang.jsgraphql.types.schema.GraphQLTypeUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
@@ -98,8 +95,8 @@ public class GraphQLLineMarkerProvider implements LineMarkerProvider {
                 Object getType = ReflectUtils.invokeMethod(arg, "getType");
                 Object getType2 = ReflectUtils.invokeMethod(getType, "getType");
 
-                Stack<GraphQLType> graphQLTypes = GraphQLTypeUtil.unwrapType((GraphQLType) getType2);
-                System.out.println(graphQLTypes);
+//                Stack<GraphQLType> graphQLTypes = GraphQLTypeUtil.unwrapType((GraphQLType) getType2);
+//                System.out.println(graphQLTypes);
                 PsiElement getNameIdentifier = (PsiElement)ReflectUtils.invokeMethod(getType2, "getNameIdentifier");
                 if (GraphQLDataTypeEnum.isExist(getNameIdentifier.getText())){
                     //Base

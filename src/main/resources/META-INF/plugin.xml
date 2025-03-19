@@ -20,12 +20,13 @@
             <li>Supports requests for the Laravel framework of PHP language</li>
             <li>Support requests for the Rails framework of Ruby language</li>
             <li>Support requests for the actix-web and Rocket framework of Rust language</li>
+            <li>Supports gRPC request generation based on .proto files and utilizes <a href="https://github.com/fullstorydev/grpcurl">grpcurl</a> for debugging.</li>
             <li>Method for automatically generating spring mvc by filling out forms(alt + '\')</li>
             <li>Support for save requests and history queries</li>
-            <li>Support pressure testing</li>
+            <li>Basic support for pressure testing, primarily for reference purposes</li>
         </ul>
         <h2>Help me</h2>
-        <p>Due to the significant differences in the way request parameters are obtained in different languages and frameworks, and my limited ability, I would like to seek your opinions. Please send me your suggestions on commonly used frameworks and request parameter generation to my email or mention <a href="https://github.com/ZhangJian002/quick-request/issues">Github.</a></p>
+        <p>Due to the significant differences in request parameter handling across various languages and frameworks, and given my limited expertise, I would like to seek your input. Please share your commonly used frameworks and suggestions for request parameter generation by sending them to my email or mentioning them on <a href="https://github.com/ZhangJian002/quick-request/issues">Github.</a></p>
         <h2>Links</h2>
         <p><a href="https://blog.csdn.net/qq_41013833/article/details/131328100">Documentation</a></p>
         <h1>中文</h1>
@@ -38,6 +39,7 @@
             <li>支持Php的Laravel框架的请求生成</li>
             <li>支持Ruby的Rails框架的请求生成</li>
             <li>支持Rust的actix-web和Rocket框架的请求生成</li>
+            <li>支持基于.proto文件的gRPC请求生成，并使用<a href="https://github.com/fullstorydev/grpcurl">grpcurl</a>进行调试</li>
             <li>在Spring Mvc中, 你可以通过填写个表单来自动生成方法, 快捷键(alt + '\')</li>
             <li>支持保存请求和请求历史记录</li>
             <li>简单支持压测，参考为主</li>
@@ -50,9 +52,9 @@
     </description>
 
     <!--    2021.1-->
-    <idea-version since-build="211.6693.111" />
+    <idea-version since-build="211.6693.111" until-build="243.25659.59" />
     <depends>com.intellij.modules.platform</depends>
-<!--    <depends optional="true" config-file="config-json.xml">com.intellij.modules.json</depends>-->
+    <depends optional="true" config-file="config-json.xml">com.intellij.modules.json</depends>
     <depends optional="true" config-file="config-java.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
     <depends optional="true" config-file="config-go.xml">org.jetbrains.plugins.go</depends>
@@ -92,8 +94,8 @@
         <codeInsight.lineMarkerProvider language="protobuf"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.ProtobufLineMarkerProvider"/>
 
-        <codeInsight.lineMarkerProvider language="GraphQL"
-                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GraphQLLineMarkerProvider"/>
+<!--        <codeInsight.lineMarkerProvider language="GraphQL"-->
+<!--                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GraphQLLineMarkerProvider"/>-->
 
         <codeInsight.lineMarkerProvider language="Rust"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>

@@ -29,6 +29,7 @@ import java.util.Objects;
 
 public class Constant {
     public static final String I18N_PATH = "io/github/zjay/fastrequest/18n/fr";
+    public static final String GRPCURL_URL = "https://github.com/fullstorydev/grpcurl";
 
     public static final String ROUTE = "11110000010010 11110000001111 11101011000001 11110000010100 11100000100101";
 

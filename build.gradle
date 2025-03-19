@@ -11,10 +11,10 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2025.3.7'
+version '2025.3.18'
 ext {
     pluginName = 'quick-request-idea'
-    pluginVersion = '2025.3.7'
+    pluginVersion = '2025.3.18'
 }
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -109,14 +109,15 @@ intellij {
     downloadSources false
 }
 patchPluginXml {
-    changeNotes """、
-    <h3>v2025.3.7</h3>
+    changeNotes """
+    <h3>v2025.3.18</h3>
     <p>中文</p>
     <ul>
         <li>新增GRPC请求方式（不支持压测），是基于grpcurl实现</li>
         <li>在右键菜单中增加Tools，增加Base64、Base32及MD5按钮，可以直接替换你选中的字符串</li>
         <li>保存时：增加输入请求名称的输入框，可直接定义请求名</li>
         <li>局部优化和一些BUG修复</li>
+        <li>新增Http请求的idea级log日志，需要在基础配置中打开</li>
     </ul>
     <p>English</p>
     <ul>
@@ -124,6 +125,7 @@ patchPluginXml {
         <li>Add a "Tools" section to the context menu, including "Base64", "Base32", and "MD5" buttons that can directly replace the selected text.</li>
         <li>Add an input field to specify the request name during saving, allowing direct definition of the request name.</li>
         <li>Minor optimizations and various bug fixes.</li>
+        <li>The idea level log for adding HTTP requests needs to be opened in the basic configuration.</li>
     </ul>
     <h3>v2025.1.21</h3>
     <p>中文</p>
