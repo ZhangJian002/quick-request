@@ -54,13 +54,13 @@
     <!--    2021.1-->
     <idea-version since-build="211.6693.111" until-build="243.25659.59" />
     <depends>com.intellij.modules.platform</depends>
-    <depends optional="true" config-file="config-json.xml">com.intellij.modules.json</depends>
     <depends optional="true" config-file="config-java.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
     <depends optional="true" config-file="config-go.xml">org.jetbrains.plugins.go</depends>
     <depends optional="true" config-file="config-php.xml">com.jetbrains.php</depends>
     <depends optional="true" config-file="config-python.xml">Pythonid</depends>
     <depends optional="true" config-file="config-ruby.xml">org.jetbrains.plugins.ruby</depends>
+<!--    <depends>com.intellij.modules.json</depends>-->
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 
@@ -88,7 +88,7 @@
 
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.RustMethodGenerator"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PbMethodGenerator"/>
-        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GraphQLMethodGenerator"/>
+<!--        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GraphQLMethodGenerator"/>-->
 
 
         <codeInsight.lineMarkerProvider language="protobuf"
@@ -96,6 +96,10 @@
 
 <!--        <codeInsight.lineMarkerProvider language="GraphQL"-->
 <!--                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GraphQLLineMarkerProvider"/>-->
+
+<!--        <codeInsight.lineMarkerProvider language="thrift"-->
+<!--                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.ThriftLineMarkerProvider"/>-->
+
 
         <codeInsight.lineMarkerProvider language="Rust"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>
@@ -158,6 +162,10 @@
     <extensions defaultExtensionNs="QuickRequest">
         <requestMappingContributor
                 implementation="io.github.zjay.plugin.quickrequest.contributor.RustRequestMappingContributor"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true" />
     </extensions>
 
 
