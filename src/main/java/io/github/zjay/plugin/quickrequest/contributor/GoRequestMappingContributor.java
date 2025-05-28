@@ -16,19 +16,17 @@
 
 package io.github.zjay.plugin.quickrequest.contributor;
 
-import com.goide.psi.*;
-import com.goide.psi.impl.*;
-import com.goide.stubs.index.*;
-import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.ResolveState;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
+import com.intellij.psi.stubs.StubIndexKey;
 import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import io.github.zjay.plugin.quickrequest.util.GoTwoJinZhi;
+import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
 import io.github.zjay.plugin.quickrequest.util.file.FileUtil;
 import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
@@ -37,7 +35,7 @@ import java.util.*;
 
 public class GoRequestMappingContributor extends OtherRequestMappingByNameContributor{
 
-    private static Set<GoFunctionDeclaration> goFunctionDeclarations = new HashSet<>();
+    private static Set<PsiElement> goFunctionDeclarations = new HashSet<>();
 
 
     @Override
@@ -46,10 +44,12 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
     }
 
     public static List<OtherRequestEntity> getResultList(Project project){
-        List<OtherRequestEntity> resultList = new LinkedList<>();
+        List<OtherRequestEntity> resultList = new ArrayList<>();
         try {
             Class.forName("com.goide.stubs.index.GoFunctionIndex");
-            Collection<GoFunctionDeclaration> collection = StubIndex.getElements(GoFunctionIndex.KEY, TwoJinZhiGet.getRealStr(Constant.MAIN), project, GlobalSearchScope.projectScope(project), GoFunctionDeclaration.class);
+            StubIndexKey<String, PsiElement> key = (StubIndexKey<String, PsiElement>)ReflectUtils.getStaticFieldValue("com.goide.stubs.index.GoFunctionIndex", "KEY");
+            Class<PsiElement> goFunctionDeclaration = (Class<PsiElement>)Class.forName("com.goide.psi.GoFunctionDeclaration");
+            Collection<PsiElement> collection = StubIndex.getElements(key, TwoJinZhiGet.getRealStr(Constant.MAIN), project, GlobalSearchScope.projectScope(project), goFunctionDeclaration);
             analyzeFunc(collection, resultList, project);
             goFunctionDeclarations.clear();
         }catch (Exception e){
@@ -58,8 +58,8 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
         return resultList;
     }
 
-    private static void analyzeFunc(Collection<GoFunctionDeclaration> collection, List<OtherRequestEntity> resultList, Project project) {
-        for (GoFunctionDeclaration element : collection) {
+    private static void analyzeFunc(Collection<PsiElement> collection, List<OtherRequestEntity> resultList, Project project) {
+        for (PsiElement element : collection) {
             VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
             if(!FileUtil.isProjectFile(project, virtualFile)){
                 continue;
@@ -70,9 +70,9 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
                 continue;
             }
             goFunctionDeclarations.add(element);
-            GoBlock block = element.getBlock();
-            List<GoStatement> statementList = block.getStatementList();
-            for (GoStatement goStatement : statementList) {
+            PsiElement block = (PsiElement)ReflectUtils.invokeMethod(element, "getBlock");
+            List<PsiElement> statementList = (List<PsiElement>)ReflectUtils.invokeMethod(block, "getStatementList");
+            for (PsiElement goStatement : statementList) {
                 try {
                     PsiElement firstChild = goStatement.getFirstChild().getFirstChild();
                     judgeCallExpr(firstChild, goStatement, resultList, project);
@@ -83,29 +83,24 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
         }
     }
 
-    private static void judgeCallExpr(PsiElement firstChild, GoStatement goStatement, List<OtherRequestEntity> resultList, Project project) {
+    private static void judgeCallExpr(PsiElement firstChild, PsiElement goStatement, List<OtherRequestEntity> resultList, Project project) {
         if (TwoJinZhiGet.getRealStr(GoTwoJinZhi.CALL_EXPR).equals((firstChild.getNode().getElementType().toString()))) {
             if (GoMethod.isExist(( firstChild.getFirstChild().getLastChild()).getText())) {
-                GoReferenceExpressionImpl firstChild1 = (GoReferenceExpressionImpl)firstChild.getFirstChild().getFirstChild();
-                PsiElement resolve1 = firstChild1.resolve();
-                if(resolve1 instanceof GoVarDefinition){
-                    GoVarDefinition resolve = (GoVarDefinition)resolve1;
-                    if(judgeGin(resolve.getGoTypeInner(ResolveState.initial()).getText())){
-                        PsiElement methodPsi = firstChild.getFirstChild().getLastChild();
-                        resultList.add(new OtherRequestEntity(methodPsi, getUrl(firstChild), methodPsi.getText()));
-                    }
-                } else if (resolve1 instanceof GoParamDefinitionImpl) {
-                    GoParamDefinitionImpl resolve = (GoParamDefinitionImpl)resolve1;
-                    if(judgeGin(resolve.getGoTypeInner(ResolveState.initial()).getText())){
-                        //就是
+                PsiElement firstChild1 = firstChild.getFirstChild().getFirstChild();
+                PsiElement resolve1 = (PsiElement)ReflectUtils.invokeMethod(firstChild1, "resolve");
+                String canonicalName = resolve1.getClass().getCanonicalName();
+                if(Objects.equals(canonicalName, "com.goide.psi.GoVarDefinition") || Objects.equals(canonicalName, "com.goide.psi.impl.GoParamDefinitionImpl")){
+                    Object getGoTypeInner = ReflectUtils.invokeMethod(resolve1, "getGoTypeInner", ResolveState.class, ResolveState.initial());
+                    String text = (String)ReflectUtils.invokeMethod(getGoTypeInner, "getText");
+                    if(judgeGin(text)){
                         PsiElement methodPsi = firstChild.getFirstChild().getLastChild();
                         resultList.add(new OtherRequestEntity(methodPsi, getUrl(firstChild), methodPsi.getText()));
                     }
                 }
             }else {
                 //是否需要再加 .getFirstChild() 取决于有没有 xx.调用
-                GoReferenceExpressionImpl firstChild1 = (GoReferenceExpressionImpl)firstChild.getFirstChild();
-                GoFunctionDeclarationImpl resolve = (GoFunctionDeclarationImpl)firstChild1.resolve();
+                PsiElement firstChild1 = firstChild.getFirstChild();
+                PsiElement resolve = (PsiElement)ReflectUtils.invokeMethod(firstChild1, "resolve");
                 if(resolve == null){
                     return;
                 }
@@ -113,9 +108,10 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
                     analyzeFunc(Arrays.asList(resolve), resultList, project);
                 }
             }
-        }else if(firstChild instanceof GoVarDefinition){
-            GoVarDefinition resolve = (GoVarDefinition)firstChild;
-            if(judgeGin(resolve.getGoTypeInner(ResolveState.initial()).getText())){
+        }else if(Objects.equals(firstChild.getClass().getCanonicalName(), "com.goide.psi.GoVarDefinition")){
+            Object getGoTypeInner = ReflectUtils.invokeMethod(firstChild, "getGoTypeInner", ResolveState.class, ResolveState.initial());
+            String text = (String)ReflectUtils.invokeMethod(getGoTypeInner, "getText");
+            if(judgeGin(text)){
                 //就是
                 PsiElement lastChild = goStatement.getFirstChild().getLastChild();
                 if (!Objects.equals(TwoJinZhiGet.getRealStr(GoTwoJinZhi.GIN_Default), lastChild.getText())) {
@@ -126,10 +122,11 @@ public class GoRequestMappingContributor extends OtherRequestMappingByNameContri
     }
 
     public static String getUrl(PsiElement firstChild) {
-        GoCallExprImpl firstChild11 = (GoCallExprImpl) firstChild;
-        GoArgumentList argumentList = firstChild11.getArgumentList();
-        GoExpression goExpression1 = argumentList.getExpressionList().get(0);
-        return goExpression1.getValue().getString();
+        PsiElement argumentList = (PsiElement)ReflectUtils.invokeMethod(firstChild, "getArgumentList");
+        List<PsiElement> getExpressionList = (List<PsiElement>)ReflectUtils.invokeMethod(argumentList, "getExpressionList");
+        PsiElement goExpression1 = getExpressionList.get(0);
+        Object value = ReflectUtils.invokeMethod(goExpression1, "getValue");
+        return (String)ReflectUtils.invokeMethod(value, "getString");
     }
 
     private static boolean judgeGin(String target){

@@ -19,17 +19,18 @@ package io.github.zjay.plugin.quickrequest.contributor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.RubyLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
+import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 import io.github.zjay.plugin.quickrequest.util.ruby.RailsMethods;
-import org.jetbrains.plugins.ruby.rails.model.RailsApp;
-import org.jetbrains.plugins.ruby.ruby.lang.psi.impl.controlStructures.blocks.RCompoundStatementImpl;
-import org.jetbrains.plugins.ruby.ruby.lang.psi.impl.methodCall.RCallImpl;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class RubyRequestMappingContributor extends OtherRequestMappingByNameContributor{
 
@@ -42,23 +43,27 @@ public class RubyRequestMappingContributor extends OtherRequestMappingByNameCont
     public static List<OtherRequestEntity> getResultList(Project project){
         List<OtherRequestEntity> resultList = new LinkedList<>();
         try {
-            Class.forName("org.jetbrains.plugins.ruby.rails.model.RailsApp");
+            Class<?> railsAppClass = Class.forName("org.jetbrains.plugins.ruby.rails.model.RailsApp");
             PsiManager psiManager = PsiManager.getInstance(project);
             ModuleManager moduleManager = ModuleManager.getInstance(project);
             for (Module module : moduleManager.getModules()) {
-                RailsApp railsApp = RailsApp.fromModule(module);
+                Object railsApp = ReflectUtils.invokeStaticMethod(railsAppClass, "fromModule", Module.class, module);
                 if(railsApp != null){
-                    railsApp.getRoutesFiles().allFiles().forEach(virtualFile -> {
+                    Object getRoutesFiles = ReflectUtils.invokeMethod(railsApp, "getRoutesFiles");
+                    Stream<VirtualFile> allFilesStream = (Stream<VirtualFile>)ReflectUtils.invokeMethod(getRoutesFiles, "allFiles");
+                    allFilesStream.forEach(virtualFile -> {
                         if(project.getBasePath() != null && virtualFile.getPath().startsWith(project.getBasePath())){
                             PsiElement[] psiElements = PsiTreeUtil.collectElements(psiManager.findFile(virtualFile), psiElement -> true);
                             for (PsiElement psiElement : psiElements) {
-                                if(psiElement instanceof RCallImpl){
-                                    if(psiElement.getParent().getParent().getParent().getParent().getParent() instanceof RCompoundStatementImpl){
-                                        RCompoundStatementImpl parent = (RCompoundStatementImpl) psiElement.getParent().getParent().getParent().getParent().getParent();
-                                        if(parent.getText().contains("Rails.application.routes.draw")){
-                                            RCallImpl rCall = (RCallImpl) psiElement;
-                                            if(RailsMethods.isExist(rCall.getName())){
-                                                String[] urlAndMethodType = RubyLineMarkerProvider.getUrlAndMethodType(rCall);
+                                if(Objects.equals("org.jetbrains.plugins.ruby.ruby.lang.psi.impl.methodCall.RCallImpl", psiElement.getClass().getCanonicalName())){
+                                    PsiElement element = psiElement.getParent().getParent().getParent().getParent().getParent();
+                                    String canonicalName = element.getClass().getCanonicalName();
+                                    if(Objects.equals("org.jetbrains.plugins.ruby.ruby.lang.psi.impl.controlStructures.blocks.RCompoundStatementImpl", canonicalName)){
+                                        String text = (String)ReflectUtils.invokeMethod(element, "getText");
+                                        if(text.contains("Rails.application.routes.draw")){
+                                            String name = (String)ReflectUtils.invokeMethod(psiElement, "getName");
+                                            if(RailsMethods.isExist(name)){
+                                                String[] urlAndMethodType = RubyLineMarkerProvider.getUrlAndMethodType(psiElement);
                                                 resultList.add(new OtherRequestEntity(psiElement, urlAndMethodType[0],urlAndMethodType[1]));
                                             }
                                         }

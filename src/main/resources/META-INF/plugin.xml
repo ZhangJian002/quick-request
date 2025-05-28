@@ -52,7 +52,7 @@
     </description>
 
     <!--    2021.1-->
-    <idea-version since-build="211.6693.111" until-build="243.25659.59" />
+    <idea-version since-build="211.6693.111"  />
     <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="config-java.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="config-kotlin.xml">org.jetbrains.kotlin</depends>
@@ -60,7 +60,7 @@
     <depends optional="true" config-file="config-php.xml">com.jetbrains.php</depends>
     <depends optional="true" config-file="config-python.xml">Pythonid</depends>
     <depends optional="true" config-file="config-ruby.xml">org.jetbrains.plugins.ruby</depends>
-<!--    <depends>com.intellij.modules.json</depends>-->
+    <depends>com.intellij.modules.json</depends>
 
     <resource-bundle>io.github.zjay.fastrequest.18n.fr</resource-bundle>
 

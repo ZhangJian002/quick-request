@@ -16,7 +16,6 @@
 
 package io.github.zjay.plugin.quickrequest.view.component.tree;
 
-import com.goide.GoIcons;
 import com.intellij.icons.AllIcons;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +37,7 @@ public class ClassNode extends BaseNode<String> {
     public @Nullable Icon getIcon(boolean selected) {
         switch (languageEnum){
             case go:
-                return GoIcons.ICON;
+                return PluginIcons.ICON_GO;
             case php:
                 return PluginIcons.ICON_PHP;
             case Python:

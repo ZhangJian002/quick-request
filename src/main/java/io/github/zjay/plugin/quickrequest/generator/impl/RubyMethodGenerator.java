@@ -20,11 +20,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.generator.NormalUrlGenerator;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.RubyLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
-import org.jetbrains.plugins.ruby.ruby.lang.psi.impl.methodCall.RCallImpl;
+import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 
 import java.util.LinkedHashMap;
 
@@ -40,7 +39,9 @@ public class RubyMethodGenerator extends NormalUrlGenerator {
         paramGroup.getBodyParamMap().clear();
         String[] methodType = RubyLineMarkerProvider.getUrlAndMethodType(psiElement);
         paramGroup.setMethodType(methodType[1]);
-        paramGroup.setMethod(((RCallImpl)psiElement).getName());
+
+        String name = (String)ReflectUtils.invokeMethod(psiElement, "getName");
+        paramGroup.setMethod(name);
         PsiFile containingFile = psiElement.getContainingFile();
         paramGroup.setClassName(containingFile.getName());
         paramGroup.setModule(psiElement.getProject().getName());

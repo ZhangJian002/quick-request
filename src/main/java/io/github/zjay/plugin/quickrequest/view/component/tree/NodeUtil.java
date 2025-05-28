@@ -16,34 +16,27 @@
 
 package io.github.zjay.plugin.quickrequest.view.component.tree;
 
-import com.goide.psi.GoFile;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.search.searches.AllClassesSearch;
 import com.intellij.util.Query;
-import com.jetbrains.php.lang.psi.PhpFile;
-import com.jetbrains.python.psi.PyFile;
 import io.github.zjay.plugin.quickrequest.config.Constant;
-import io.github.zjay.plugin.quickrequest.contributor.GoRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.contributor.PhpRequestMappingContributor;
-import io.github.zjay.plugin.quickrequest.contributor.PythonRequestMappingContributor;
 import io.github.zjay.plugin.quickrequest.generator.impl.DubboMethodGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.JaxRsGenerator;
 import io.github.zjay.plugin.quickrequest.generator.impl.SpringMethodUrlGenerator;
-import io.github.zjay.plugin.quickrequest.model.ApiService;
-import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
-import io.github.zjay.plugin.quickrequest.util.FrPsiUtil;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.DubboLineMarkerProvider;
+import io.github.zjay.plugin.quickrequest.model.ApiService;
+import io.github.zjay.plugin.quickrequest.util.FrPsiUtil;
 import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
+import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 import io.github.zjay.plugin.quickrequest.util.TwoJinZhiGet;
-import io.github.zjay.plugin.quickrequest.util.go.GoMethod;
 import io.github.zjay.plugin.quickrequest.util.php.LaravelMethods;
 import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.GoApis;
 import io.github.zjay.plugin.quickrequest.view.component.tree.allApis.PyApis;
@@ -332,10 +325,11 @@ public class NodeUtil {
                 apiServiceList.add(apiService);
                 apiService.setLanguage(LanguageEnum.php);
                 PsiElement psiMethod = apiService.getApiMethodList().get(0).getPsiMethod();
-                PhpFile containingFile = (PhpFile) psiMethod.getContainingFile();
-                apiService.setPackageName(containingFile.getMainNamespaceName());
-                apiService.setClassName(containingFile.getName());
-                Module module = ModuleUtil.findModuleForFile(containingFile);
+                String mainNamespaceName = (String)ReflectUtils.invokeMethod(psiMethod.getContainingFile(), "getMainNamespaceName");
+                String name = (String)ReflectUtils.invokeMethod(psiMethod.getContainingFile(), "getName");
+                apiService.setPackageName(mainNamespaceName);
+                apiService.setClassName(name);
+                Module module = ModuleUtil.findModuleForFile(psiMethod.getContainingFile());
                 if (module != null) {
                     apiService.setModuleName(module.getName());
                 }

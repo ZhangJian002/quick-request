@@ -121,6 +121,7 @@ public class KV<K, V> extends LinkedHashMap<K, V> {
         normalTypes.put("java.time.LocalTime", LocalTime.now(ZoneId.of(JSON.defaultTimeZone.getID())).toString());
         normalTypes.put("java.time.LocalDateTime", LocalDateTime.now(ZoneId.of(JSON.defaultTimeZone.getID())).toString());
         normalTypes.put("java.time.YearMonth", YearMonth.now(ZoneId.of(JSON.defaultTimeZone.getID())).toString());
+        normalTypes.put("java.lang.Number", ThreadLocalRandom.current().nextInt(1, 100));
 
 
         KV kv = KV.create();

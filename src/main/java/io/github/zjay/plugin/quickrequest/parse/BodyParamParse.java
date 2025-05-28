@@ -68,7 +68,13 @@ public class BodyParamParse extends AbstractParamParse {
                 }
                 continue;
             }else if (numberClass != null && (paramNameType.getPsiClass().isInheritor(numberClass, true) || paramNameType.getPsiClass() == numberClass)) {
-                nameValueMap.put(name, new ParamKeyValue(name, ThreadLocalRandom.current().nextInt(0, 101), 2, TypeUtil.Type.Number.name()));
+                int value = ThreadLocalRandom.current().nextInt(0, 101);
+                if(arrayFlag || listFlag){
+                    ParamKeyValue paramKeyValue = new ParamKeyValue("", value, 2, TypeUtil.Type.Number.name());
+                    nameValueMap.put(name, new ParamKeyValue(name, Lists.newArrayList(paramKeyValue), 2, TypeUtil.Type.Array.name()));
+                }else {
+                    nameValueMap.put(name, new ParamKeyValue(name, value, 2, TypeUtil.Type.Number.name()));
+                }
                 continue;
             }
 

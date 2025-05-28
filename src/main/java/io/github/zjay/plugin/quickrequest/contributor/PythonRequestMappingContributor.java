@@ -25,13 +25,9 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.jetbrains.python.psi.*;
-import com.jetbrains.python.psi.impl.PyCallExpressionImpl;
-import com.jetbrains.python.psi.impl.PyDecoratorImpl;
-import com.jetbrains.python.psi.impl.PyFunctionImpl;
-import com.jetbrains.python.psi.impl.PyReferenceExpressionImpl;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.PyLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
+import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 import io.github.zjay.plugin.quickrequest.util.file.FileUtil;
 import io.github.zjay.plugin.quickrequest.util.python.FlaskMethods;
 
@@ -46,7 +42,7 @@ public class PythonRequestMappingContributor extends OtherRequestMappingByNameCo
     }
 
     public static List<OtherRequestEntity> getResultList(Project project){
-        List<OtherRequestEntity> resultList = new LinkedList<>();
+        List<OtherRequestEntity> resultList = new ArrayList<>();
         PsiManager psiManager = PsiManager.getInstance(project);
         Collection<VirtualFile> virtualFiles = FilenameIndex.getAllFilesByExt(project, "py", GlobalSearchScope.projectScope(project));
         try {
@@ -55,32 +51,33 @@ public class PythonRequestMappingContributor extends OtherRequestMappingByNameCo
                     PsiFile file = psiManager.findFile(virtualFile);
                     PsiElement[] psiElements = PsiTreeUtil.collectElements(file, psiElement -> true);
                     for (PsiElement psiElement : psiElements) {
-                        if(psiElement instanceof PyDecoratorList){
-                            PyDecoratorList pyDecorators = (PyDecoratorList) psiElement;
-                            for (PyDecorator pyDecorator : pyDecorators.getDecorators()) {
-                                if(FlaskMethods.isExist(((PyDecoratorImpl)pyDecorator).getName())){
-                                    PyArgumentList argumentList = pyDecorator.getArgumentList();
-                                    if(argumentList == null){
-                                        continue;
-                                    }
-                                    PyExpression[] arguments = argumentList.getArguments();
-                                    for (PyExpression argument : arguments) {
-                                        String url = PyLineMarkerProvider.getUrlFromDecorator(argument);
-                                        if(url != null){
-                                            PyCallExpressionImpl expression = (PyCallExpressionImpl)pyDecorator.getExpression();
-                                            PyReferenceExpressionImpl callee = (PyReferenceExpressionImpl)expression.getCallee();
-                                            PsiElement resolve = callee.getReference().resolve();
-                                            String qualifiedName = null;
-                                            if(resolve instanceof PyFunctionImpl){
-                                                PyFunctionImpl reference = (PyFunctionImpl) callee.getReference().resolve();
-                                                qualifiedName = reference.getQualifiedName();
-                                            }else if (resolve instanceof PyTargetExpression){
-                                                PyTargetExpression reference = (PyTargetExpression) callee.getReference().resolve();
-                                                qualifiedName = reference.getQualifiedName();
-                                            }
-                                            if(qualifiedName != null && qualifiedName.startsWith("flask.sansio.scaffold.Scaffold.")){
-                                                resultList.add(new OtherRequestEntity(pyDecorator, url,FlaskMethods.getMethodType(((PyDecoratorImpl)pyDecorator).getName())));
-                                            }
+                        if (!Objects.equals("com.jetbrains.python.psi.PyDecoratorList", psiElement.getClass().getCanonicalName())){
+                            continue;
+                        }
+                        List<PsiElement> decorators = (List<PsiElement>)ReflectUtils.invokeMethod(psiElement, "getDecorators");
+                        for (PsiElement pyDecorator : decorators) {
+                            String name = (String)ReflectUtils.invokeMethod(pyDecorator, "getName");
+                            if(FlaskMethods.isExist(name)){
+                                PsiElement argumentList = (PsiElement)ReflectUtils.invokeMethod(pyDecorator, "getArgumentList");
+                                if(argumentList == null){
+                                    continue;
+                                }
+                                PsiElement expression = (PsiElement)ReflectUtils.invokeMethod(pyDecorator, "getExpression");
+                                PsiElement callee = (PsiElement)ReflectUtils.invokeMethod(expression, "getCallee");
+                                PsiElement resolve = callee.getReference().resolve();
+
+                                PsiElement[] arguments = (PsiElement[])ReflectUtils.invokeMethod(argumentList, "getArguments");
+                                for (PsiElement argument : arguments) {
+                                    String url = PyLineMarkerProvider.getUrlFromDecorator(argument);
+                                    if(url != null){
+                                        String qualifiedName = null;
+                                        String canonicalName = resolve.getClass().getCanonicalName();
+                                        if(Objects.equals("com.jetbrains.python.psi.impl.PyFunctionImpl", canonicalName) || Objects.equals("com.jetbrains.python.psi.PyTargetExpression", canonicalName)){
+                                            PsiElement reference =  callee.getReference().resolve();
+                                            qualifiedName = (String) ReflectUtils.invokeMethod(reference, "getQualifiedName");
+                                        }
+                                        if(qualifiedName != null && qualifiedName.startsWith("flask.sansio.scaffold.Scaffold.")){
+                                            resultList.add(new OtherRequestEntity(pyDecorator, url,FlaskMethods.getMethodType(name)));
                                         }
                                     }
                                 }

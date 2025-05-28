@@ -18,6 +18,8 @@ package io.github.zjay.plugin.quickrequest.action;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import io.github.zjay.plugin.quickrequest.base.ParentDumbAction;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
@@ -55,10 +57,12 @@ public class ToolbarSendAndDownloadRequestAction extends ParentDumbAction {
             return;
         }
 
-        FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
-        if (fastRequestToolWindow != null) {
-            e.getPresentation().setEnabled(fastRequestToolWindow.getSendButtonFlag() && StringUtils.isNoneBlank(fastRequestToolWindow.urlTextField.getText()));
-        }
+        ApplicationManager.getApplication().runReadAction(() -> {
+            FastRequestToolWindow fastRequestToolWindow = ToolWindowUtil.getFastRequestToolWindow(myProject);
+            if (fastRequestToolWindow != null) {
+                e.getPresentation().setEnabled(fastRequestToolWindow.getSendButtonFlag() && StringUtils.isNoneBlank(fastRequestToolWindow.urlTextField.getText()));
+            }
+        });
     }
 
 }

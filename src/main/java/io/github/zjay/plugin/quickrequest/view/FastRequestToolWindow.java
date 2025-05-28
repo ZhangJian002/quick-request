@@ -69,6 +69,7 @@ import com.intellij.util.ui.ListTableModel;
 import groovy.json.StringEscapeUtils;
 import io.github.zjay.plugin.quickrequest.action.*;
 import io.github.zjay.plugin.quickrequest.action.soft_wrap.BodyFormatAction;
+import io.github.zjay.plugin.quickrequest.action.soft_wrap.FormatAction;
 import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.complete.GeneralTextAutoCompleteEditor;
 import io.github.zjay.plugin.quickrequest.config.*;
@@ -1309,7 +1310,13 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             formFlag = false;
         }
         if (StringUtils.isNotEmpty(rowParams)) {
-            RequestBody body = RequestBody.create(rowParams, MediaType.parse(getTargetContentType()));
+            String contentType;
+            if(CollectionUtils.isNotEmpty(globalHeaderMap.get("Content-Type"))){
+                contentType = globalHeaderMap.get("Content-Type").get(0);
+            }else {
+                contentType = getTargetContentType();
+            }
+            RequestBody body = RequestBody.create(rowParams, MediaType.parse(contentType));
             request.method(methodType, body);
             formFlag = false;
         }
@@ -1661,7 +1668,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             } else {
                 if (JsonUtil.isJson(body)) {
                     responseTabbedPanel.setSelectedIndex(1);
-                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(body.isBlank() ? "" : body);
+                    MyLanguageTextField prettyJsonEditor = (MyLanguageTextField) prettyJsonEditorPanel;
+                    prettyJsonEditor.setText(body.isBlank() ? "" : body);
+                    if(!(prettyJsonEditor.getFileType() instanceof JsonFileType)){
+                        prettyJsonEditor.updateFileLanguage(JsonFileType.INSTANCE, body);
+                        prettyJsonEditor.setLanguage(JsonLanguage.INSTANCE);
+                    }
                     ((MyLanguageTextField) responseTextAreaPanel).setText(body);
                     refreshResponseTable(body);
                 } else {
@@ -1674,7 +1686,12 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 //                    if (body.length() > 32768) {
 //                        subBody += "\n\ntext too large only show 32768 characters\n.............";
 //                    }
-                    ((MyLanguageTextField) prettyJsonEditorPanel).setText(body);
+                    MyLanguageTextField prettyJsonEditor = (MyLanguageTextField) prettyJsonEditorPanel;
+                    prettyJsonEditor.setText(body);
+                    if (XmlUtil.isXml(body)){
+                        prettyJsonEditor.updateFileLanguage(XmlFileType.INSTANCE, body);
+                        prettyJsonEditor.setLanguage(XMLLanguage.INSTANCE);
+                    }
                     ((MyLanguageTextField) responseTextAreaPanel).setText(body);
                     refreshResponseTable("");
                 }

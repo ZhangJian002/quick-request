@@ -35,6 +35,10 @@ public class FormatAction extends ParentAction {
         if (editor == null || !editor.getDocument().isWritable()) {
             return;
         }
+        reformat(editor, project);
+    }
+
+    public static void reformat(Editor editor, Project project){
         PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
         if (psiFile != null && StringUtils.isNotBlank(editor.getDocument().getText())) {
             WriteCommandAction.runWriteCommandAction(project, (Computable<PsiElement>) () -> CodeStyleManager.getInstance(project).reformat(psiFile));

@@ -33,15 +33,15 @@ import io.github.zjay.plugin.quickrequest.util.LanguageEnum;
 import io.github.zjay.plugin.quickrequest.util.ReflectUtils;
 import io.github.zjay.plugin.quickrequest.util.ToolWindowUtil;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import quickRequest.icons.PluginIcons;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 
 public class GraphQLLineMarkerProvider implements LineMarkerProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(GraphQLLineMarkerProvider.class);
 
     public LineMarkerInfo<PsiElement> getLineMarkerInfo(@NotNull PsiElement element) {
         if (Objects.equals(element.getClass().getCanonicalName(), "com.intellij.lang.jsgraphql.psi.impl.GraphQLFieldDefinitionImpl")){
@@ -53,9 +53,9 @@ public class GraphQLLineMarkerProvider implements LineMarkerProvider {
                     new GraphQLFunctionTooltip(element, LanguageEnum.GraphQL, url, null),
                     (e, elt) -> {
                         Project project = elt.getProject();
-                        ApplicationManager.getApplication().getService(GraphQLMethodGenerator.class).generate(element, null, null);
-                        ToolWindowUtil.openToolWindow(project);
-                        ToolWindowUtil.sendRequest(project, false);
+//                        ApplicationManager.getApplication().getService(GraphQLMethodGenerator.class).generate(element, null, null);
+//                        ToolWindowUtil.openToolWindow(project);
+//                        ToolWindowUtil.sendRequest(project, false);
                     },
                     GutterIconRenderer.Alignment.LEFT, () -> "quickRequest");
         }
@@ -65,6 +65,14 @@ public class GraphQLLineMarkerProvider implements LineMarkerProvider {
     private boolean judgeRequest(PsiElement element) {
         try {
             Object child = ReflectUtils.invokeMethod(element, "getParent");
+            Object getArgumentsDefinition = ReflectUtils.invokeMethod(element, "getArgumentsDefinition");
+            List getInputValueDefinitionList = (List)ReflectUtils.invokeMethod(getArgumentsDefinition, "getInputValueDefinitionList");
+            for (Object o : getInputValueDefinitionList) {
+                PsiElement getType = (PsiElement)ReflectUtils.invokeMethod(o, "getType");
+                PsiElement getType1 = (PsiElement)ReflectUtils.invokeMethod(getType, "getType");
+                PsiElement getNameIdentifier = (PsiElement)ReflectUtils.invokeMethod(getType1, "getNameIdentifier");
+                System.out.println(getNameIdentifier);
+            }
             Object getType = ReflectUtils.invokeMethod(child, "getParent");
             Object getTypeNameDefinition = ReflectUtils.invokeMethod(getType, "getTypeNameDefinition");
             Object getNameIdentifier = ReflectUtils.invokeMethod(getTypeNameDefinition, "getNameIdentifier");
@@ -88,25 +96,30 @@ public class GraphQLLineMarkerProvider implements LineMarkerProvider {
                     System.out.println(getNameIdentifier + ":" + getValue);
                 }
             }
+            Class<?> aClass = Class.forName("com.intellij.lang.jsgraphql.schema.library.GraphQLLibraryManager");
+            Object getInstance = ReflectUtils.invokeStaticMethod(aClass, "getInstance", Project.class, psiElement.getProject());
+            System.out.println(getInstance);
+
+//            Collection<GoFunctionDeclaration> collection = StubIndex.getElements(GraphQLIdentifierIndex.NAME, TwoJinZhiGet.getRealStr(Constant.MAIN), psiElement.getProject(), GlobalSearchScope.projectScope(psiElement.getProject()), GraphQLIdentifierIndex.IdentifierKind.class);
+
 
             Object getArgumentsDefinition = ReflectUtils.invokeMethod(psiElement, "getArgumentsDefinition");
             List getInputValueDefinitionList = (List)ReflectUtils.invokeMethod(getArgumentsDefinition, "getInputValueDefinitionList");
             for (Object arg : getInputValueDefinitionList) {
                 Object getType = ReflectUtils.invokeMethod(arg, "getType");
                 Object getType2 = ReflectUtils.invokeMethod(getType, "getType");
-
-//                Stack<GraphQLType> graphQLTypes = GraphQLTypeUtil.unwrapType((GraphQLType) getType2);
-//                System.out.println(graphQLTypes);
                 PsiElement getNameIdentifier = (PsiElement)ReflectUtils.invokeMethod(getType2, "getNameIdentifier");
                 if (GraphQLDataTypeEnum.isExist(getNameIdentifier.getText())){
                     //Base
                     System.out.println(11);
                 }else {
-                    Object getReference = ReflectUtils.invokeMethod(getNameIdentifier, "getReference");
-                    Object resolve = ReflectUtils.invokeMethod(getReference, "resolve");
-                    Object getReference1 = ReflectUtils.invokeMethod(resolve, "getReference");
-                    Object resolve1 = ReflectUtils.invokeMethod(getReference1, "resolve");
-                    System.out.println(resolve1);
+//                    PsiElement resolve2 = GraphQLResolveUtil.resolve((PsiElement) getType2);
+//                    System.out.println(resolve2);
+//                    Object getReference = ReflectUtils.invokeMethod(getNameIdentifier, "getReference");
+//                    Object resolve = ReflectUtils.invokeMethod(getReference, "resolve");
+//                    Object getReference1 = ReflectUtils.invokeMethod(resolve, "getReference");
+//                    Object resolve1 = ReflectUtils.invokeMethod(getReference1, "resolve");
+//                    System.out.println(resolve1);
 
                 }
                 System.out.println(getNameIdentifier.getText());
@@ -114,7 +127,7 @@ public class GraphQLLineMarkerProvider implements LineMarkerProvider {
 
             return null;
         }catch (Exception e){
-            log.debug("handleMessageEntity error", e);
+//            log.debug("handleMessageEntity error", e);
         }
         return new LinkedHashMap<>();
     }

@@ -42,6 +42,26 @@ public class ReflectUtils {
         return null;
     }
 
+    public static Object invokeMethod(Object target, String method, Class<?> clz, Object... params){
+        try {
+            Method targetMethod = target.getClass().getMethod(method, clz);
+            targetMethod.setAccessible(true);
+            return targetMethod.invoke(target, params);
+        }catch (Exception e){
+        }
+        return null;
+    }
+
+    public static Object invokeStaticMethod(Class <?> target, String method, Class<?> clz, Object... params){
+        try {
+            Method targetMethod = target.getDeclaredMethod(method, clz);
+            targetMethod.setAccessible(true);
+            return targetMethod.invoke(null, params);
+        }catch (Exception e){
+        }
+        return null;
+    }
+
     public static Object getInstance(String classAllName){
         try {
             Class<?> aClass = Class.forName(classAllName);
@@ -50,6 +70,23 @@ public class ReflectUtils {
             return declaredConstructor.newInstance();
         }catch (Exception e){
 
+        }
+        return null;
+    }
+
+    public static Object getStaticFieldValue(String className,  String fieldName) {
+        try {
+            // 动态加载类
+            Class<?> clazz = Class.forName(className);
+            // 获取静态变量字段
+            Field staticField = clazz.getDeclaredField(fieldName);
+
+            // 设置访问权限（针对非公有字段）
+            staticField.setAccessible(true);
+            // 读取值
+            return staticField.get(null);
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
         }
         return null;
     }
