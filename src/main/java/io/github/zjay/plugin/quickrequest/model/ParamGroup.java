@@ -16,6 +16,7 @@
 
 package io.github.zjay.plugin.quickrequest.model;
 
+
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 
@@ -56,7 +57,9 @@ public class ParamGroup implements Serializable {
         this.method = "";
         this.module = "";
         this.type = 1;
+        this.pbInfo = null;
     }
+
 
     private static class PbInfo{
         private String pbImportPath;

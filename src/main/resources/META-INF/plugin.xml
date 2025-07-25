@@ -88,24 +88,14 @@
 
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.RustMethodGenerator"/>
         <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.PbMethodGenerator"/>
-<!--        <applicationService serviceImplementation="io.github.zjay.plugin.quickrequest.generator.impl.GraphQLMethodGenerator"/>-->
 
 
         <codeInsight.lineMarkerProvider language="protobuf"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.ProtobufLineMarkerProvider"/>
 
-<!--        <codeInsight.lineMarkerProvider language="GraphQL"-->
-<!--                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.GraphQLLineMarkerProvider"/>-->
-
-<!--        <codeInsight.lineMarkerProvider language="thrift"-->
-<!--                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.ThriftLineMarkerProvider"/>-->
-
 
         <codeInsight.lineMarkerProvider language="Rust"
                                         implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>
-
-<!--        <codeInsight.lineMarkerProvider language="cs"-->
-<!--                                        implementationClass="io.github.zjay.plugin.quickrequest.generator.linemarker.RustLineMarkerProvider"/>-->
 
         <notificationGroup id="quickRequestWindowNotificationGroup" displayType="TOOL_WINDOW"/>
         <postStartupActivity implementation="io.github.zjay.plugin.quickrequest.update.WhatsNewActivity"/>

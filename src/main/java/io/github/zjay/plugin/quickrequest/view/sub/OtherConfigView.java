@@ -182,26 +182,14 @@ public class OtherConfigView extends AbstractConfigurableView {
         JBCheckBox clickAndSendCheckBox = createClickAndSendPanel();
         JBCheckBox needInterfaceCheckBox = createNeedInterfacePanel();
         JBCheckBox needAutoGenerateConfigPanel = createNeedAutoGenerateConfigPanel();
-        JBCheckBox needIdeaLogPanel = createNeedIdeaLogPanel();
         JPanel clickAndSendConfigPanel = new MyPanelGridBuilder()
                 .add(new MyComponentPanelBuilder(clickAndSendCheckBox))
                 .add(new MyComponentPanelBuilder(needInterfaceCheckBox))
                 .add(new MyComponentPanelBuilder(needAutoGenerateConfigPanel).withTooltip(MyResourceBundleUtil.getKey("NoNeedAutoGenerateConfigTip")))
-                .add(new MyComponentPanelBuilder(needIdeaLogPanel))
                 .createPanel();
         clickAndSendConfigPanel.setBorder(IdeBorderFactory.createTitledBorder(MyResourceBundleUtil.getKey("BaseConfig")));
         return clickAndSendConfigPanel;
 
-    }
-
-    private JBCheckBox createNeedIdeaLogPanel() {
-        Boolean needIdeaLog = config.getNeedIdeaLog();
-        this.needIdeaLog = needIdeaLog;
-        JBCheckBox completeCheckBox = new JBCheckBox(MyResourceBundleUtil.getKey("NeedIdeaLog"), needIdeaLog != null && needIdeaLog);
-        completeCheckBox.addItemListener(e -> {
-            this.needIdeaLog = e.getStateChange() == ItemEvent.SELECTED;
-        });
-        return completeCheckBox;
     }
 
     private JPanel createRequestPanel() {

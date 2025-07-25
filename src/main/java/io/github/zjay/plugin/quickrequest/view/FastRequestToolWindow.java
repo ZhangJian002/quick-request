@@ -69,7 +69,6 @@ import com.intellij.util.ui.ListTableModel;
 import groovy.json.StringEscapeUtils;
 import io.github.zjay.plugin.quickrequest.action.*;
 import io.github.zjay.plugin.quickrequest.action.soft_wrap.BodyFormatAction;
-import io.github.zjay.plugin.quickrequest.action.soft_wrap.FormatAction;
 import io.github.zjay.plugin.quickrequest.base.ParentAction;
 import io.github.zjay.plugin.quickrequest.complete.GeneralTextAutoCompleteEditor;
 import io.github.zjay.plugin.quickrequest.config.*;
@@ -91,7 +90,6 @@ import io.github.zjay.plugin.quickrequest.view.component.MyParamCheckItemListene
 import io.github.zjay.plugin.quickrequest.view.inner.EnvAddView;
 import io.github.zjay.plugin.quickrequest.view.inner.HeaderGroupView;
 import io.github.zjay.plugin.quickrequest.view.inner.SupportView;
-import io.github.zjay.plugin.quickrequest.view.inner.SyncView;
 import io.github.zjay.plugin.quickrequest.view.ui.MethodFontListCellRenderer;
 import okhttp3.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -123,8 +121,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -791,12 +789,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         actionToolbar1.setTargetComponent(sendPanel);
         JComponent component = actionToolbar1.getComponent();
         sendPanel.add(component);
-    }
-
-    private void initRequestParams(FastRequestConfiguration config) {
-        ParamGroup paramGroup = config.getParamGroup();
-        paramGroup.getRequestParamMap();
-
     }
 
     private void changeUrlParamsText() {
@@ -1562,6 +1554,9 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             historyTableData.setJsonParam(((LanguageTextField) rowParamsTextArea).getText());
             FastRequestConfiguration configuration = FastRequestComponent.getInstance().getState();
             historyTableData.setPbInfo(configuration.getParamGroup().getPbImportPath(), configuration.getParamGroup().getPbFileName());
+        } else if (type == 4) {
+            historyTableData = new HistoryTableData(methodName, getDubboSendUrl(), formattedDateTime);
+            historyTableData.setJsonParam(((LanguageTextField) rowParamsTextArea).getText());
         }
         historyTable.getList().add(0, historyTableData);
     }
@@ -4438,107 +4433,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
         }
     }
 
-//    private static final class DocAction extends ParentAction {
-//        public DocAction() {
-//            super(MyResourceBundleUtil.getKey("StarDocument"), MyResourceBundleUtil.getKey("StarDocument"), PluginIcons.ICON_DOC);
-//        }
-//
-//        @Override
-//        public void actionPerformed(@NotNull AnActionEvent event) {
-//            try {
-//                Desktop dp = Desktop.getDesktop();
-//                if (dp.isSupported(Desktop.Action.BROWSE)) {
-//                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-//                        dp.browse(URI.create(Constant.CN_DOC_DOMAIN));
-//                    } else {
-//                        dp.browse(URI.create(Constant.EN_DOC_DOMAIN));
-//                    }
-//                }
-//            } catch (Exception e) {
-//                LOGGER.error("open url fail:%s", e, Constant.EN_DOC_DOMAIN);
-//            }
-//        }
-//    }
-
-//    private static final class WhatsNewAction extends ParentAction {
-//        public WhatsNewAction() {
-//            super(MyResourceBundleUtil.getKey("whatsnew"), MyResourceBundleUtil.getKey("whatsnew"), PluginIcons.NOTIFICATIONS_NEW);
-//        }
-//
-//        @Override
-//        public void actionPerformed(@NotNull AnActionEvent event) {
-//            try {
-//                Desktop dp = Desktop.getDesktop();
-//                if (dp.isSupported(Desktop.Action.BROWSE)) {
-//                    if ("zh".equals(MyResourceBundleUtil.getKey("language"))) {
-//                        dp.browse(URI.create(String.format("%s%s", Constant.CN_DOC_DOMAIN, "/guide/whatsnew")));
-//                    } else {
-//                        dp.browse(URI.create(String.format("%s%s", Constant.EN_DOC_DOMAIN, "guide/whatsnew")));
-//                    }
-//                }
-//            } catch (Exception e) {
-//                LOGGER.error("open url fail:%s", e, String.format("%s%s", Constant.EN_DOC_DOMAIN, "guide/whatsnew"));
-//            }
-//        }
-//    }
-
-
-//    public class ToolbarSendRequestAction extends DumbAwareAction {
-//
-//        public ToolbarSendRequestAction() {
-//            super(() -> "Send", PluginIcons.ICON_SEND);
-//        }
-//
-//
-//        @Override
-//        public void actionPerformed(@NotNull AnActionEvent e) {
-//            sendRequestEvent(e,false);
-//        }
-//
-//        @Override
-//        public void update(@NotNull AnActionEvent e) {
-//            e.getPresentation().setEnabled(sendButtonFlag);
-//        }
-//
-//        @Override
-//        public @Nullable @NlsActions.ActionText String getTemplateText() {
-//            return "Quick Request Send";
-//        }
-//
-//        @Override
-//        protected void setShortcutSet(@NotNull ShortcutSet shortcutSet) {
-//            CustomShortcutSet altPlus = new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
-//            super.setShortcutSet(altPlus);
-//        }
-//
-//
-//    }
-//
-//    public class ToolbarSendAndDownloadRequestAction extends DumbAwareAction {
-//
-//        public ToolbarSendAndDownloadRequestAction() {
-//            super(() -> "Send and Download", PluginIcons.ICON_SEND_DOWNLOAD);
-//        }
-//
-//        @Override
-//        public void actionPerformed(@NotNull AnActionEvent e) {
-//            sendRequestEvent(e,true);
-//        }
-//
-//        @Override
-//        public void update(@NotNull AnActionEvent e) {
-//            e.getPresentation().setEnabled(sendButtonFlag);
-//        }
-//
-//        @Override
-//        protected void setShortcutSet(@NotNull ShortcutSet shortcutSet) {
-//            CustomShortcutSet altMinue = new CustomShortcutSet(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
-//            super.setShortcutSet(altMinue);
-//        }
-//
-//    }
-
-
     private static final class CoffeeMeAction extends ParentAction {
         public CoffeeMeAction() {
             super(MyResourceBundleUtil.getKey("CoffeeMe"), MyResourceBundleUtil.getKey("CoffeeMe"), AllIcons.Ide.Gift);
@@ -4576,39 +4470,6 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
             }
         }
     }
-
-    private static final class SynchronizationAction extends ParentAction {
-        public SynchronizationAction() {
-            super(MyResourceBundleUtil.getKey("synchronization"), MyResourceBundleUtil.getKey("synchronization"), PluginIcons.ICON_SYNC);
-        }
-
-        @Override
-        public void actionPerformed(@NotNull AnActionEvent event) {
-            //PropertiesComponent读取state
-//            com.intellij.ide.util.PropertiesComponent.getInstance().
-//            String workspacePath = WorkspaceSettings.getPath().toString();
-//            System.out.println(workspacePath);
-//            File projectDir = new File(workspacePath);
-//            File[] files = projectDir.listFiles();
-//            if (files != null) {
-//                for (File file : files) {
-//                    if (file.isDirectory() && new File(file, ".idea").exists()&& new File(file, ".git").exists()) {
-//                        // 该目录是一个项目
-//                        Project project = ProjectManager.getInstance().lo(file.getPath());
-//                        // 在这里处理项目
-//                    }
-//                }
-//            }
-
-            SyncView syncView = new SyncView();
-            if (syncView.showAndGet()) {
-                System.out.println(syncView.changeAndGet());
-//                GitRepositoryManager.getInstance();
-//                ProjectManager.getInstance().
-            }
-        }
-    }
-
 
     private class GotoFile extends ParentAction {
         private File file;

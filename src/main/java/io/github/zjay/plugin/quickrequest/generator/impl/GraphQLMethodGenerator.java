@@ -21,7 +21,6 @@ import com.intellij.psi.PsiFile;
 import io.github.zjay.plugin.quickrequest.config.FastRequestComponent;
 import io.github.zjay.plugin.quickrequest.generator.NormalUrlGenerator;
 import io.github.zjay.plugin.quickrequest.generator.linemarker.GraphQLLineMarkerProvider;
-import io.github.zjay.plugin.quickrequest.generator.linemarker.ProtobufLineMarkerProvider;
 import io.github.zjay.plugin.quickrequest.model.FastRequestConfiguration;
 import io.github.zjay.plugin.quickrequest.model.ParamGroup;
 
@@ -45,7 +44,7 @@ public class GraphQLMethodGenerator extends NormalUrlGenerator {
         paramGroup.setModule(psiElement.getProject().getName());
         paramGroup.setOriginUrl(url);
         paramGroup.setUrl(paramGroup.getOriginUrl());
-        paramGroup.setType(7);
+        paramGroup.setType(9);
         PsiFile containingFile = psiElement.getContainingFile();
         String parent = "";
         if (containingFile.getVirtualFile() != null && containingFile.getVirtualFile().getParent() != null){

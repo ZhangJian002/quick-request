@@ -1,21 +1,10 @@
-//import proguard.gradle.ProGuardTask
-//buildscript {
-//    dependencies {
-//        classpath 'com.guardsquare:proguard-gradle:7.3.2'
-//    }
-//}
-
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '0.7.3'
 }
 
 group 'io.github.zjay'
-version '2025.5.20'
-ext {
-    pluginName = 'quick-request-idea'
-    pluginVersion = '2025.5.20'
-}
+version '2025.7.25'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 repositories {
@@ -35,81 +24,36 @@ dependencies {
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
     }
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
-//    implementation("org.apache.thrift:libthrift:0.16.0")
 }
-// idea 依赖所在目录
-def ideaPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3"
-def kotlinPath = "/Users/mac/.gradle\\caches\\modules-2\\files-2.1\\com.jetbrains.intellij.idea\\ideaIC\\2021.3\\75777e10a0e2880bc02945066dda2480a696c3d9\\ideaIC-2021.3\\plugins\\Kotlin"
-//task proguard(type: ProGuardTask, dependsOn: jar) {
-//    // 输出混淆前->混淆后的映射
-////    printmapping "$buildDir/dic.txt"
-//    // 混淆规则文件
-//    configuration 'proguard-rules.pro'
-//    verbose()
-//
-//    // 项目依赖jar
-//    libraryjars configurations.runtimeClasspath.collect()
-//    dontshrink()
-//    dontoptimize()
-//
-//    adaptclassstrings("**.xml")
-//    adaptresourcefilecontents("**.xml")
-//    overloadaggressively()
-//    repackageclasses("")
-//    dontwarn()
-//    printmapping("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}-ProGuard-ChangeLog.txt")
-//
-//    target(project.property("pluginVersion") as String)
-//
-//    adaptresourcefilenames()
-//    optimizationpasses(9)
-//    allowaccessmodification()
-//
-//    keepattributes("Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod")
-//    keep("class * implements com.intellij.openapi.components.PersistentStateComponent {*;}")
-//    keepclassmembers("class * {public static ** INSTANCE;}")
-//
-//    // jdk 依赖，区分jdk8 前后版本
-//    if (System.getProperty('java.version').startsWith('1.')) {
-//        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
-//    } else {
-//        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-//        libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-//        libraryjars "${System.getProperty('java.home')}/jmods/java.datatransfer.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-//    }
-//    // 如果使用了插件，附加插件jar
-//    libraryjars fileTree("$ideaPath/plugins/java/lib").filter {!it.name.startsWith("debugger")}.collect()
-//    // idea 依赖的jar
-//    libraryjars files("$ideaPath/lib")
-//
-//    libraryjars files("$kotlinPath/lib")
-//
-//    injars("build/libs/${project.property("pluginName")}-${project.property("pluginVersion")}.jar")
-//    outjars("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar")
-//
-//}
-
-//prepareSandbox.dependsOn("proguard")
-//prepareSandbox.setPluginJar(new File("build/obfuscated/output/${project.property("pluginName")}-${project.property("pluginVersion")}.jar"))
-
-// See https://github.com/JetBrains/gradle-intellij-plugin/
-//intellij {
-//    plugins = ['java','Kotlin']
-//    version '2021.3'//2021.3、2021.1、2020.3.4
-//    updateSinceUntilBuild false
-//    downloadSources true
-////    type = "IU"
-//}
 intellij {
     type = "IC"
-    plugins = ['java','Kotlin', 'com.intellij.lang.jsgraphql:3.1.2' ,'thrift-assistant:1.4']
+    plugins = ['java','Kotlin']
     version '2021.3'//2021.3、2021.1、2020.3.4
     updateSinceUntilBuild false
     downloadSources false
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2025.7.25</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复了一些问题</li>
+        <li>移除了IDEA日志功能</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fixed bugs</li>
+        <li>Disabled the IntelliJ IDEA logging functionality</li>
+    </ul>
+    <h3>v2025.5.28</h3>
+    <p>中文</p>
+    <ul>
+        <li>修复了一些问题</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Fixed bugs</li>
+    </ul>
     <h3>v2025.5.20</h3>
     <p>中文</p>
     <ul>
@@ -645,14 +589,11 @@ test {
 }
 runIde {
     jvmArgs '--add-exports', 'java.base/jdk.internal.vm=ALL-UNNAMED', "-Xmx4096m","-Xms128m"
-//    jbrVersion 'jbrsdk-11_0_10-osx-x64-b1314.58'
+    jbrVersion 'jbrsdk-11_0_10-osx-x64-b1314.58'
     autoReloadPlugins = true
-//    setAutoReloadPlugins(true)
 }
 runPluginVerifier {
     ideVersions = ["IIC-2021.3"]
-    verifierVersion = "1.383"
-//  https://github.com/JetBrains/intellij-plugin-verifier/releases
-//  https://data.services.jetbrains.com/products?code=IIU
+    verifierVersion = "1.384"
     verifierPath = '/Users/wilson/Downloads/verifier-cli-1.266-all.jar'
 }
