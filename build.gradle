@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2025.7.25'
+version '2026.1.13'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 repositories {
@@ -34,6 +34,17 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
+    <h3>v2026.1.13</h3>
+    <p>中文</p>
+    <ul>
+        <li>优化Url的输入框，输入内容过长时会自动伸缩</li>
+        <li>全局搜索API时，新增可根据模块过滤</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Auto-expanding URL input for better visibility of long paths.</li>
+        <li>Added module filters for API search in Search Everywhere.</li>
+    </ul>
     <h3>v2025.7.25</h3>
     <p>中文</p>
     <ul>

@@ -6,7 +6,7 @@ package io.github.zjay.plugin.quickrequest.util;
  * @author looly
  * @since 5.6.3
  */
-public interface CharPool {
+public interface  CharPool {
 	/**
 	 * 字符常量：空格符 {@code ' '}
 	 */

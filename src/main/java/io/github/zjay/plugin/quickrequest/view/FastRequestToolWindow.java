@@ -85,6 +85,7 @@ import io.github.zjay.plugin.quickrequest.util.http.Header;
 import io.github.zjay.plugin.quickrequest.util.http.UrlQuery;
 import io.github.zjay.plugin.quickrequest.util.thead.GlobalThreadPool;
 import io.github.zjay.plugin.quickrequest.view.component.CheckBoxHeader;
+import io.github.zjay.plugin.quickrequest.view.component.ExpandableTextField;
 import io.github.zjay.plugin.quickrequest.view.component.MyLanguageTextField;
 import io.github.zjay.plugin.quickrequest.view.component.MyParamCheckItemListener;
 import io.github.zjay.plugin.quickrequest.view.inner.EnvAddView;
@@ -479,6 +480,7 @@ public class FastRequestToolWindow extends SimpleToolWindowPanel {
 
         chartPanel = new JPanel();
         sendPanel = new JPanel();
+        urlTextField = new ExpandableTextField();
 //        chartPanel.setLayout(new BorderLayout());
 //        chartPanel.setPreferredSize(new Dimension(-1, 400));
 //        chartPanel.setSize(-1, 400);

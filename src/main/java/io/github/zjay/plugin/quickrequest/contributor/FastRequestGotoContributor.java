@@ -1,6 +1,4 @@
 /*
- * Copyright 2021 zjay(darzjay@gmail.com)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +14,18 @@
 
 package io.github.zjay.plugin.quickrequest.contributor;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.SearchEverywherePsiRenderer;
 import com.intellij.ide.actions.searcheverywhere.*;
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel;
 import com.intellij.ide.util.gotoByName.GotoFileModel;
 import com.intellij.navigation.ChooseByNameContributor;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -34,6 +37,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
@@ -42,12 +47,15 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
 
     private final GotoFileModel myModelForRenderer;
 
+    private int lastManagerId;
+
     protected FastRequestGotoContributor(@NotNull AnActionEvent event) {
         super(event);
         myProject = event.getProject();
         myModelForRenderer = new MyGotoFileModel(myProject);
         requestMappingModel = new RequestMappingModel(myProject, ExtensionPointName.<ChooseByNameContributor>create("QuickRequest.requestMappingContributor").getExtensionList());
     }
+
 
     private class MyGotoFileModel extends GotoFileModel{
 
@@ -126,7 +134,42 @@ public class FastRequestGotoContributor extends AbstractGotoSEContributor  {
         public @NotNull SearchEverywhereContributor<Object> createContributor(@NotNull AnActionEvent initEvent) {
             return new FastRequestGotoContributor(initEvent);
         }
+    }
 
+    @Override
+    public @NotNull List<AnAction> getActions(@NotNull Runnable refreshAction) {
+        List<AnAction> actions = new ArrayList<>(super.getActions(refreshAction));
 
+        int currentManagerId = System.identityHashCode(com.intellij.ide.actions.searcheverywhere.SearchEverywhereManager.getInstance(myProject));
+
+        if (lastManagerId != currentManagerId) {
+            if (requestMappingModel != null) {
+                requestMappingModel.clearModuleSelected();
+            }
+            lastManagerId = currentManagerId;
+        }
+        // 1. 创建模块过滤组
+        DefaultActionGroup moduleFilterGroup = new DefaultActionGroup("Modules", true);
+        moduleFilterGroup.getTemplatePresentation().setIcon(AllIcons.Actions.ModuleDirectory); // 使用模块图标
+
+        // 2. 获取当前项目的所有模块并添加为选项
+        com.intellij.openapi.module.Module[] modules = ModuleManager.getInstance(myProject).getModules();
+        for (com.intellij.openapi.module.Module module : modules) {
+            moduleFilterGroup.add(new ToggleAction(module.getName()) {
+                @Override
+                public boolean isSelected(@NotNull AnActionEvent e) {
+                    return requestMappingModel.isModuleSelected(module);
+                }
+
+                @Override
+                public void setSelected(@NotNull AnActionEvent e, boolean state) {
+                    requestMappingModel.setModuleSelected(module, state);
+                    refreshAction.run(); // 选中后立即刷新列表
+                }
+            });
+        }
+
+        actions.add(moduleFilterGroup);
+        return actions;
     }
 }

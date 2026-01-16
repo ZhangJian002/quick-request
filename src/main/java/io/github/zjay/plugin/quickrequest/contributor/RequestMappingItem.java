@@ -17,6 +17,8 @@
 package io.github.zjay.plugin.quickrequest.contributor;
 
 import com.intellij.navigation.ItemPresentation;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.FakePsiElement;
@@ -34,6 +36,7 @@ public  class RequestMappingItem extends FakePsiElement {
    private final PsiElement psiElement;
    private final String urlPath;
    private final String requestMethod;
+   private final String moduleName;
 
    public String getRequestMethod(){
       return this.requestMethod;
@@ -95,9 +98,17 @@ public  class RequestMappingItem extends FakePsiElement {
       }
 
       this.navigationElement = (Navigatable)var10001;
+
+      // 自动获取模块名
+      Module module = ModuleUtil.findModuleForPsiElement(psiElement);
+      this.moduleName = (module != null) ? module.getName() : "Unknown";
    }
 
-   public final class RequestMappingItemPresentation implements ItemPresentation {
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public final class RequestMappingItemPresentation implements ItemPresentation {
       @Override
       @NotNull
       public String getPresentableText() {

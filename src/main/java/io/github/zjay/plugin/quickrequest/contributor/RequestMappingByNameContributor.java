@@ -46,18 +46,25 @@ public abstract class RequestMappingByNameContributor implements ChooseByNameCon
     abstract List<PsiAnnotation> getAnnotationSearchers(String annotationName, Project project);
     private List<RequestMappingItem> navigationItems = new ArrayList<>();
     @Override
-    public String[] getNames(Project project, boolean includeNonProjectItems) {
+    public String @NotNull [] getNames(Project project, boolean includeNonProjectItems) {
         navigationItems = Constant.SUPPORTED_ANNOTATIONS.stream().flatMap(annotation -> findRequestMappingItems(project, annotation).stream()).collect(Collectors.toList());
-        return navigationItems.stream()
+        return navigationItems.stream().filter(q -> selectedModules.isEmpty() || selectedModules.contains(q.getModuleName()))
                 .map(RequestMappingItem::getName).distinct().toArray(String[]::new);
+    }
+
+    // 增加一个内存中的过滤状态（由外部通过 Model 或 Contributor 实例设置）
+    private Set<String> selectedModules = new HashSet<>();
+
+    public void setSelectedModules(Set<String> modules) {
+        this.selectedModules = modules;
     }
 
 
 
-
     @Override
-    public NavigationItem [] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
-        return navigationItems.stream().filter(q -> q.getName().equals(name)).toArray(RequestMappingItem[]::new);
+    public NavigationItem @NotNull [] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
+        return navigationItems.stream().filter(q -> q.getName().equals(name))
+                .filter(q -> selectedModules.isEmpty() || selectedModules.contains(q.getModuleName())).toArray(RequestMappingItem[]::new);
     }
 
     private List<RequestMappingItem> findRequestMappingItems(Project project, String annotationName) {

@@ -23,10 +23,7 @@ import io.github.zjay.plugin.quickrequest.config.Constant;
 import io.github.zjay.plugin.quickrequest.model.OtherRequestEntity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,21 +34,27 @@ public abstract class OtherRequestMappingByNameContributor implements ChooseByNa
     @Override
     public String[] getNames(Project project, boolean includeNonProjectItems) {
         navigationItems = findRequestMappingItems(project);
-        return navigationItems.stream()
+        return navigationItems.stream().filter(q -> selectedModules.isEmpty() || selectedModules.contains(q.getModuleName()))
                 .map(RequestMappingItem::getName).distinct().toArray(String[]::new);
     }
 
+    // 增加一个内存中的过滤状态（由外部通过 Model 或 Contributor 实例设置）
+    private Set<String> selectedModules = new HashSet<>();
 
+    public void setSelectedModules(Set<String> modules) {
+        this.selectedModules = modules;
+    }
 
 
     @Override
     public NavigationItem[] getItemsByName(String name, String pattern, Project project, boolean includeNonProjectItems) {
-        return navigationItems.stream().filter(q -> q.getName().equals(name)).toArray(RequestMappingItem[]::new);
+        return navigationItems.stream().filter(q -> q.getName().equals(name))
+                .filter(q -> selectedModules.isEmpty() || selectedModules.contains(q.getModuleName())).toArray(RequestMappingItem[]::new);
     }
 
     private List<RequestMappingItem> findRequestMappingItems(Project project) {
         List<OtherRequestEntity> psiSearchers = getPsiElementSearchers(project);
-        List<RequestMappingItem> resultList = new LinkedList<>();
+        List<RequestMappingItem> resultList = new ArrayList<>();
         for (OtherRequestEntity psiSearcher : psiSearchers) {
             resultList.add(new RequestMappingItem(psiSearcher.getElement(),psiSearcher.getUrlPath(),psiSearcher.getMethod()));
         }
