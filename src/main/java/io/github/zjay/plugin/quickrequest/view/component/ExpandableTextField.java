@@ -61,6 +61,15 @@ public class ExpandableTextField extends JBTextField {
             }
         });
 
+        // 页面被收起/隐藏时（如点击 ToolWindow 图标收起整个页面）焦点不会经过 overlay，
+        // focusLost 不会触发，这里通过显示状态变化销毁 overlay；
+        // 同时清空引用，保证再次展开页面后超长文本能重新弹出 overlay。
+        this.addHierarchyListener(e -> {
+            if (!isShowing()) {
+                removeOverlay();
+            }
+        });
+
         // 增加鼠标点击监听：确保点击即检查状态
         this.addMouseListener(new MouseAdapter() {
             @Override
