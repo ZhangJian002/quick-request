@@ -18,7 +18,7 @@ package io.github.zjay.plugin.quickrequest.idea;
 
 import com.intellij.CommonBundle;
 import com.intellij.ide.ExporterToTextFile;
-import com.intellij.ide.IdeBundle;
+import io.github.zjay.plugin.quickrequest.util.QuickRequestBundle;
 import com.intellij.openapi.components.PathMacroManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -80,10 +80,10 @@ public final class ExportToFileUtil {
     if (file.exists()) {
       int result = Messages.showYesNoCancelDialog(
         project,
-        IdeBundle.message("error.text.file.already.exists", fileName),
-        IdeBundle.message("dialog.title.export.to.file"),
-        IdeBundle.message("action.overwrite"),
-        IdeBundle.message("action.append"),
+        QuickRequestBundle.message("error.text.file.already.exists", fileName),
+        QuickRequestBundle.message("dialog.title.export.to.file"),
+        QuickRequestBundle.message("action.overwrite"),
+        QuickRequestBundle.message("action.append"),
         CommonBundle.getCancelButtonText(),
         Messages.getWarningIcon()
       );
@@ -102,7 +102,7 @@ public final class ExportToFileUtil {
     catch (IOException e) {
       Messages.showMessageDialog(
         project,
-        IdeBundle.message("error.writing.to.file", fileName),
+        QuickRequestBundle.message("error.writing.to.file", fileName),
         CommonBundle.getErrorTitle(),
         Messages.getErrorIcon()
       );
@@ -135,8 +135,8 @@ public final class ExportToFileUtil {
         }
       });
 
-      setTitle(IdeBundle.message("title.export.preview"));
-      setOKButtonText(IdeBundle.message("button.save"));
+      setTitle(QuickRequestBundle.message("title.export.preview"));
+      setOKButtonText(QuickRequestBundle.message("button.save"));
       init();
       try {
         myListener = new ChangeListener() {
@@ -205,7 +205,7 @@ public final class ExportToFileUtil {
       panel.setLayout(new GridBagLayout());
       GridBagConstraints gbConstraints = new GridBagConstraints();
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-      JLabel promptLabel = new JLabel(IdeBundle.message("editbox.export.to.file"));
+      JLabel promptLabel = new JLabel(QuickRequestBundle.message("editbox.export.to.file"));
       gbConstraints.weightx = 0;
       panel.add(promptLabel, gbConstraints);
       gbConstraints.weightx = 1;
@@ -246,8 +246,8 @@ public final class ExportToFileUtil {
 
     protected class CopyToClipboardAction extends AbstractAction {
       public CopyToClipboardAction() {
-        super(IdeBundle.message("button.copy"));
-        putValue(Action.SHORT_DESCRIPTION, IdeBundle.message("description.copy.text.to.clipboard"));
+        super(QuickRequestBundle.message("button.copy"));
+        putValue(Action.SHORT_DESCRIPTION, QuickRequestBundle.message("description.copy.text.to.clipboard"));
       }
 
       @Override

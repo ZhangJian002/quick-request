@@ -1,7 +1,7 @@
 package io.github.zjay.plugin.quickrequest.action.soft_wrap;
 
 import com.intellij.icons.AllIcons;
-import com.intellij.idea.ActionsBundle;
+import io.github.zjay.plugin.quickrequest.util.QuickRequestBundle;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
@@ -35,7 +35,7 @@ public class SoftWrapAction extends ParentToggleAction {
         Integer integer = (Integer)editor.getUserData(Constant.KEY_QUICKREQUEST);
         paramAnActionEvent.getPresentation().setIcon(AllIcons.Actions.ToggleSoftWrap);
         if (integer != null) {
-            paramAnActionEvent.getPresentation().setText(ActionsBundle.messagePointer("action.EditorGutterToggleLocalSoftWraps.gutterText", new Object[0]));
+            paramAnActionEvent.getPresentation().setText(QuickRequestBundle.message("action.EditorGutterToggleLocalSoftWraps.gutterText"));
             paramAnActionEvent.getPresentation().setEnabledAndVisible(true);
         } else {
             paramAnActionEvent.getPresentation().setEnabledAndVisible(false);

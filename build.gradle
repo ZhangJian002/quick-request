@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'io.github.zjay'
-version '2026.1.13'
+version '2026.8.14'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 repositories {
@@ -32,6 +32,9 @@ intellij {
     updateSinceUntilBuild false
     downloadSources false
 }
+// macOS 14 (Sonoma) + Apple Silicon 上，2021.3 自带的 JBR 11.0.13 启动无头 IDE 会崩溃（退出码 255），
+// 该任务仅生成"设置项搜索索引"，禁用不影响插件编译、打包与运行。
+buildSearchableOptions.enabled = false
 patchPluginXml {
     changeNotes """
     <h3>v2026.1.13</h3>

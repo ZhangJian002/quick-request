@@ -17,7 +17,7 @@
 package io.github.zjay.plugin.quickrequest.idea;
 
 import com.intellij.CommonBundle;
-import com.intellij.ide.IdeBundle;
+import io.github.zjay.plugin.quickrequest.util.QuickRequestBundle;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 
@@ -33,10 +33,10 @@ public class ExportUtil {
         if (file.exists()) {
             int result = Messages.showYesNoCancelDialog(
                     project,
-                    IdeBundle.message("error.text.file.already.exists", fileName),
-                    IdeBundle.message("dialog.title.export.to.file"),
-                    IdeBundle.message("action.overwrite"),
-                    IdeBundle.message("action.append"),
+                    QuickRequestBundle.message("error.text.file.already.exists", fileName),
+                    QuickRequestBundle.message("dialog.title.export.to.file"),
+                    QuickRequestBundle.message("action.overwrite"),
+                    QuickRequestBundle.message("action.append"),
                     CommonBundle.getCancelButtonText(),
                     Messages.getWarningIcon()
             );
@@ -55,7 +55,7 @@ public class ExportUtil {
         catch (IOException e) {
             Messages.showMessageDialog(
                     project,
-                    IdeBundle.message("error.writing.to.file", fileName),
+                    QuickRequestBundle.message("error.writing.to.file", fileName),
                     CommonBundle.getErrorTitle(),
                     Messages.getErrorIcon()
             );
