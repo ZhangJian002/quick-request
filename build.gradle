@@ -37,6 +37,17 @@ intellij {
 buildSearchableOptions.enabled = false
 patchPluginXml {
     changeNotes """
+    <h3>v2026.8.14</h3>
+    <p>中文</p>
+    <ul>
+        <li>兼容性修改</li>
+        <li>局部bug修复</li>
+    </ul>
+    <p>English</p>
+    <ul>
+        <li>Compatibility modification.</li>
+        <li>Fixed bugs.</li>
+    </ul>
     <h3>v2026.1.13</h3>
     <p>中文</p>
     <ul>
